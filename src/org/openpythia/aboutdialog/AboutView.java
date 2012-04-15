@@ -13,7 +13,11 @@ import com.jgoodies.forms.layout.*;
  * @author Andreas Rothmann
  */
 public class AboutView extends JDialog {
-    public AboutView(Frame owner) {
+
+	// The dialogs are not designed to be serialized. But to avoid the warnings...
+	private static final long serialVersionUID = 1L;
+
+	public AboutView(Frame owner) {
         super(owner);
         initComponents();
     }
@@ -33,70 +37,73 @@ public class AboutView extends JDialog {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner non-commercial license
-        dialogPane = new JPanel();
-        contentPanel = new JPanel();
-        scrollPane1 = new JScrollPane();
-        editorPaneAbout = new JEditorPane();
-        buttonBar = new JPanel();
-        btnOK = new JButton();
+		dialogPane = new JPanel();
+		contentPanel = new JPanel();
+		scrollPane1 = new JScrollPane();
+		editorPaneAbout = new JEditorPane();
+		buttonBar = new JPanel();
+		btnOK = new JButton();
 
-        //======== this ========
-        setTitle("About Pythia");
-        setModal(true);
-        setMinimumSize(new Dimension(400, 200));
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        Container contentPane = getContentPane();
-        contentPane.setLayout(new BorderLayout());
+		//======== this ========
+		setTitle("About OpenPythia");
+		setModal(true);
+		setMinimumSize(new Dimension(400, 200));
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setName("this");
+		Container contentPane = getContentPane();
+		contentPane.setLayout(new BorderLayout());
 
-        //======== dialogPane ========
-        {
-            dialogPane.setBorder(Borders.DIALOG_BORDER);
-            dialogPane.setLayout(new BorderLayout());
+		//======== dialogPane ========
+		{
+			dialogPane.setBorder(Borders.DIALOG_BORDER);
+			dialogPane.setName("dialogPane");
+			dialogPane.setLayout(new BorderLayout());
 
-            //======== contentPanel ========
-            {
-                contentPanel.setLayout(new FormLayout(
-                    "200dlu, $lcgap, default:grow",
-                    "100dlu, $lgap, default:grow"));
+			//======== contentPanel ========
+			{
+				contentPanel.setName("contentPanel");
+				contentPanel.setLayout(new FormLayout(
+						"200dlu, $lcgap, default:grow",
+						"100dlu, $lgap, default:grow"));
 
-                //======== scrollPane1 ========
-                {
+				//======== scrollPane1 ========
+				{
+					scrollPane1.setName("scrollPane1");
 
-                    //---- editorPaneAbout ----
-                    editorPaneAbout.setEditable(false);
-                    scrollPane1.setViewportView(editorPaneAbout);
-                }
-                contentPanel.add(scrollPane1, CC.xywh(1, 1, 3, 3));
-            }
-            dialogPane.add(contentPanel, BorderLayout.CENTER);
+					//---- editorPaneAbout ----
+					editorPaneAbout.setEditable(false);
+					editorPaneAbout.setName("editorPaneAbout");
+					scrollPane1.setViewportView(editorPaneAbout);
+				}
+				contentPanel.add(scrollPane1, CC.xywh(1, 1, 3, 3));
+			}
+			dialogPane.add(contentPanel, BorderLayout.CENTER);
 
-            //======== buttonBar ========
-            {
-                buttonBar.setBorder(Borders.BUTTON_BAR_GAP_BORDER);
-                buttonBar.setLayout(new FormLayout(
-                    "$glue, $button",
-                    "pref"));
+			//======== buttonBar ========
+			{
+				buttonBar.setBorder(Borders.BUTTON_BAR_GAP_BORDER);
+				buttonBar.setName("buttonBar");
+				buttonBar.setLayout(new FormLayout("$glue, $button", "pref"));
 
-                //---- btnOK ----
-                btnOK.setText("OK");
-                buttonBar.add(btnOK, CC.xy(2, 1));
-            }
-            dialogPane.add(buttonBar, BorderLayout.SOUTH);
-        }
-        contentPane.add(dialogPane, BorderLayout.CENTER);
-        pack();
-        setLocationRelativeTo(getOwner());
+				//---- btnOK ----
+				btnOK.setText("OK");
+				btnOK.setName("btnOK");
+				buttonBar.add(btnOK, CC.xy(2, 1));
+			}
+			dialogPane.add(buttonBar, BorderLayout.SOUTH);
+		}
+		contentPane.add(dialogPane, BorderLayout.CENTER);
+		pack();
+		setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner non-commercial license
-    private JPanel dialogPane;
-    private JPanel contentPanel;
-    private JScrollPane scrollPane1;
-    private JEditorPane editorPaneAbout;
-    private JPanel buttonBar;
-    private JButton btnOK;
+	private JPanel dialogPane;
+	private JPanel contentPanel;
+	private JScrollPane scrollPane1;
+	private JEditorPane editorPaneAbout;
+	private JPanel buttonBar;
+	private JButton btnOK;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

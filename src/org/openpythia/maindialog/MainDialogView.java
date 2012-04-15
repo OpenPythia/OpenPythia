@@ -13,6 +13,10 @@ import com.jgoodies.forms.layout.*;
  * @author Andreas Rothmann
  */
 public class MainDialogView extends JFrame {
+	
+	// The dialogs are not designed to be serialized. But to avoid the warnings...
+	private static final long serialVersionUID = 1L;
+
     public MainDialogView() {
         initComponents();
     }
