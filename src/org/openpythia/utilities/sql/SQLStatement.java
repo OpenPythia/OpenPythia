@@ -53,7 +53,7 @@ public class SQLStatement {
      * with question marks.
      * 
      * SQL statements which just differ in contained literals are handled as
-     * different SQL statements by the optimizer / database. Fut from some
+     * different SQL statements by the optimizer / database. But from some
      * logical perspective they are all the some statement. To identify these
      * statements, the literals have to be removed/replaced. This methods
      * replace the literals with question marks so two statements can easily be

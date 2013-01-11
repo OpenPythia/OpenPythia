@@ -67,7 +67,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         view.getBtnExportExcel().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                exportDeltaToExcel();
+                exportDeltaToExcel(connectionPool);
             }
         });
         view.getBtnExportExcel().setEnabled(false);
@@ -91,7 +91,6 @@ public class WorstStatementsDetailController implements FinishedListener {
                 "Pythia is taking a snapshot of the library cache.");
         SnapshotHelper.takeSnapshot(connectionPool, controller);
 
-        // TODO
         SQLHelper.startSQLTextLoader(connectionPool);
     }
 
@@ -165,10 +164,11 @@ public class WorstStatementsDetailController implements FinishedListener {
                 new DeltaSnapshotTableModel(deltaSnapshot));
     }
 
-    private void exportDeltaToExcel() {
+    private void exportDeltaToExcel(ConnectionPool connectionPool) {
         File excelFile = FileSelectorUtility.chooseExcelFileToWrite(view);
         if (excelFile != null) {
-            DeltaSnapshotWriter.saveDeltaSnapshot(excelFile, deltaSnapshot);
+            DeltaSnapshotWriter.saveDeltaSnapshot(connectionPool, excelFile,
+                    deltaSnapshot);
         }
     }
 
