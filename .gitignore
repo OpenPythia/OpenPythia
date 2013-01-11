@@ -1,1 +1,7 @@
-/bin
+bin/
+target/
+.idea/
+.classpath
+.fbprefs
+.project
+.settings
