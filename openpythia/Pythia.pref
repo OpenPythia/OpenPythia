@@ -1,7 +1,0 @@
-#Pythia Preferences
-#Mon Jan 14 08:32:18 CET 2013
-JDBCDriverFileName=/Users/rabe/ojdbc16-11.2.0.jar
-ConnectionSchema=pythia
-ConnectionHost=openpythia-vm
-ConnectionDatabaseName=orcl
-ConnectionPort=1521
