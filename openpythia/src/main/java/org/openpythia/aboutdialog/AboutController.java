@@ -1,26 +1,37 @@
 package org.openpythia.aboutdialog;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.InputStream;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
+import org.apache.commons.io.IOUtils;
 import org.openpythia.utilities.FileRessourceUtility;
 
 public class AboutController {
 
+    public static final String ABOUT_HTML = "about.html";
     private AboutView view;
 
     public AboutController(JFrame owner) {
-
         view = new AboutView(owner);
-
         view.getEditorPaneAbout().setContentType("text/html");
-        String aboutText = FileRessourceUtility
-                .getStringFromRessource("about.html");
+
+        String aboutText = "";
+
+        try {
+            InputStream inputStream = this.getClass().getResourceAsStream(ABOUT_HTML);
+            aboutText = IOUtils.toString(inputStream);
+        }
+        catch (Exception e) {
+            JOptionPane.showMessageDialog((Component) null, e);
+        }
+
         view.getEditorPaneAbout().setText(aboutText);
 
         view.getEditorPaneAbout().addHyperlinkListener(new HyperlinkListener() {

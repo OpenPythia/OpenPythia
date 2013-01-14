@@ -1,5 +1,8 @@
 package org.openpythia.utilities.sql;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * An ExecutionPlanStep represents one step on an execution plan as found in the
@@ -8,8 +11,8 @@ package org.openpythia.utilities.sql;
 public class ExecutionPlanStep {
 
     private int executionPlanStepId;
-    private ExecutionPlanStep parentStep;
     private int parentExecutionPlanStepId;
+    private ExecutionPlanStep parentStep;
     private String operation;
     private String options;
     private String objectOwner;
@@ -24,15 +27,16 @@ public class ExecutionPlanStep {
     private String accessPredicates;
     private String filterPredicates;
 
+    // The Child-Steps of this step
+    private List<ExecutionPlanStep> childSteps = new ArrayList<ExecutionPlanStep>();;
+
     public ExecutionPlanStep(int executionPlanStepId,
-            ExecutionPlanStep parentStep, int parentExecutionPlanStepId,
-            String operation, String options, String objectOwner,
-            String objectName, int depth, int position, int cost,
-            int cardinality, int bytes, int cpuCost, int ioCost,
+            int parentExecutionPlanStepId, String operation, String options,
+            String objectOwner, String objectName, int depth, int position,
+            int cost, int cardinality, int bytes, int cpuCost, int ioCost,
             String accessPredicates, String filterPredicates) {
+
         this.executionPlanStepId = executionPlanStepId;
-        this.parentStep = parentStep;
-        // TODO: Do we need this information?
         this.parentExecutionPlanStepId = parentExecutionPlanStepId;
         this.operation = operation;
         this.options = options;
@@ -53,12 +57,16 @@ public class ExecutionPlanStep {
         return executionPlanStepId;
     }
 
-    public ExecutionPlanStep getParentStep() {
-        return parentStep;
-    }
-
     public int getParentExecutionPlanStepId() {
         return parentExecutionPlanStepId;
+    }
+
+    private void setParentExecutionPlanStep(ExecutionPlanStep parentStep) {
+        this.parentStep = parentStep;
+    }
+
+    public ExecutionPlanStep getParentExecutionPlanStep() {
+        return parentStep;
     }
 
     public String getOperation() {
@@ -113,4 +121,43 @@ public class ExecutionPlanStep {
         return filterPredicates;
     }
 
+    public List<ExecutionPlanStep> getChildSteps() {
+        return childSteps;
+    }
+
+    public boolean insertStepToCorrectionPositionInStepOrChilds(
+            ExecutionPlanStep stepToAdd) {
+        boolean stepStored = false;
+
+        if (stepToAdd.parentExecutionPlanStepId == this.executionPlanStepId) {
+            // the given step is a child of this step
+            addChildStep(stepToAdd);
+            stepToAdd.setParentExecutionPlanStep(this);
+
+            stepStored = true;
+        } else {
+            // the given step belongs to one of the child elements
+            Iterator<ExecutionPlanStep> stepIterator = childSteps.iterator();
+            while (!stepStored && stepIterator.hasNext()) {
+                stepStored = stepIterator
+                        .next()
+                        .insertStepToCorrectionPositionInStepOrChilds(stepToAdd);
+            }
+        }
+        return stepStored;
+    }
+
+    private void addChildStep(ExecutionPlanStep childStep) {
+        int insertAt = -1;
+        for (ExecutionPlanStep currentStep : childSteps) {
+            if (currentStep.position > childStep.position) {
+                insertAt = childSteps.indexOf(currentStep);
+            }
+        }
+        if (insertAt == -1) {
+            childSteps.add(childStep);
+        } else {
+            childSteps.add(insertAt, childStep);
+        }
+    }
 }

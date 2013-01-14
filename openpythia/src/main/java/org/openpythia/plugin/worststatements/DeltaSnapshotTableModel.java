@@ -6,9 +6,6 @@ import javax.swing.table.TableModel;
 import org.openpythia.utilities.deltasql.DeltaSnapshot;
 
 class DeltaSnapshotTableModel extends AbstractTableModel implements TableModel {
-	
-	// The dialogs are not designed to be serialized. But to avoid the warnings...
-	private static final long serialVersionUID = 1L;
 
     private DeltaSnapshot deltaSnaphot;
 

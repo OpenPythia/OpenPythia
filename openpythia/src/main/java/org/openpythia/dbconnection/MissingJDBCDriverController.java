@@ -1,18 +1,22 @@
 package org.openpythia.dbconnection;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.InputStream;
 
+import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
+import org.apache.commons.io.IOUtils;
 import org.openpythia.utilities.FileRessourceUtility;
 import org.openpythia.utilities.FileSelectorUtility;
 
 public class MissingJDBCDriverController {
 
+    public static final String MISSING_JDBCDRIVER_HTML = "missingJDBCdriver.html";
     private MissingJDBCDriverView view;
 
     private String pathJDBCDriver = null;
@@ -35,8 +39,17 @@ public class MissingJDBCDriverController {
 
     private void prepareTextArea() {
         view.getEditorPaneMissingJDBCDriver().setContentType("text/html");
-        String missingJDBCdriverText = FileRessourceUtility
-                .getStringFromRessource("missingJDBCdriver.html");
+
+        String missingJDBCdriverText = "";
+
+        try {
+            InputStream inputStream =  this.getClass().getResourceAsStream(MISSING_JDBCDRIVER_HTML);
+            missingJDBCdriverText = IOUtils.toString(inputStream);
+        }
+        catch (Exception e) {
+            JOptionPane.showMessageDialog((Component) null, e);
+        }
+
         view.getEditorPaneMissingJDBCDriver().setText(missingJDBCdriverText);
 
         view.getEditorPaneMissingJDBCDriver().addHyperlinkListener(

@@ -215,32 +215,32 @@ public class FileRessourceUtility {
         return result.toString();
     }
 
-    private static String getStringFromFileSystem(String ressourceIdentifier) {
-        StringBuffer result = new StringBuffer();
-        try {
-            File in = new File("./Ressources/" + ressourceIdentifier);
-
-            BufferedReader inputReader = new BufferedReader(new FileReader(in));
-
-            String newLine;
-            while ((newLine = inputReader.readLine()) != null) {
-                result.append(newLine);
-            }
-            inputReader.close();
-        } catch (FileNotFoundException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
-        }
-
-        return result.toString();
-    }
-
-    public static String getStringFromRessource(String ressourceIdentifier) {
-        if (isRunningFromJar()) {
-            return getStringFromJar(ressourceIdentifier);
-        } else {
-            return getStringFromFileSystem(ressourceIdentifier);
-        }
-    }
+//    private static String getStringFromFileSystem(String ressourceIdentifier) {
+//        StringBuffer result = new StringBuffer();
+//        try {
+//            File in = new File("./Ressources/" + ressourceIdentifier);
+//
+//            BufferedReader inputReader = new BufferedReader(new FileReader(in));
+//
+//            String newLine;
+//            while ((newLine = inputReader.readLine()) != null) {
+//                result.append(newLine);
+//            }
+//            inputReader.close();
+//        } catch (FileNotFoundException e) {
+//            JOptionPane.showMessageDialog((Component) null, e);
+//        } catch (IOException e) {
+//            JOptionPane.showMessageDialog((Component) null, e);
+//        }
+//
+//        return result.toString();
+//    }
+//
+//    public static String getStringFromRessource(String ressourceIdentifier) {
+//        if (isRunningFromJar()) {
+//            return getStringFromJar(ressourceIdentifier);
+//        } else {
+//            return getStringFromFileSystem(ressourceIdentifier);
+//        }
+//    }
 }

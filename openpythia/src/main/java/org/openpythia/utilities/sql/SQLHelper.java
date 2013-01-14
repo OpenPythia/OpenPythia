@@ -44,6 +44,23 @@ public class SQLHelper {
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " + "ORDER BY address, piece";
 
+    private final static String SELECT_EXECUTION_PLANS_FOR_100_STATEMENTS = "SELECT address, child_number, id, parent_id, operation, "
+            + "options, object_owner, object_name, depth, position, cost, cardinality, "
+            + "bytes, cpu_cost, io_cost, access_predicates, filter_predicates "
+            + "FROM v$sql_plan "
+            + "WHERE address IN ("
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+            + "ORDER BY address, child_number, id, position";
+
     private static List<SQLStatement> allSQLStatements = new ArrayList<SQLStatement>();
     private static List<SQLStatement> unloadedSQLStatements = new CopyOnWriteArrayList<SQLStatement>();
 
@@ -129,7 +146,6 @@ public class SQLHelper {
         }
     }
 
-    // FIXME there should be a more elegant way to achieve this...
     public static synchronized void startSQLTextLoader(
             ConnectionPool connectionPool) {
         if (sqlStatementLoader == null) {
@@ -261,6 +277,207 @@ public class SQLHelper {
             // we didn't find the statement
             return null;
         }
+    }
+
+    public static void loadExecutionPlansForStatements(
+            ConnectionPool connectionPool, List<SQLStatement> sqlStatements,
+            ProgressListener progressListener) {
+        if (progressListener != null) {
+            progressListener.setStartValue(0);
+            progressListener.setEndValue(sqlStatements.size());
+            progressListener.setCurrentValue(0);
+        }
+
+        int progressCounter = 0;
+
+        List<SQLStatement> missingExecutionPlanSqlStatements = sqlStatements;
+        List<SQLStatement> sqlStatementsToLoad = new ArrayList<SQLStatement>();
+
+        int numberStatements;
+
+        while (missingExecutionPlanSqlStatements.size() > 0) {
+            sqlStatementsToLoad.clear();
+            numberStatements = 0;
+
+            Iterator<SQLStatement> iterator = missingExecutionPlanSqlStatements
+                    .iterator();
+
+            // add up to 200 statements on the lict of statements, for which the
+            // execution plan will be loaded
+            while (iterator.hasNext() && numberStatements <= 200) {
+                sqlStatementsToLoad.add(iterator.next());
+                numberStatements++;
+            }
+
+            // remove those statements from the initial for which the loading is
+            // going on
+            for (SQLStatement statement : sqlStatementsToLoad) {
+                missingExecutionPlanSqlStatements.remove(statement);
+            }
+
+            loadExecutionPlansForSQLStatements(connectionPool,
+                    sqlStatementsToLoad);
+
+            progressCounter += sqlStatementsToLoad.size();
+
+            if (progressListener != null) {
+                progressListener.setCurrentValue(progressCounter);
+            }
+
+            // sleep for 0.1 seconds so all the other tasks can do their
+            // work
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // we don't care for being interrupted
+            }
+        }
+
+        if (progressListener != null) {
+            progressListener.informFinished();
+        }
+    }
+
+    private static void loadExecutionPlansForSQLStatements(
+            ConnectionPool connectionPool,
+            List<SQLStatement> sqlStatementsToLoad) {
+
+        Connection connection = null;
+        try {
+            connection = connectionPool.getConnection();
+            PreparedStatement sqlExecutionPlansStatement = connection
+                    .prepareStatement(SELECT_EXECUTION_PLANS_FOR_100_STATEMENTS);
+            sqlExecutionPlansStatement.setFetchSize(1000);
+
+            int indexPlaceholder = 1;
+            for (SQLStatement currentStatement : sqlStatementsToLoad) {
+                sqlExecutionPlansStatement.setString(indexPlaceholder,
+                        currentStatement.getAddress());
+                indexPlaceholder++;
+
+                if (indexPlaceholder > NUMBER_BIND_VARIABLES) {
+                    // all place holders are filled - so fetch the execution
+                    // plans from the DB
+                    getExecutionPlansFromDB(sqlStatementsToLoad,
+                            sqlExecutionPlansStatement);
+
+                    indexPlaceholder = 1;
+                }
+            }
+
+            if (indexPlaceholder > 1) {
+                // there are some statements left...
+                // fill the empty bind variables with invalid addresses
+                for (int index = indexPlaceholder; index <= NUMBER_BIND_VARIABLES; index++) {
+                    sqlExecutionPlansStatement.setString(index, "");
+                }
+                getExecutionPlansFromDB(sqlStatementsToLoad,
+                        sqlExecutionPlansStatement);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog((Component) null, e);
+        } finally {
+            connectionPool.giveConnectionBack(connection);
+        }
+    }
+
+    private static void getExecutionPlansFromDB(
+            List<SQLStatement> sqlStatementsToLoad,
+            PreparedStatement sqlTextStatement) throws SQLException {
+        SQLStatement sqlStatement;
+
+        ResultSet executionPlansResultSet = sqlTextStatement.executeQuery();
+
+        // use a definitely not used (invalid) address and ChildId to get
+        // started
+        String lastAddress = "";
+        int lastChildNumber = -1;
+        ExecutionPlan lastExecutionPlan = null;
+        while (executionPlansResultSet.next()) {
+
+            String currentAddress = executionPlansResultSet.getString(1);
+            int currentChildNumber = executionPlansResultSet.getInt(2);
+
+            // find the SQL statement with this address
+            sqlStatement = findSQLStatementWithAddress(sqlStatementsToLoad,
+                    currentAddress);
+            if (sqlStatement == null) {
+                // there is no SQL statement with this address in the list
+                // this should never happen...
+                throw new RuntimeException(
+                        "Fatal Exception: Oracle returned a result not beeing asked for.");
+            }
+
+            ExecutionPlanStep newStep = new ExecutionPlanStep(
+            // id
+                    executionPlansResultSet.getInt(3),
+                    // parent id
+                    executionPlansResultSet.getInt(4),
+                    // operation
+                    executionPlansResultSet.getString(5),
+                    // options
+                    executionPlansResultSet.getString(6),
+                    // objectOwner
+                    executionPlansResultSet.getString(7),
+                    // objectName
+                    executionPlansResultSet.getString(8),
+                    // depth
+                    executionPlansResultSet.getInt(9),
+                    // position
+                    executionPlansResultSet.getInt(10),
+                    // cost
+                    executionPlansResultSet.getInt(11),
+                    // cardinality
+                    executionPlansResultSet.getInt(12),
+                    // bytes
+                    executionPlansResultSet.getInt(13),
+                    // cpuCost
+                    executionPlansResultSet.getInt(14),
+                    // ioCost
+                    executionPlansResultSet.getInt(15),
+                    // accessPredicates
+                    executionPlansResultSet.getString(16),
+                    // filterPredicates
+                    executionPlansResultSet.getString(17));
+
+            if (lastAddress.equals(currentAddress)
+                    && lastChildNumber == currentChildNumber) {
+                // a new step for the current child of the current address/SQL
+                // statement
+                if (!lastExecutionPlan.getParentStep()
+                        .insertStepToCorrectionPositionInStepOrChilds(newStep)) {
+                    // the new step could not be integrated into the execution
+                    // plan.
+                    // this should never happen...
+                    throw new RuntimeException(
+                            "Fatal Exception: Oracle returned a step of an execution plan that could not be integrated.");
+                }
+            } else {
+                // a new execution plan for the current address/SQL statement or
+                // a new address/SQL statement
+                // no matter - in both cases we need a new execution plan for
+                // the
+                // current statement
+                lastExecutionPlan = new ExecutionPlan(currentChildNumber,
+                        currentAddress);
+                lastExecutionPlan.setParentStep(newStep);
+                sqlStatement.addExecutionPlan(lastExecutionPlan);
+            }
+
+            lastAddress = currentAddress;
+            lastChildNumber = currentChildNumber;
+        }
+    }
+
+    private static SQLStatement findSQLStatementWithAddress(
+            List<SQLStatement> sqlStatements, String address) {
+        for (SQLStatement statement : sqlStatements) {
+            if (address.equals(statement.getAddress())) {
+                return statement;
+            }
+        }
+        // we didn't find the statement
+        return null;
     }
 
     public static int getNumberSQLStatements(ConnectionPool connectionPool) {
