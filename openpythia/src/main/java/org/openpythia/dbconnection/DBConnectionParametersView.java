@@ -1,24 +1,30 @@
 /*
- * Created by JFormDesigner on Wed Jun 01 16:10:02 CEST 2011
+ * Created by JFormDesigner on Mon Jan 14 13:18:03 CET 2013
  */
 
 package org.openpythia.dbconnection;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.*;
 import com.jgoodies.forms.factories.*;
 import com.jgoodies.forms.layout.*;
 
 /**
- * @author Andreas Rothmann
+ * @author Dr. Jürgen Tenckhoff
  */
 public class DBConnectionParametersView extends JDialog {
+
     public DBConnectionParametersView() {
         initComponents();
     }
 
     public JTextField getTfHost() {
         return tfHost;
+    }
+
+    public JButton getBtnSchemaCreation() {
+        return btnSchemaCreation;
     }
 
     public JTextField getTfPort() {
@@ -45,15 +51,12 @@ public class DBConnectionParametersView extends JDialog {
         return btnCancel;
     }
 
-    public JButton getBtnSchemaCreation() {
-        return btnSchemaCreation;
-    }
-
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner non-commercial license
+        panel2 = new JPanel();
         label1 = new JLabel();
         tfHost = new JTextField();
+        separator1 = new JSeparator();
         btnSchemaCreation = new JButton();
         label2 = new JLabel();
         tfPort = new JTextField();
@@ -63,6 +66,7 @@ public class DBConnectionParametersView extends JDialog {
         TfSchema = new JTextField();
         label5 = new JLabel();
         tfPassword = new JPasswordField();
+        panel1 = new JPanel();
         btnOK = new JButton();
         btnCancel = new JButton();
 
@@ -70,55 +74,76 @@ public class DBConnectionParametersView extends JDialog {
         setModal(true);
         setTitle("Connection Parameters");
         Container contentPane = getContentPane();
-        contentPane.setLayout(new FormLayout(
-            "default, 2*($lcgap, 80dlu)",
-            "5*(default, $lgap), default"));
+        contentPane.setLayout(new BorderLayout());
 
-        //---- label1 ----
-        label1.setText("Host");
-        contentPane.add(label1, CC.xy(1, 1));
-        contentPane.add(tfHost, CC.xy(3, 1));
+        //======== panel2 ========
+        {
+            panel2.setBorder(new EmptyBorder(5, 5, 5, 5));
+            panel2.setLayout(new FormLayout(
+                "default, $lcgap, 120dlu:grow, $lcgap, pref, $lcgap, default",
+                "5*(default, $lgap), default"));
 
-        //---- btnSchemaCreation ----
-        btnSchemaCreation.setText("<html>Schema creation<br>script</html>");
-        contentPane.add(btnSchemaCreation, CC.xywh(5, 1, 1, 3));
+            //---- label1 ----
+            label1.setText("Host");
+            panel2.add(label1, CC.xy(1, 1));
+            panel2.add(tfHost, CC.xy(3, 1));
 
-        //---- label2 ----
-        label2.setText("Port");
-        contentPane.add(label2, CC.xy(1, 3));
-        contentPane.add(tfPort, CC.xy(3, 3));
+            //---- separator1 ----
+            separator1.setOrientation(SwingConstants.VERTICAL);
+            panel2.add(separator1, CC.xywh(5, 1, 1, 11));
 
-        //---- label3 ----
-        label3.setText("Database Name");
-        contentPane.add(label3, CC.xy(1, 5));
-        contentPane.add(tfDatabaseName, CC.xy(3, 5));
+            //---- btnSchemaCreation ----
+            btnSchemaCreation.setText("<html>Schema creation<br>script</html>");
+            panel2.add(btnSchemaCreation, CC.xywh(7, 1, 1, 3));
 
-        //---- label4 ----
-        label4.setText("User / Schema");
-        contentPane.add(label4, CC.xy(1, 7));
-        contentPane.add(TfSchema, CC.xy(3, 7));
+            //---- label2 ----
+            label2.setText("Port");
+            panel2.add(label2, CC.xy(1, 3));
+            panel2.add(tfPort, CC.xy(3, 3));
 
-        //---- label5 ----
-        label5.setText("Password");
-        contentPane.add(label5, CC.xy(1, 9));
-        contentPane.add(tfPassword, CC.xy(3, 9));
+            //---- label3 ----
+            label3.setText("Database Name");
+            panel2.add(label3, CC.xy(1, 5));
+            panel2.add(tfDatabaseName, CC.xy(3, 5));
 
-        //---- btnOK ----
-        btnOK.setText("OK");
-        contentPane.add(btnOK, CC.xy(3, 11));
+            //---- label4 ----
+            label4.setText("User / Schema");
+            panel2.add(label4, CC.xy(1, 7));
+            panel2.add(TfSchema, CC.xy(3, 7));
 
-        //---- btnCancel ----
-        btnCancel.setText("Cancel");
-        contentPane.add(btnCancel, CC.xy(5, 11));
+            //---- label5 ----
+            label5.setText("Password");
+            panel2.add(label5, CC.xy(1, 9));
+            panel2.add(tfPassword, CC.xy(3, 9));
+
+            //======== panel1 ========
+            {
+                panel1.setBorder(Borders.BUTTON_BAR_GAP_BORDER);
+                panel1.setLayout(new FormLayout(
+                    "$button, $lcgap, $button",
+                    "fill:default"));
+
+                //---- btnOK ----
+                btnOK.setText("OK");
+                panel1.add(btnOK, CC.xy(1, 1));
+
+                //---- btnCancel ----
+                btnCancel.setText("Cancel");
+                panel1.add(btnCancel, CC.xy(3, 1));
+            }
+            panel2.add(panel1, CC.xywh(1, 11, 3, 1));
+        }
+        contentPane.add(panel2, BorderLayout.CENTER);
         pack();
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner non-commercial license
+    private JPanel panel2;
     private JLabel label1;
     private JTextField tfHost;
+    private JSeparator separator1;
     private JButton btnSchemaCreation;
     private JLabel label2;
     private JTextField tfPort;
@@ -128,6 +153,7 @@ public class DBConnectionParametersView extends JDialog {
     private JTextField TfSchema;
     private JLabel label5;
     private JPasswordField tfPassword;
+    private JPanel panel1;
     private JButton btnOK;
     private JButton btnCancel;
     // JFormDesigner - End of variables declaration  //GEN-END:variables

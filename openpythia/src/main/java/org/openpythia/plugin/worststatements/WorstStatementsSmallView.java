@@ -1,5 +1,5 @@
 /*
- * Created by JFormDesigner on Mon Jun 06 10:41:28 CEST 2011
+ * Created by JFormDesigner on Mon Jan 14 10:39:17 CET 2013
  */
 
 package org.openpythia.plugin.worststatements;
@@ -11,7 +11,7 @@ import com.jgoodies.forms.factories.*;
 import com.jgoodies.forms.layout.*;
 
 /**
- * @author Andreas Rothmann
+ * @author r b
  */
 public class WorstStatementsSmallView extends JPanel {
     public WorstStatementsSmallView() {
@@ -22,29 +22,28 @@ public class WorstStatementsSmallView extends JPanel {
         return tfTotalNumber;
     }
 
-    public JButton getBtnShowDetails() {
-        return btnShowDetails;
-    }
-
     public JTextField getTfElapsedTop20() {
         return tfElapsedTop20;
     }
 
+    public JButton getBtnShowDetails() {
+        return btnShowDetails;
+    }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner non-commercial license
         label1 = new JLabel();
         tfTotalNumber = new JTextField();
-        btnShowDetails = new JButton();
         label2 = new JLabel();
         tfElapsedTop20 = new JTextField();
+        label3 = new JLabel();
+        btnShowDetails = new JButton();
 
         //======== this ========
         setBorder(new TitledBorder("Worst SQL Statements"));
-        setMaximumSize(new Dimension(400, 83));
         setLayout(new FormLayout(
-            "110dlu, $lcgap, 35dlu, $lcgap, default",
-            "default, $lgap, default"));
+            "left:110dlu, $lcgap, 35dlu, 0px, default",
+            "2*(default, $lgap), top:default"));
 
         //---- label1 ----
         label1.setText("Total Number of SQL Statements");
@@ -52,12 +51,8 @@ public class WorstStatementsSmallView extends JPanel {
 
         //---- tfTotalNumber ----
         tfTotalNumber.setEditable(false);
+        tfTotalNumber.setHorizontalAlignment(SwingConstants.RIGHT);
         add(tfTotalNumber, CC.xy(3, 1));
-
-        //---- btnShowDetails ----
-        btnShowDetails.setText("Details");
-        btnShowDetails.setMargin(new Insets(2, 5, 2, 5));
-        add(btnShowDetails, CC.xywh(5, 1, 1, 3));
 
         //---- label2 ----
         label2.setText("Elapsed Time for Top 20");
@@ -65,16 +60,26 @@ public class WorstStatementsSmallView extends JPanel {
 
         //---- tfElapsedTop20 ----
         tfElapsedTop20.setEditable(false);
+        tfElapsedTop20.setHorizontalAlignment(SwingConstants.RIGHT);
         add(tfElapsedTop20, CC.xy(3, 3));
+
+        //---- label3 ----
+        label3.setText("%");
+        add(label3, CC.xy(5, 3));
+
+        //---- btnShowDetails ----
+        btnShowDetails.setText("Details");
+        btnShowDetails.setMargin(new Insets(2, 5, 2, 5));
+        add(btnShowDetails, CC.xy(1, 5, CC.LEFT, CC.DEFAULT));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner non-commercial license
     private JLabel label1;
     private JTextField tfTotalNumber;
-    private JButton btnShowDetails;
     private JLabel label2;
     private JTextField tfElapsedTop20;
+    private JLabel label3;
+    private JButton btnShowDetails;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

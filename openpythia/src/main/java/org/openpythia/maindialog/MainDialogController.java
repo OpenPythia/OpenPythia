@@ -1,7 +1,6 @@
 package org.openpythia.maindialog;
 
-import java.awt.Component;
-import java.awt.Desktop;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -10,8 +9,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import org.openpythia.aboutdialog.AboutController;
 import org.openpythia.dbconnection.ConnectionPool;
@@ -38,6 +36,9 @@ public class MainDialogController implements MainDialog {
         fillSmallViews();
         view.addWindowListener(new CloseWindowListener());
 
+        view.getPanelDetails().setVisible(false);
+        view.pack();
+
         view.setVisible(true);
     }
 
@@ -46,10 +47,16 @@ public class MainDialogController implements MainDialog {
         pluginControllers.add(new HitRatioController(connectionPool));
         pluginControllers.add(new WorstStatementsSmallController(view, this,
                 connectionPool));
-        // TODO add the other plugin controllers
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridx  = 0;
+        constraints.gridy  = 0;
+        constraints.fill   = GridBagConstraints.HORIZONTAL;
+        constraints.anchor = GridBagConstraints.NORTH;
 
         for (PythiaPluginController controller : pluginControllers) {
-            view.getPanelOverview().add(controller.getSmallView());
+            view.getPanelOverview().add(controller.getSmallView(), constraints);
+            constraints.gridy++;
         }
     }
 
@@ -103,8 +110,12 @@ public class MainDialogController implements MainDialog {
 
     @Override
     public void showDetailView(JPanel detailView) {
+        if(!view.getPanelDetails().isVisible()) {
+            view.getPanelDetails().setVisible(true);
+        }
+
         view.getPanelDetails().removeAll();
-        view.getPanelDetails().add(detailView);
+        view.getPanelDetails().add(new JScrollPane(detailView));
         view.pack();
         view.repaint();
     }

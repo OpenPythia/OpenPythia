@@ -127,7 +127,7 @@ public class HitRatioController implements PythiaPluginController {
         private void updateView(float bufferCacheHitRatio,
                 float libraryCacheHitRatio) {
             smallView.getTfBufferCacheHitRatio().setText(
-                    String.format("%6.2f %%", bufferCacheHitRatio * 100));
+                    String.format("%6.2f", bufferCacheHitRatio * 100));
             if (bufferCacheHitRatio >= 0.97) {
                 smallView.getLblIconBufferCacheHitRatio().setIcon(
                         new ImageIcon(getClass().getResource(
@@ -143,7 +143,7 @@ public class HitRatioController implements PythiaPluginController {
             }
 
             smallView.getTfLibraryCacheHitRatio().setText(
-                    String.format("%6.2f %%", libraryCacheHitRatio * 100));
+                    String.format("%6.2f", libraryCacheHitRatio * 100));
             if (libraryCacheHitRatio >= 0.99) {
                 smallView.getLblIconLibraryCacheHitRatio().setIcon(
                         new ImageIcon(getClass().getResource(

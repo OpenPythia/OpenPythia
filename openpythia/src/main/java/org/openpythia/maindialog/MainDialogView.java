@@ -6,6 +6,7 @@ package org.openpythia.maindialog;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.*;
 import com.jgoodies.forms.factories.*;
 import com.jgoodies.forms.layout.*;
 
@@ -39,7 +40,6 @@ public class MainDialogView extends JFrame {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner non-commercial license
         menuBar1 = new JMenuBar();
         menu1 = new JMenu();
         miQuit = new JMenuItem();
@@ -48,16 +48,12 @@ public class MainDialogView extends JFrame {
         miAbout = new JMenuItem();
         scrollPane1 = new JScrollPane();
         panelOverview = new JPanel();
-        scrollPane2 = new JScrollPane();
         panelDetails = new JPanel();
 
         //======== this ========
         setTitle("Pythia");
-        setMinimumSize(new Dimension(640, 480));
         Container contentPane = getContentPane();
-        contentPane.setLayout(new FormLayout(
-            "2*($lcgap, 200dlu), $lcgap, default:grow, $lcgap",
-            "$lgap, 160dlu, $lgap, default:grow, $lgap"));
+        contentPane.setLayout(new BorderLayout());
 
         //======== menuBar1 ========
         {
@@ -94,29 +90,29 @@ public class MainDialogView extends JFrame {
 
             //======== panelOverview ========
             {
-                panelOverview.setLayout(new BoxLayout(panelOverview, BoxLayout.Y_AXIS));
+                panelOverview.setBorder(new EmptyBorder(5, 5, 5, 5));
+                panelOverview.setLayout(new GridBagLayout());
+                ((GridBagLayout)panelOverview.getLayout()).columnWidths = new int[] {0, 0};
+                ((GridBagLayout)panelOverview.getLayout()).rowHeights = new int[] {0, 0};
+                ((GridBagLayout)panelOverview.getLayout()).columnWeights = new double[] {1.0, 1.0E-4};
+                ((GridBagLayout)panelOverview.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
             }
             scrollPane1.setViewportView(panelOverview);
         }
-        contentPane.add(scrollPane1, CC.xywh(2, 2, 1, 3));
+        contentPane.add(scrollPane1, BorderLayout.WEST);
 
-        //======== scrollPane2 ========
+        //======== panelDetails ========
         {
-
-            //======== panelDetails ========
-            {
-                panelDetails.setLayout(new BoxLayout(panelDetails, BoxLayout.Y_AXIS));
-            }
-            scrollPane2.setViewportView(panelDetails);
+            panelDetails.setBorder(new EmptyBorder(5, 5, 5, 5));
+            panelDetails.setLayout(new BorderLayout());
         }
-        contentPane.add(scrollPane2, CC.xywh(4, 2, 3, 3));
+        contentPane.add(panelDetails, BorderLayout.CENTER);
         pack();
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner non-commercial license
     private JMenuBar menuBar1;
     private JMenu menu1;
     private JMenuItem miQuit;
@@ -125,7 +121,6 @@ public class MainDialogView extends JFrame {
     private JMenuItem miAbout;
     private JScrollPane scrollPane1;
     private JPanel panelOverview;
-    private JScrollPane scrollPane2;
     private JPanel panelDetails;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }

@@ -135,7 +135,7 @@ public class WorstStatementsSmallController implements PythiaPluginController {
                     String.valueOf(numberSQLStatements));
 
             smallView.getTfElapsedTop20().setText(
-                    String.format("%6.2f %%", ratioTop20 * 100));
+                    String.format("%6.2f", ratioTop20 * 100));
         }
     }
 }

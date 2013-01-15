@@ -4,7 +4,9 @@
 
 package org.openpythia.plugin.worststatements;
 
+import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.*;
 import com.jgoodies.forms.factories.*;
 import com.jgoodies.forms.layout.*;
 
@@ -50,7 +52,6 @@ public class WorstStatementsDetailView extends JPanel {
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner non-commercial license
         DefaultComponentFactory compFactory = DefaultComponentFactory.getInstance();
         label1 = new JLabel();
         scrollPane1 = new JScrollPane();
@@ -132,7 +133,6 @@ public class WorstStatementsDetailView extends JPanel {
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner non-commercial license
     private JLabel label1;
     private JScrollPane scrollPane1;
     private JList listSnapshots;
