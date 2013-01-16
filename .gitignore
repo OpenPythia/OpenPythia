@@ -7,14 +7,6 @@ target/
 .settings
 atlassian-ide-plugin.xml
 openpythia.iml
-compiler.xml
-copyright
-encodings.xml
-libraries
-misc.xml
-modules.xml
-scopes
-uiDesigner.xml
-vcs.xml
-workspace.xml
-openpythia/Pythia.pref
+Pythia.pref
+.DS_Store
+.com.apple.timemachine.supported
