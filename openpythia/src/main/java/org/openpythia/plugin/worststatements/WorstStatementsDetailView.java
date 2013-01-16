@@ -1,18 +1,23 @@
-/*
- * Created by JFormDesigner on Mon Jun 06 11:34:58 CEST 2011
- */
-
+/**
+ * Copyright 2012 msg systems ag
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 package org.openpythia.plugin.worststatements;
 
-import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.*;
 import com.jgoodies.forms.factories.*;
 import com.jgoodies.forms.layout.*;
-
-/**
- * @author Andreas Rothmann
- */
 public class WorstStatementsDetailView extends JPanel {
     public WorstStatementsDetailView() {
         initComponents();
@@ -34,6 +39,10 @@ public class WorstStatementsDetailView extends JPanel {
         return tfSnapshotA;
     }
 
+    public JButton getBtnExportExcel() {
+        return btnExportExcel;
+    }
+
     public JTextField getTfSnapshotB() {
         return tfSnapshotB;
     }
@@ -44,10 +53,6 @@ public class WorstStatementsDetailView extends JPanel {
 
     public JTable getTableDeltaSQLStatements() {
         return tableDeltaSQLStatements;
-    }
-
-    public JButton getBtnExportExcel() {
-        return btnExportExcel;
     }
 
     private void initComponents() {
