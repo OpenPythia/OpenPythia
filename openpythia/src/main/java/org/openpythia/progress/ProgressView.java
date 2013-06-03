@@ -15,10 +15,11 @@
  **/
 package org.openpythia.progress;
 
+import com.jgoodies.forms.factories.CC;
+import com.jgoodies.forms.layout.FormLayout;
+
 import java.awt.*;
 import javax.swing.*;
-import com.jgoodies.forms.factories.*;
-import com.jgoodies.forms.layout.*;
 public class ProgressView extends JDialog {
     public ProgressView(Frame owner) {
         super(owner);

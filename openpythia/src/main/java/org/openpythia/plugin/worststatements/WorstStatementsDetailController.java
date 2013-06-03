@@ -27,7 +27,6 @@ import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.openpythia.dbconnection.ConnectionPool;
 import org.openpythia.progress.FinishedListener;
 import org.openpythia.progress.ProgressController;
 import org.openpythia.progress.ProgressListener;
@@ -41,15 +40,12 @@ import org.openpythia.utilities.sql.SnapshotHelper;
 public class WorstStatementsDetailController implements FinishedListener {
 
     private Frame owner;
-    private ConnectionPool connectionPool;
     private WorstStatementsDetailView view;
 
     private DeltaSnapshot deltaSnapshot = null;
 
-    public WorstStatementsDetailController(Frame owner,
-            ConnectionPool connectionPool) {
+    public WorstStatementsDetailController(Frame owner) {
         this.owner = owner;
-        this.connectionPool = connectionPool;
 
         view = new WorstStatementsDetailView();
 
@@ -82,7 +78,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         view.getBtnExportExcel().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                exportDeltaToExcel(connectionPool);
+                exportDeltaToExcel();
             }
         });
         view.getBtnExportExcel().setEnabled(false);
@@ -104,9 +100,9 @@ public class WorstStatementsDetailController implements FinishedListener {
         ProgressController controller = new ProgressController(owner, this,
                 "Taking Snapshot...",
                 "Pythia is taking a snapshot of the library cache.");
-        SnapshotHelper.takeSnapshot(connectionPool, controller);
+        SnapshotHelper.takeSnapshot(controller);
 
-        SQLHelper.startSQLTextLoader(connectionPool);
+        SQLHelper.startSQLTextLoader();
     }
 
     private void compareSnapshot() {
@@ -134,8 +130,7 @@ public class WorstStatementsDetailController implements FinishedListener {
 
         if (sqlStatements.size() <= 100) {
             // no progress bar for just one bunch of statements
-            SQLHelper.loadSQLTextForStatements(connectionPool, sqlStatements,
-                    null);
+            SQLHelper.loadSQLTextForStatements(sqlStatements,null);
         } else {
             ProgressListener listener = new ProgressController(owner, this,
                     "Load SQL Text",
@@ -160,8 +155,7 @@ public class WorstStatementsDetailController implements FinishedListener {
 
         @Override
         public void run() {
-            SQLHelper.loadSQLTextForStatements(connectionPool,
-                    statementsToLoad, progressListener);
+            SQLHelper.loadSQLTextForStatements(statementsToLoad, progressListener);
         }
 
     }
@@ -179,11 +173,10 @@ public class WorstStatementsDetailController implements FinishedListener {
                 new DeltaSnapshotTableModel(deltaSnapshot));
     }
 
-    private void exportDeltaToExcel(ConnectionPool connectionPool) {
+    private void exportDeltaToExcel() {
         File excelFile = FileSelectorUtility.chooseExcelFileToWrite(view);
         if (excelFile != null) {
-            DeltaSnapshotWriter.saveDeltaSnapshot(connectionPool, excelFile,
-                    deltaSnapshot);
+            DeltaSnapshotWriter.saveDeltaSnapshot(excelFile,deltaSnapshot);
         }
     }
 

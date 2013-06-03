@@ -36,8 +36,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.util.IOUtils;
-import org.openpythia.dbconnection.ConnectionPool;
-import org.openpythia.utilities.FileRessourceUtility;
 import org.openpythia.utilities.SSUtilities;
 import org.openpythia.utilities.deltasql.DeltaSQLStatementSnapshot;
 import org.openpythia.utilities.deltasql.DeltaSnapshot;
@@ -63,7 +61,6 @@ public class DeltaSnapshotWriter {
     private static final int INDEX_COLUMN_PARSING_SCHEMA = 0;
     public static final String TEMPLATE_DELTA_V_SQLAREA_XLS = "Template_DELTA_V$SQLAREA.xls";
 
-    private ConnectionPool connectionPool;
     private File destination;
     private DeltaSnapshot deltaSnapshot;
 
@@ -71,10 +68,7 @@ public class DeltaSnapshotWriter {
     private Sheet executionPlansSheet;
     private CellStyle hyperlinkStyle;
 
-    private DeltaSnapshotWriter(ConnectionPool connectionPool,
-            File destination, DeltaSnapshot deltaSnapshot) {
-
-        this.connectionPool = connectionPool;
+    private DeltaSnapshotWriter(File destination, DeltaSnapshot deltaSnapshot) {
         this.destination = destination;
         this.deltaSnapshot = deltaSnapshot;
     }
@@ -120,12 +114,8 @@ public class DeltaSnapshotWriter {
         }
     }
 
-    public static void saveDeltaSnapshot(ConnectionPool connectionPool,
-            File destination, DeltaSnapshot deltaSnapshot) {
-
-        DeltaSnapshotWriter writer = new DeltaSnapshotWriter(connectionPool,
-                destination, deltaSnapshot);
-
+    public static void saveDeltaSnapshot(File destination, DeltaSnapshot deltaSnapshot) {
+        DeltaSnapshotWriter writer = new DeltaSnapshotWriter(destination, deltaSnapshot);
         writer.saveDeltaSnapshot();
     }
 
@@ -212,8 +202,7 @@ public class DeltaSnapshotWriter {
                 worstStatements.add(currentSnapshot.getSqlStatement());
             }
         }
-        SQLHelper.loadExecutionPlansForStatements(connectionPool,
-                worstStatements, null);
+        SQLHelper.loadExecutionPlansForStatements(worstStatements, null);
 
         // Now write the execution plans into the Excel sheet
         int currentRowIndex = 3;

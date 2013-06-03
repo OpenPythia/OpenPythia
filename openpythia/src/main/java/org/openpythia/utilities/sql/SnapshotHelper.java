@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import javax.swing.JOptionPane;
 
-import org.openpythia.dbconnection.ConnectionPool;
+import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.progress.ProgressListener;
 
 public class SnapshotHelper {
@@ -54,8 +54,8 @@ public class SnapshotHelper {
         }
     }
 
-    public static void takeSnapshot(ConnectionPool connectionPool, ProgressListener progressListener) {
-        new Thread(new SnapshotTaker(connectionPool, progressListener)).start();
+    public static void takeSnapshot(ProgressListener progressListener) {
+        new Thread(new SnapshotTaker(progressListener)).start();
     }
 
     private static class SnapshotTaker implements Runnable {
@@ -64,21 +64,19 @@ public class SnapshotHelper {
                 + "executions, elapsed_time / 1000000, cpu_time / 1000000, buffer_gets, disk_reads, rows_processed "
                 + "FROM v$sqlarea";
 
-        private ConnectionPool connectionPool;
         private ProgressListener progressListener;
 
-        public SnapshotTaker(ConnectionPool connectionPool, ProgressListener progressListener) {
-            this.connectionPool = connectionPool;
+        public SnapshotTaker(ProgressListener progressListener) {
             this.progressListener = progressListener;
         }
 
         @Override
         public void run() {
             progressListener.setStartValue(0);
-            progressListener.setEndValue(SQLHelper.getNumberSQLStatements(connectionPool));
+            progressListener.setEndValue(SQLHelper.getNumberSQLStatements());
             progressListener.setCurrentValue(0);
 
-            Date snapshotDate = SQLHelper.getCurrentDBDateTime(connectionPool);
+            Date snapshotDate = SQLHelper.getCurrentDBDateTime();
             Calendar snapshotCalendar = new GregorianCalendar();
             snapshotCalendar.setTime(snapshotDate);
             String snapshotID = snapshotCalendar.get(Calendar.YEAR) + "."
@@ -106,7 +104,7 @@ public class SnapshotHelper {
         }
 
         private void fillSnapshot(Snapshot snapshot) {
-            Connection connection = connectionPool.getConnection();
+            Connection connection = ConnectionPoolUtils.getConnectionFromPool();
             try {
                 PreparedStatement snapshotStatement = connection
                         .prepareStatement(SNAPSHOT_SQL_AREA);
@@ -144,7 +142,7 @@ public class SnapshotHelper {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog((Component) null, e);
             } finally {
-                connectionPool.giveConnectionBack(connection);
+                ConnectionPoolUtils.returnConnectionToPool(connection);
             }
 
         }

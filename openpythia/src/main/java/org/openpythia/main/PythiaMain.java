@@ -19,12 +19,12 @@ import java.util.List;
 
 import javax.swing.UIManager;
 
-import org.openpythia.dbconnection.ConnectionPool;
-import org.openpythia.dbconnection.DBConnectionParametersController;
-import org.openpythia.dbconnection.JDBCHandler;
+import org.openpythia.dbconnection.*;
 import org.openpythia.maindialog.MainDialogController;
 import org.openpythia.schemaprivileges.MissingPrivilegesController;
 import org.openpythia.schemaprivileges.PrivilegesHelper;
+
+import static org.openpythia.dbconnection.LoginController.LoginResult.CANCEL;
 
 public class PythiaMain {
 
@@ -44,25 +44,25 @@ public class PythiaMain {
             gracefullExit();
         }
 
-        if (!DBConnectionParametersController.establishDBConnection()) {
+        LoginController loginController = new LoginController();
+
+        if (loginController.showDialog() == CANCEL) {
             // When being asked for the connection details the user pressed the
             // cancel button
             gracefullExit();
         }
 
-        checkPrivileges(DBConnectionParametersController.getConnectionPool());
+        checkPrivileges();
 
-        openMainDialog(DBConnectionParametersController.getConnectionPool());
+        openMainDialog();
     }
 
     private static void switchLookAndFeel() {
         try {
             // The default look & feel in Windows looks just ugly - so switch to
             // a nicer look & feel
-            if (System.getProperties().getProperty("os.name")
-                    .contains("Windows")) {
-                UIManager
-                        .setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+            if (System.getProperties().getProperty("os.name").contains("Windows")) {
+                UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
             }
         } catch (Exception e) {
             // Just ignore any exception: There will be no problem running with
@@ -70,25 +70,21 @@ public class PythiaMain {
         }
     }
 
-    private static void checkPrivileges(ConnectionPool connectionPool) {
-        List<String> missingObjectPrivileges = PrivilegesHelper
-                .getMissingObjectPrivileges(connectionPool);
+    private static void checkPrivileges() {
+        List<String> missingObjectPrivileges = PrivilegesHelper.getMissingObjectPrivileges();
 
         if (missingObjectPrivileges.size() > 0) {
             new MissingPrivilegesController(PrivilegesHelper.createGrantScript(
-                    missingObjectPrivileges, connectionPool.getSchemaName()));
+                    missingObjectPrivileges, "pythia"));
         }
     }
 
-    private static void openMainDialog(ConnectionPool connectionPool) {
-        new MainDialogController(connectionPool);
+    private static void openMainDialog() {
+        new MainDialogController();
     }
 
     public static void gracefullExit() {
-        if (DBConnectionParametersController.getConnectionPool() != null) {
-            DBConnectionParametersController.getConnectionPool()
-                    .releaseAllPooledConnections();
-        }
+        ConnectionPoolUtils.shutdownPool();
         System.exit(0);
     }
 }

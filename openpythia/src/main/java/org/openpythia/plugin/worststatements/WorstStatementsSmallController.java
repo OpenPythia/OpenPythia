@@ -27,7 +27,7 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import org.openpythia.dbconnection.ConnectionPool;
+import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.plugin.MainDialog;
 import org.openpythia.plugin.PythiaPluginController;
 import org.openpythia.utilities.sql.SQLHelper;
@@ -48,14 +48,12 @@ public class WorstStatementsSmallController implements PythiaPluginController {
     private WorstStatementsSmallView smallView;
     private WorstStatementsDetailController detailController;
 
-    public WorstStatementsSmallController(Frame owner, MainDialog mainDialog,
-            ConnectionPool connectionPool) {
+    public WorstStatementsSmallController(Frame owner, MainDialog mainDialog) {
         this.mainDialog = mainDialog;
 
-        updater = new Updater(connectionPool);
+        updater = new Updater();
 
-        detailController = new WorstStatementsDetailController(owner,
-                connectionPool);
+        detailController = new WorstStatementsDetailController(owner);
 
         smallView = new WorstStatementsSmallView();
 
@@ -89,16 +87,9 @@ public class WorstStatementsSmallController implements PythiaPluginController {
 
     private class Updater implements Runnable {
 
-        private ConnectionPool connectionPool;
-
-        public Updater(ConnectionPool connectionPool) {
-            this.connectionPool = connectionPool;
-        }
-
         @Override
         public void run() {
-            int numberSQLStatements = SQLHelper
-                    .getNumberSQLStatements(connectionPool);
+            int numberSQLStatements = SQLHelper.getNumberSQLStatements();
             float ratioTop20 = getRatioTop20();
 
             updateView(numberSQLStatements, ratioTop20);
@@ -108,7 +99,7 @@ public class WorstStatementsSmallController implements PythiaPluginController {
             int elpasedTimeTop20 = 0;
             int elapsedTimeTotal = 1;
 
-            Connection connection = connectionPool.getConnection();
+            Connection connection = ConnectionPoolUtils.getConnectionFromPool();
             try {
                 PreparedStatement elapsedTop20Statement = connection
                         .prepareStatement(ELAPSED_TIME_TOP20);
@@ -140,7 +131,7 @@ public class WorstStatementsSmallController implements PythiaPluginController {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog((Component) null, e);
             } finally {
-                connectionPool.giveConnectionBack(connection);
+                ConnectionPoolUtils.returnConnectionToPool(connection);
             }
             return (float) elpasedTimeTop20 / (float) elapsedTimeTotal;
         }

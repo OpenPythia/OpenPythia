@@ -24,7 +24,8 @@ import java.sql.Driver;
 
 import javax.swing.JOptionPane;
 
-import org.openpythia.utilities.PreferencesHandler;
+import org.openpythia.preferences.PreferencesManager;
+import org.openpythia.preferences.PythiaConfiguration;
 
 public class JDBCHandler {
     final static String JDBC_DRIVER_CLASS_NAME = "oracle.jdbc.driver.OracleDriver";
@@ -48,18 +49,17 @@ public class JDBCHandler {
             return true;
         }
 
-        if (PreferencesHandler.getJDBCDriverFileName() != null) {
-            if (loadJDBCDriverFromFile(PreferencesHandler
-                    .getJDBCDriverFileName())) {
+        if (PreferencesManager.getPathToJDBCDriver() != null) {
+            if (loadJDBCDriverFromFile(PreferencesManager.getPathToJDBCDriver())) {
                 // A path for the jar file is in the preferences AND the driver
                 // was successfully loaded.
                 return true;
             } else {
-                PreferencesHandler.setJDBCDriverFileName(null);
+                PreferencesManager.setPathToJDBCDriver(null);
             }
         }
 
-        while (PreferencesHandler.getJDBCDriverFileName() == null) {
+        while (PreferencesManager.getPathToJDBCDriver() == null) {
             // There is no JDBC driver in the class path and we don't know where
             // to load it from - so ask the user...
             MissingJDBCDriverController controller = new MissingJDBCDriverController();
@@ -70,15 +70,13 @@ public class JDBCHandler {
                 return false;
             } else if (loadJDBCDriverFromFile(controller.getPathJDBCDriver())) {
                 // The file provided by the user contains a valid JDBC driver
-                PreferencesHandler.setJDBCDriverFileName(controller
-                        .getPathJDBCDriver());
+                PreferencesManager.setPathToJDBCDriver(controller.getPathJDBCDriver());
                 return true;
             } else {
                 // The file provided by the user contains NOT a valid JDBC
                 // driver
-                JOptionPane
-                        .showMessageDialog((Component) null,
-                                "The file you provided does not contain a valid JDBC driver from Oracle.");
+                JOptionPane.showMessageDialog((Component) null,
+                    "The file you provided does not contain a valid JDBC driver from Oracle.");
             }
         }
         

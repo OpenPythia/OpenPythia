@@ -25,7 +25,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import org.openpythia.dbconnection.ConnectionPool;
+import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.plugin.PythiaPluginController;
 
 public class HitRatioController implements PythiaPluginController {
@@ -50,9 +50,9 @@ public class HitRatioController implements PythiaPluginController {
 
     private HitRatioSmallView smallView;
 
-    public HitRatioController(ConnectionPool connectionPool) {
+    public HitRatioController() {
 
-        updater = new Updater(connectionPool);
+        updater = new Updater();
 
         smallView = new HitRatioSmallView();
 
@@ -71,12 +71,6 @@ public class HitRatioController implements PythiaPluginController {
 
     private class Updater implements Runnable {
 
-        private ConnectionPool connectionPool;
-
-        public Updater(ConnectionPool connectionPool) {
-            this.connectionPool = connectionPool;
-        }
-
         @Override
         public void run() {
             float bufferCacheHitRatio = getBufferCacheHitRatio();
@@ -88,7 +82,7 @@ public class HitRatioController implements PythiaPluginController {
         private float getBufferCacheHitRatio() {
             float result = 0;
 
-            Connection connection = connectionPool.getConnection();
+            Connection connection = ConnectionPoolUtils.getConnectionFromPool();
             try {
                 PreparedStatement bufferCacheStatement = connection
                         .prepareStatement(BUFFER_CACHE_SQL_STATEMENT);
@@ -107,7 +101,7 @@ public class HitRatioController implements PythiaPluginController {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog((Component) null, e);
             } finally {
-                connectionPool.giveConnectionBack(connection);
+                ConnectionPoolUtils.returnConnectionToPool(connection);
             }
             return result;
         }
@@ -115,7 +109,7 @@ public class HitRatioController implements PythiaPluginController {
         private float getLibraryCacheHitRatio() {
             float result = 0;
 
-            Connection connection = connectionPool.getConnection();
+            Connection connection = ConnectionPoolUtils.getConnectionFromPool();
             try {
                 PreparedStatement libraryCacheStatement = connection
                         .prepareStatement(LIBRARY_CACHE_SQL_STATEMENT);
@@ -134,7 +128,7 @@ public class HitRatioController implements PythiaPluginController {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog((Component) null, e);
             } finally {
-                connectionPool.giveConnectionBack(connection);
+                ConnectionPoolUtils.returnConnectionToPool(connection);
             }
             return result;
         }

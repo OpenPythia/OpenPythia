@@ -27,7 +27,6 @@ import java.util.List;
 import javax.swing.*;
 
 import org.openpythia.aboutdialog.AboutController;
-import org.openpythia.dbconnection.ConnectionPool;
 import org.openpythia.main.PythiaMain;
 import org.openpythia.plugin.MainDialog;
 import org.openpythia.plugin.PythiaPluginController;
@@ -36,15 +35,10 @@ import org.openpythia.plugin.worststatements.WorstStatementsSmallController;
 
 public class MainDialogController implements MainDialog {
 
-    private ConnectionPool connectionPool;
-
     private MainDialogView view;
     private List<PythiaPluginController> pluginControllers;
 
-    public MainDialogController(ConnectionPool connectionPool) {
-
-        this.connectionPool = connectionPool;
-
+    public MainDialogController() {
         view = new MainDialogView();
 
         bindMenus();
@@ -59,9 +53,8 @@ public class MainDialogController implements MainDialog {
 
     private void fillSmallViews() {
         pluginControllers = new ArrayList<PythiaPluginController>();
-        pluginControllers.add(new HitRatioController(connectionPool));
-        pluginControllers.add(new WorstStatementsSmallController(view, this,
-                connectionPool));
+        pluginControllers.add(new HitRatioController());
+        pluginControllers.add(new WorstStatementsSmallController(view, this));
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx  = 0;

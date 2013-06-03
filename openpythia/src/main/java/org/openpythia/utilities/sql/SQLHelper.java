@@ -28,7 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.JOptionPane;
 
-import org.openpythia.dbconnection.ConnectionPool;
+import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.progress.ProgressListener;
 
 public class SQLHelper {
@@ -101,8 +101,7 @@ public class SQLHelper {
         return result;
     }
 
-    public static void loadSQLTextForStatements(ConnectionPool connectionPool,
-            List<SQLStatement> sqlStatements, ProgressListener progressListener) {
+    public static void loadSQLTextForStatements(List<SQLStatement> sqlStatements, ProgressListener progressListener) {
         if (progressListener != null) {
             progressListener.setStartValue(0);
             progressListener.setEndValue(sqlStatements.size());
@@ -111,7 +110,7 @@ public class SQLHelper {
 
         int progressCounter = 0;
         for (SQLStatement statement : sqlStatements) {
-            loadSQLTextForStatement(connectionPool, statement);
+            loadSQLTextForStatement(statement);
 
             progressCounter++;
             if (progressListener != null) {
@@ -123,8 +122,7 @@ public class SQLHelper {
         }
     }
 
-    public static void loadSQLTextForStatement(ConnectionPool connectionPool,
-            SQLStatement sqlStatement) {
+    public static void loadSQLTextForStatement(SQLStatement sqlStatement) {
 
         if (sqlStatement.getSqlText() == null) {
             // statement has no sql text assigned - so load it...
@@ -132,7 +130,7 @@ public class SQLHelper {
             Connection connection = null;
             PreparedStatement sqlTextStatement = null;
             try {
-                connection = connectionPool.getConnection();
+                connection = ConnectionPoolUtils.getConnectionFromPool();
                 sqlTextStatement = connection
                         .prepareStatement(SELECT_SQL_TEXT_FOR_ONE_STATEMENT);
                 sqlTextStatement.setString(1, sqlStatement.getAddress());
@@ -156,28 +154,20 @@ public class SQLHelper {
                         // ignore
                     }
                 }
-                connectionPool.giveConnectionBack(connection);
+                ConnectionPoolUtils.returnConnectionToPool(connection);
             }
         }
     }
 
-    public static synchronized void startSQLTextLoader(
-            ConnectionPool connectionPool) {
+    public static synchronized void startSQLTextLoader() {
         if (sqlStatementLoader == null) {
-            sqlStatementLoader = new SQLStatementLoader(connectionPool);
+            sqlStatementLoader = new SQLStatementLoader();
             new Thread(sqlStatementLoader).start();
         }
     }
 
     private static class SQLStatementLoader implements Runnable {
 
-        private ConnectionPool connectionPool;
-
-        public SQLStatementLoader(ConnectionPool connectionPool) {
-            this.connectionPool = connectionPool;
-        }
-
-        @Override
         public void run() {
             List<SQLStatement> sqlStatementsToLoad = new ArrayList<SQLStatement>();
             int numberStatements;
@@ -213,7 +203,7 @@ public class SQLHelper {
 
             Connection connection = null;
             try {
-                connection = connectionPool.getConnection();
+                connection = ConnectionPoolUtils.getConnectionFromPool();
                 PreparedStatement sqlTextStatement = connection
                         .prepareStatement(SELECT_SQL_TEXT_FOR_100_STATEMENTS);
                 sqlTextStatement.setFetchSize(1000);
@@ -244,7 +234,7 @@ public class SQLHelper {
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog((Component) null, e);
             } finally {
-                connectionPool.giveConnectionBack(connection);
+                ConnectionPoolUtils.returnConnectionToPool(connection);
             }
         }
 
@@ -294,8 +284,7 @@ public class SQLHelper {
         }
     }
 
-    public static void loadExecutionPlansForStatements(
-            ConnectionPool connectionPool, List<SQLStatement> sqlStatements,
+    public static void loadExecutionPlansForStatements( List<SQLStatement> sqlStatements,
             ProgressListener progressListener) {
         if (progressListener != null) {
             progressListener.setStartValue(0);
@@ -330,8 +319,7 @@ public class SQLHelper {
                 missingExecutionPlanSqlStatements.remove(statement);
             }
 
-            loadExecutionPlansForSQLStatements(connectionPool,
-                    sqlStatementsToLoad);
+            loadExecutionPlansForSQLStatements(sqlStatementsToLoad);
 
             progressCounter += sqlStatementsToLoad.size();
 
@@ -353,13 +341,11 @@ public class SQLHelper {
         }
     }
 
-    private static void loadExecutionPlansForSQLStatements(
-            ConnectionPool connectionPool,
-            List<SQLStatement> sqlStatementsToLoad) {
+    private static void loadExecutionPlansForSQLStatements(List<SQLStatement> sqlStatementsToLoad) {
 
         Connection connection = null;
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPoolUtils.getConnectionFromPool();
             PreparedStatement sqlExecutionPlansStatement = connection
                     .prepareStatement(SELECT_EXECUTION_PLANS_FOR_100_STATEMENTS);
             sqlExecutionPlansStatement.setFetchSize(1000);
@@ -392,7 +378,7 @@ public class SQLHelper {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog((Component) null, e);
         } finally {
-            connectionPool.giveConnectionBack(connection);
+            ConnectionPoolUtils.returnConnectionToPool(connection);
         }
     }
 
@@ -495,10 +481,10 @@ public class SQLHelper {
         return null;
     }
 
-    public static int getNumberSQLStatements(ConnectionPool connectionPool) {
+    public static int getNumberSQLStatements() {
         int result = 0;
 
-        Connection connection = connectionPool.getConnection();
+        Connection connection = ConnectionPoolUtils.getConnectionFromPool();
         try {
             PreparedStatement numberStatementsStatement = connection
                     .prepareStatement(NUMBER_STATEMENTS_IN_LIBRARY_CACHE);
@@ -517,15 +503,15 @@ public class SQLHelper {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog((Component) null, e);
         } finally {
-            connectionPool.giveConnectionBack(connection);
+            ConnectionPoolUtils.returnConnectionToPool(connection);
         }
         return result;
     }
 
-    public static Date getCurrentDBDateTime(ConnectionPool connectionPool) {
+    public static Date getCurrentDBDateTime() {
         Date result = null;
 
-        Connection connection = connectionPool.getConnection();
+        Connection connection = ConnectionPoolUtils.getConnectionFromPool();
         try {
             PreparedStatement dateTimeStatement = connection
                     .prepareStatement(DATE_TIME_DATABASE);
@@ -546,7 +532,7 @@ public class SQLHelper {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog((Component) null, e);
         } finally {
-            connectionPool.giveConnectionBack(connection);
+            ConnectionPoolUtils.returnConnectionToPool(connection);
         }
         return result;
     }

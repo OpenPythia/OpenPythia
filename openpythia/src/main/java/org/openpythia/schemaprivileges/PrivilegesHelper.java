@@ -25,7 +25,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import org.openpythia.dbconnection.ConnectionPool;
+import org.openpythia.dbconnection.ConnectionPoolUtils;
 
 public class PrivilegesHelper {
 
@@ -61,12 +61,11 @@ public class PrivilegesHelper {
         return result;
     }
 
-    public static List<String> getMissingObjectPrivileges(
-            ConnectionPool connectionPool) {
+    public static List<String> getMissingObjectPrivileges() {
 
         // get a list with all granted objects
         List<String> grantedObjects = new ArrayList<String>();
-        Connection connection = connectionPool.getConnection();
+        Connection connection = ConnectionPoolUtils.getConnectionFromPool();
         try {
             PreparedStatement grantedObjectsStatement = connection
                     .prepareStatement(SELECT_USER_PRIVILEGES);
@@ -86,7 +85,12 @@ public class PrivilegesHelper {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog((Component) null, e);
         } finally {
-            connectionPool.giveConnectionBack(connection);
+            try {
+                connection.close();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         return getMissingObjectPrivileges(grantedObjects);
