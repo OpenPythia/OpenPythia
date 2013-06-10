@@ -48,11 +48,11 @@ public class FileSelectorUtility {
     }
 
     public static File chooseExcelFileToWrite(Component owner) {
-        return chooseFileToWrite(owner, new FileFilterExcel(), ".xls", null);
+        return chooseFileToWrite(owner, new FileFilterExcel(), ".xlsx", null);
     }
 
     public static File chooseExcelFileToWrite(Component owner, String fileName) {
-        return chooseFileToWrite(owner, new FileFilterExcel(), ".xls", fileName);
+        return chooseFileToWrite(owner, new FileFilterExcel(), ".xlsx", fileName);
     }
 
     public static File chooseSQLFileToWrite(Component owner) {

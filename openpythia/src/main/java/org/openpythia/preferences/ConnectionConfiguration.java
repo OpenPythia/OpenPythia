@@ -5,18 +5,12 @@ public class ConnectionConfiguration {
     private String connectionName;
     private String host;
     private Integer port;
-    private String databaseNameX;
     private ConnectionTypeEnum connectionTypeEnum;
     private String sid;
     private String serviceName;
     private String tnsName;
     private String user;
     private String password;
-
-    // used by persistence - do not delete even it seem not to be used
-    public ConnectionConfiguration() {
-
-    }
 
     public ConnectionConfiguration(String connectionName, String host, Integer port,
                                    ConnectionTypeEnum connectionTypeEnum, String sid, String serviceName, String tnsName,
@@ -80,6 +74,48 @@ public class ConnectionConfiguration {
 
         return null;
     }
+
+    // all the following methods are used by XML persistence - do not delete even they seem not to be used
+    public ConnectionConfiguration() {
+    }
+
+    public void setConnectionName(String connectionName) {
+        this.connectionName = connectionName;
+    }
+
+    public void setConnectionTypeEnum(ConnectionTypeEnum connectionTypeEnum) {
+        this.connectionTypeEnum = connectionTypeEnum;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public void setSid(String sid) {
+        this.sid = sid;
+    }
+
+    public void setTnsName(String tnsName) {
+        this.tnsName = tnsName;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    // END usage by XML persistence
 
     @Override
     public boolean equals(Object o) {

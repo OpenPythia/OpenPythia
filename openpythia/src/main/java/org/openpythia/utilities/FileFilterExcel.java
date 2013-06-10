@@ -29,7 +29,7 @@ public class FileFilterExcel extends FileFilter {
 
 		String extension = FileSelectorUtility.getExtension(file);
 		if (extension != null) {
-			if (extension.equals("xls")) {
+			if (extension.equals("xlsx")) {
 				return true;
 			}
 		}
@@ -38,7 +38,7 @@ public class FileFilterExcel extends FileFilter {
 
 	@Override
 	public String getDescription() {
-		return "Excel Files (.xls)";
+		return "Excel Files (.xlsx)";
 	}
 
 }

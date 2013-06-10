@@ -20,6 +20,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SSUtilities {
 
     public static Row copyRow(Sheet sheet, Row sourceRow, int destination) {
@@ -68,10 +71,44 @@ public class SSUtilities {
                 // this region is within the row - so copy it
                 sheet.addMergedRegion(new CellRangeAddress(destination,
                         destination, mergedRegion.getFirstColumn(), mergedRegion
-                                .getLastColumn()));
+                        .getLastColumn()));
             }
         }
 
         return newRow;
     }
+
+    public static void deleteRow(Sheet sheet, Row rowToDelete) {
+
+        // if the row contains merged regions, delete them
+        List<Integer> mergedRegionsToDelete = new ArrayList<Integer>();
+        int numberMergedRegions = sheet.getNumMergedRegions();
+        for (int i = 0; i < numberMergedRegions; i++) {
+            CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
+
+            if (mergedRegion.getFirstRow() == rowToDelete.getRowNum()
+                    && mergedRegion.getLastRow() == rowToDelete.getRowNum()) {
+                // this region is within the row - so mark it for deletion
+                mergedRegionsToDelete.add(i);
+            }
+        }
+
+        // now that we know all regions to delete just do it
+        for (Integer indexToDelete : mergedRegionsToDelete) {
+            sheet.removeMergedRegion(indexToDelete);
+        }
+
+        int rowIndex = rowToDelete.getRowNum();
+
+        // this only removes the content of the row
+        sheet.removeRow(rowToDelete);
+
+        int lastRowNum = sheet.getLastRowNum();
+
+        // shift the rest of the sheet one index down
+        if (rowIndex >= 0 && rowIndex < lastRowNum) {
+            sheet.shiftRows(rowIndex + 1, lastRowNum, -1);
+        }
+    }
+
 }

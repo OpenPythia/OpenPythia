@@ -18,13 +18,6 @@ package org.openpythia.preferences;
 import java.beans.*;
 import java.io.*;
 
-/**
- * Created with IntelliJ IDEA.
- * User: rabe
- * Date: 18.01.13
- * Time: 11:04
- * To change this template use File | Settings | File Templates.
- */
 public class ConfigurationWriter {
 
     private OutputStream outputStream;

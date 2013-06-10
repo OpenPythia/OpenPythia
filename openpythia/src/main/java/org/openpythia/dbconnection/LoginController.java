@@ -102,11 +102,9 @@ public class LoginController {
     public LoginController() {
         view = new LoginView((Dialog) null);
 
-        ConnectionConfiguration lastConnectionConfiguration = PreferencesManager.
-                getLastConfiguration();
+        ConnectionConfiguration lastConnectionConfiguration = PreferencesManager.getLastConfiguration();
 
-        List<ConnectionConfiguration> savedConnectionConfiguration = PreferencesManager.
-                getSavedConnectionConfiguration();
+        List<ConnectionConfiguration> savedConnectionConfiguration = PreferencesManager.getSavedConnectionConfiguration();
 
         if (lastConnectionConfiguration == null) {
             updateView(DEFAULT_CONNECTION_PREFERENCES);
@@ -261,16 +259,21 @@ public class LoginController {
         view.getTextFieldConnectionName().setText(connection.getConnectionName());
         view.getTextFieldHost().setText(connection.getHost());
         view.getTextFieldPort().setValue(connection.getPort());
-        switch (connection.getConnectionType()) {
-            case SID:
-                view.getRbSID().setSelected(true);
-                break;
-            case ServiceName:
-                view.getRbServiceName().setSelected(true);
-                break;
-            case TNSName:
-                view.getRbTnsName().setSelected(true);
-                break;
+        if (connection.getConnectionType() == null) {
+            // default is SID
+            view.getRbSID().setSelected(true);
+        } else {
+            switch (connection.getConnectionType()) {
+                case SID:
+                    view.getRbSID().setSelected(true);
+                    break;
+                case ServiceName:
+                    view.getRbServiceName().setSelected(true);
+                    break;
+                case TNSName:
+                    view.getRbTnsName().setSelected(true);
+                    break;
+            }
         }
         view.getTextFieldSID().setText(connection.getSid());
         view.getTextFieldServiceName().setText(connection.getServiceName());

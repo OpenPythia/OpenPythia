@@ -35,6 +35,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.util.IOUtils;
 import org.openpythia.utilities.SSUtilities;
 import org.openpythia.utilities.deltasql.DeltaSQLStatementSnapshot;
@@ -47,6 +48,7 @@ import org.openpythia.utilities.sql.SQLStatement;
 public class DeltaSnapshotWriter {
 
     private static final int INDEX_ROW_TEMPLATE_DELTA_SQL_STATEMENT = 3;
+    private static final int INDEX_ROW_START_SQL_STATEMENTS = 4;
     private static final int INDEX_ROW_SUM_FORMULAS = 2;
 
     private static final int INDEX_COLUMN_ADDRESS = 17;
@@ -59,7 +61,14 @@ public class DeltaSnapshotWriter {
     private static final int INDEX_COLUMN_DELTA_EXECUTIONS = 2;
     private static final int INDEX_COLUMN_SQL_TEXT = 1;
     private static final int INDEX_COLUMN_PARSING_SCHEMA = 0;
-    public static final String TEMPLATE_DELTA_V_SQLAREA_XLS = "Template_DELTA_V$SQLAREA.xls";
+
+    private static final int INDEX_ROW_TEMPLATE_STATEMENT_HEADER_ROW = 3;
+    private static final int INDEX_ROW_TEMPLATE_CHILD_HEADER_ROW = 4;
+    private static final int INDEX_ROW_TEMPLATE_EXECUTION_STEP_ROW = 5;
+    private static final int INDEX_START_EXECUTION_PLANS = 6;
+
+
+    public static final String TEMPLATE_DELTA_V_SQL_AREA_XLSX = "Template_DELTA_V$SQLAREA.xlsx";
 
     private File destination;
     private DeltaSnapshot deltaSnapshot;
@@ -75,24 +84,21 @@ public class DeltaSnapshotWriter {
 
     private void saveDeltaSnapshot() {
         try {
-            InputStream  inputStream = null;
+            InputStream inputStream = null;
             OutputStream outputStream = null;
 
             try {
-                inputStream  = this.getClass().getResourceAsStream(TEMPLATE_DELTA_V_SQLAREA_XLS);
+                inputStream = this.getClass().getResourceAsStream(TEMPLATE_DELTA_V_SQL_AREA_XLSX);
                 outputStream = new FileOutputStream(destination);
                 IOUtils.copy(inputStream, outputStream);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 JOptionPane.showMessageDialog((Component) null, e);
-            }
-            finally {
+            } finally {
                 IOUtils.closeQuietly(inputStream);
                 IOUtils.closeQuietly(outputStream);
             }
 
-            Workbook workbook = WorkbookFactory.create(new FileInputStream(
-                    destination));
+            Workbook workbook = WorkbookFactory.create(new FileInputStream(destination));
             statementsSheet = workbook.getSheet("Delta V$SQLAREA");
             executionPlansSheet = workbook.getSheet("Execution Plans");
             hyperlinkStyle = createHyperlinkStyle(workbook);
@@ -137,29 +143,32 @@ public class DeltaSnapshotWriter {
     private void writeDeltaSnapshotStatements() {
         Row templateRow = statementsSheet.getRow(INDEX_ROW_TEMPLATE_DELTA_SQL_STATEMENT);
 
-        int currentRowIndex = 3;
+        int currentRowIndex = INDEX_ROW_START_SQL_STATEMENTS;
 
-        for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot
-                .getDeltaSqlStatementSnapshots()) {
-            Row currentRow = SSUtilities.copyRow(statementsSheet, templateRow,
-                    currentRowIndex);
+        for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
+            Row currentRow = SSUtilities.copyRow(statementsSheet, templateRow, currentRowIndex);
 
             currentRow.getCell(INDEX_COLUMN_PARSING_SCHEMA).setCellValue(
                     currentSnapshot.getSqlStatement().getParsingSchema());
             currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
                     currentSnapshot.getSqlStatement().getSqlText());
+
             currentRow.getCell(INDEX_COLUMN_DELTA_EXECUTIONS).setCellValue(
                     currentSnapshot.getDeltaExecutions());
+
             currentRow.getCell(INDEX_COLUMN_DELTA_ELAPSED_SECONDS)
                     .setCellValue(currentSnapshot.getDeltaElapsedSeconds());
             currentRow.getCell(INDEX_COLUMN_DELTA_CPU_SECONDS).setCellValue(
                     currentSnapshot.getDeltaCpuSeconds());
+
             currentRow.getCell(INDEX_COLUMN_DELTA_BUFFER_GETS).setCellValue(
                     currentSnapshot.getDeltaBufferGets());
             currentRow.getCell(INDEX_COLUMN_DELTA_DISK_READS).setCellValue(
                     currentSnapshot.getDeltaDiskReads());
+
             currentRow.getCell(INDEX_COLUMN_DELTA_ROWS_PROCESSED).setCellValue(
                     currentSnapshot.getDeltaRowsProcessed());
+
             currentRow.getCell(INDEX_COLUMN_SQL_ID).setCellValue(
                     currentSnapshot.getSqlStatement().getSqlId());
             currentRow.getCell(INDEX_COLUMN_ADDRESS).setCellValue(
@@ -168,9 +177,11 @@ public class DeltaSnapshotWriter {
             currentRowIndex++;
         }
 
+        // delete the template row
+        SSUtilities.deleteRow(statementsSheet, templateRow);
+
         // update the formulas in the third row (sum)
-        FormulaEvaluator evaluator = statementsSheet.getWorkbook()
-                .getCreationHelper().createFormulaEvaluator();
+        FormulaEvaluator evaluator = statementsSheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
         Iterator<Cell> cellIterator = statementsSheet.getRow(INDEX_ROW_SUM_FORMULAS).cellIterator();
         while (cellIterator.hasNext()) {
             Cell currentCell = cellIterator.next();
@@ -181,22 +192,15 @@ public class DeltaSnapshotWriter {
     }
 
     private void writeExecutionPlansForWorstStatements() {
+        Row templateStatementHeaderRow = executionPlansSheet.getRow(INDEX_ROW_TEMPLATE_STATEMENT_HEADER_ROW);
+        Row templateChildHeaderRow = executionPlansSheet.getRow(INDEX_ROW_TEMPLATE_CHILD_HEADER_ROW);
+        Row templateExecutionStepRow = executionPlansSheet.getRow(INDEX_ROW_TEMPLATE_EXECUTION_STEP_ROW);
 
-        Row templateStatementHeaderRow = executionPlansSheet.getRow(3);
-        Row templateChildHeaderRow = executionPlansSheet.getRow(4);
-        Row templateExecutionStepRow = executionPlansSheet.getRow(5);
-
-        executionPlansSheet.removeRow(templateExecutionStepRow);
-        executionPlansSheet.removeRow(templateChildHeaderRow);
-        executionPlansSheet.removeRow(templateStatementHeaderRow);
-
-        WorstStatementIdentifier wsi = new WorstStatementIdentifier(
-                deltaSnapshot);
+        WorstStatementIdentifier wsi = new WorstStatementIdentifier(deltaSnapshot);
 
         // Identify the worst statements and load their execution plans
         List<SQLStatement> worstStatements = new ArrayList<SQLStatement>();
-        for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot
-                .getDeltaSqlStatementSnapshots()) {
+        for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
 
             if (wsi.isAWorstStatement(currentSnapshot)) {
                 worstStatements.add(currentSnapshot.getSqlStatement());
@@ -205,41 +209,32 @@ public class DeltaSnapshotWriter {
         SQLHelper.loadExecutionPlansForStatements(worstStatements, null);
 
         // Now write the execution plans into the Excel sheet
-        int currentRowIndex = 3;
+        int currentRowIndex = INDEX_START_EXECUTION_PLANS;
         Row currentRow;
 
-        for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot
-                .getDeltaSqlStatementSnapshots()) {
+        for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
 
             if (wsi.isAWorstStatement(currentSnapshot)) {
                 // Header for statement
-                currentRow = SSUtilities.copyRow(executionPlansSheet,
-                        templateStatementHeaderRow, currentRowIndex);
-                currentRow.getCell(0).setCellValue(
-                        currentSnapshot.getSqlStatement().getSqlId());
-                currentRow.getCell(1).setCellValue(
-                        currentSnapshot.getSqlStatement().getAddress());
-                currentRow.getCell(2).setCellValue(
-                        currentSnapshot.getSqlStatement().getSqlText());
+                currentRow = SSUtilities.copyRow(executionPlansSheet, templateStatementHeaderRow, currentRowIndex);
+
+                currentRow.getCell(0).setCellValue(currentSnapshot.getSqlStatement().getSqlId());
+                currentRow.getCell(1).setCellValue(currentSnapshot.getSqlStatement().getAddress());
+                currentRow.getCell(2).setCellValue(currentSnapshot.getSqlStatement().getSqlText());
                 currentRowIndex++;
 
                 // Link from sheet with statements to this execution plan
-                Hyperlink link = statementsSheet.getWorkbook()
-                        .getCreationHelper()
-                        .createHyperlink(Hyperlink.LINK_DOCUMENT);
-                link.setAddress("'" + executionPlansSheet.getSheetName()
-                        + "'!A" + currentRowIndex);
-                addLinkFromStatementToExecutionPlans(currentSnapshot
-                        .getSqlStatement().getAddress(), link);
+                Hyperlink link = statementsSheet.getWorkbook().getCreationHelper().createHyperlink(Hyperlink.LINK_DOCUMENT);
+                // Later on we will delete three rows at the beginning of the sheet. Prepare the
+                // hyperlink to point to the correct cell after the deletion.
+                link.setAddress("'" + executionPlansSheet.getSheetName() + "'!A" + (currentRowIndex - 3));
+                addLinkFromStatementToExecutionPlans(currentSnapshot.getSqlStatement().getAddress(), link);
 
-                for (ExecutionPlan currentPlan : currentSnapshot
-                        .getSqlStatement().getExecutionPlans()) {
+                for (ExecutionPlan currentPlan : currentSnapshot.getSqlStatement().getExecutionPlans()) {
                     // Header for Child / Execution Plan
                     // There may be more than one execution plans...
-                    currentRow = SSUtilities.copyRow(executionPlansSheet,
-                            templateChildHeaderRow, currentRowIndex);
-                    currentRow.getCell(0).setCellValue(
-                            currentPlan.getChildNumber());
+                    currentRow = SSUtilities.copyRow(executionPlansSheet, templateChildHeaderRow, currentRowIndex);
+                    currentRow.getCell(0).setCellValue(currentPlan.getChildNumber());
                     currentRowIndex++;
 
                     currentRowIndex = writeExecutionPlanStepToExcel(
@@ -248,16 +243,20 @@ public class DeltaSnapshotWriter {
                 }
             }
         }
+
+        // delete the template rows
+        SSUtilities.deleteRow(executionPlansSheet, templateStatementHeaderRow);
+        SSUtilities.deleteRow(executionPlansSheet, templateChildHeaderRow);
+        SSUtilities.deleteRow(executionPlansSheet, templateExecutionStepRow);
     }
 
-    private void addLinkFromStatementToExecutionPlans(String address,
-            Hyperlink hyperlinkToExecutionPlanCell) {
+    private void addLinkFromStatementToExecutionPlans(String address, Hyperlink hyperlinkToExecutionPlanCell) {
 
         int rowIndex = 1;
         while (rowIndex <= statementsSheet.getLastRowNum()
                 && !statementsSheet.getRow(rowIndex)
-                        .getCell(INDEX_COLUMN_ADDRESS).getStringCellValue()
-                        .equals(address)) {
+                .getCell(INDEX_COLUMN_ADDRESS).getStringCellValue()
+                .equals(address)) {
             rowIndex++;
         }
 
@@ -272,7 +271,7 @@ public class DeltaSnapshotWriter {
     }
 
     private int writeExecutionPlanStepToExcel(Row templateForExcecutionStepRow,
-            int currentRowIndex, ExecutionPlanStep step) {
+                                              int currentRowIndex, ExecutionPlanStep step) {
 
         int internalCurrentRowIndex = currentRowIndex;
 
