@@ -19,6 +19,8 @@ import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -96,8 +98,8 @@ public class WorstStatementsSmallController implements PythiaPluginController {
         }
 
         private float getRatioTop20() {
-            int elpasedTimeTop20 = 0;
-            int elapsedTimeTotal = 1;
+            BigDecimal elapsedTimeTop20 = new BigDecimal(0);
+            BigDecimal elapsedTimeTotal = new BigDecimal(1);
 
             Connection connection = ConnectionPoolUtils.getConnectionFromPool();
             try {
@@ -109,21 +111,19 @@ public class WorstStatementsSmallController implements PythiaPluginController {
 
                 if (elapsedTop20ResultSet != null) {
                     while (elapsedTop20ResultSet.next()) {
-                        elpasedTimeTop20 = elapsedTop20ResultSet.getInt(1);
+                        elapsedTimeTop20 = elapsedTop20ResultSet.getBigDecimal(1);
                     }
                 }
 
                 elapsedTop20Statement.close();
 
-                PreparedStatement elapsedTotalStatement = connection
-                        .prepareStatement(ELAPSED_TIME_TOTAL);
+                PreparedStatement elapsedTotalStatement = connection.prepareStatement(ELAPSED_TIME_TOTAL);
 
-                ResultSet elapsedTotalResultSet = elapsedTotalStatement
-                        .executeQuery();
+                ResultSet elapsedTotalResultSet = elapsedTotalStatement.executeQuery();
 
                 if (elapsedTotalResultSet != null) {
                     while (elapsedTotalResultSet.next()) {
-                        elapsedTimeTotal = elapsedTotalResultSet.getInt(1);
+                        elapsedTimeTotal = elapsedTotalResultSet.getBigDecimal(1);
                     }
                 }
 
@@ -133,7 +133,7 @@ public class WorstStatementsSmallController implements PythiaPluginController {
             } finally {
                 ConnectionPoolUtils.returnConnectionToPool(connection);
             }
-            return (float) elpasedTimeTop20 / (float) elapsedTimeTotal;
+            return elapsedTimeTop20.divide(elapsedTimeTotal, RoundingMode.HALF_UP).floatValue();
         }
 
         private void updateView(int numberSQLStatements, float ratioTop20) {

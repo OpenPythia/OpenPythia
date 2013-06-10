@@ -74,8 +74,10 @@ public class PythiaMain {
         List<String> missingObjectPrivileges = PrivilegesHelper.getMissingObjectPrivileges();
 
         if (missingObjectPrivileges.size() > 0) {
+            String userName = ConnectionPoolUtils.getLoggedInUserName();
+
             new MissingPrivilegesController(PrivilegesHelper.createGrantScript(
-                    missingObjectPrivileges, "pythia"));
+                    missingObjectPrivileges, userName));
         }
     }
 

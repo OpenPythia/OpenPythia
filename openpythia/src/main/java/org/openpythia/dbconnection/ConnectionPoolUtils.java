@@ -36,6 +36,8 @@ public class ConnectionPoolUtils {
     private static final String POOL_DRIVER_URL = "jdbc:apache:commons:dbcp:";
     private static final String POOLING_DRIVER = "org.apache.commons.dbcp.PoolingDriver";
 
+    private static String userName;
+
     private static boolean hasBeenSuccessfullyConfigured = false;
 
     private ConnectionPoolUtils() {
@@ -46,12 +48,14 @@ public class ConnectionPoolUtils {
      * and connectionProperties.
      *
      * @param connectionUrl the connection url
-     * @param connectionPorperties  the connectionProperties
+     * @param connectionProperties  the connectionProperties
      */
-    public static void configurePool(String connectionUrl, Properties connectionPorperties) throws SQLException {
+    public static void configurePool(String connectionUrl, Properties connectionProperties) throws SQLException {
         try {
             ConnectionFactory connectionFactory = new DriverConnectionFactory(JDBCHandler.getOracleJDBCDriver(),
-                    connectionUrl, connectionPorperties);
+                    connectionUrl, connectionProperties);
+
+            userName = connectionProperties.getProperty("user");
 
             GenericObjectPool connectionPool = new GenericObjectPool();
             connectionPool.setFactory(new PoolableConnectionFactory(connectionFactory, connectionPool,
@@ -109,5 +113,9 @@ public class ConnectionPoolUtils {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String getLoggedInUserName() {
+        return userName;
     }
 }

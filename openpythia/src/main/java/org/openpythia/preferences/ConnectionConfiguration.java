@@ -70,6 +70,9 @@ public class ConnectionConfiguration {
     }
 
     public String toConnectionString() {
+        // FIXME Andreas: Workaround for K + N
+        // We need to add a radio button for SID vs. Service Name.
+        // See http://www.razorsql.com/articles/oracle_jdbc_connect.html
         return String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, databaseName);
     }
 
