@@ -15,19 +15,25 @@
  **/
 package org.openpythia.utilities.sql;
 
+import java.math.BigDecimal;
+
 public class SQLStatementSnapshot {
 
     private SQLStatement sqlStatement;
-    private int executions;
-    private int elapsedSeconds;
-    private int cpuSeconds;
-    private int bufferGets;
-    private int diskReads;
-    private int rowsProcessed;
+    private BigDecimal executions;
+    private BigDecimal elapsedSeconds;
+    private BigDecimal cpuSeconds;
+    private BigDecimal bufferGets;
+    private BigDecimal diskReads;
+    private BigDecimal rowsProcessed;
 
-    public SQLStatementSnapshot(SQLStatement sqlStatement, int executions,
-            int elapsedSeconds, int cpuSeconds, int bufferGets, int diskReads,
-            int rowsProcessed) {
+    public SQLStatementSnapshot(SQLStatement sqlStatement,
+                                BigDecimal executions,
+                                BigDecimal elapsedSeconds,
+                                BigDecimal cpuSeconds,
+                                BigDecimal bufferGets,
+                                BigDecimal diskReads,
+                                BigDecimal rowsProcessed) {
         this.sqlStatement = sqlStatement;
         this.executions = executions;
         this.elapsedSeconds = elapsedSeconds;
@@ -41,27 +47,27 @@ public class SQLStatementSnapshot {
         return sqlStatement;
     }
 
-    public int getExecutions() {
+    public BigDecimal getExecutions() {
         return executions;
     }
 
-    public int getElapsedSeconds() {
+    public BigDecimal getElapsedSeconds() {
         return elapsedSeconds;
     }
 
-    public int getCpuSeconds() {
+    public BigDecimal getCpuSeconds() {
         return cpuSeconds;
     }
 
-    public int getBufferGets() {
+    public BigDecimal getBufferGets() {
         return bufferGets;
     }
 
-    public int getDiskReads() {
+    public BigDecimal getDiskReads() {
         return diskReads;
     }
 
-    public int getRowsProcessed() {
+    public BigDecimal getRowsProcessed() {
         return rowsProcessed;
     }
 

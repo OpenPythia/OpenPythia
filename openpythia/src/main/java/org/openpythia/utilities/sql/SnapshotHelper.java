@@ -16,6 +16,7 @@
 package org.openpythia.utilities.sql;
 
 import java.awt.Component;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -91,10 +92,10 @@ public class SnapshotHelper {
             fillSnapshot(snapshot);
 
             addSnapshot(snapshot);
-            
+
             progressListener.informFinished();
         }
-        
+
         private String fillLeadingZero(int value) {
             if (value >= 10) {
                 return String.valueOf(value);
@@ -117,21 +118,24 @@ public class SnapshotHelper {
                         String sqlId = snapshotResultSet.getString(1);
                         String address = snapshotResultSet.getString(2);
                         String parsingSchema = snapshotResultSet.getString(3);
-                        int executions = snapshotResultSet.getInt(4);
-                        int elapsedSeconds = snapshotResultSet.getInt(5);
-                        int cpuSeconds = snapshotResultSet.getInt(6);
-                        int bufferGets = snapshotResultSet.getInt(7);
-                        int diskReads = snapshotResultSet.getInt(8);
-                        int rowsProcessed = snapshotResultSet.getInt(9);
+                        BigDecimal executions = snapshotResultSet.getBigDecimal(4);
+                        BigDecimal elapsedSeconds = snapshotResultSet.getBigDecimal(5);
+                        BigDecimal cpuSeconds = snapshotResultSet.getBigDecimal(6);
+                        BigDecimal bufferGets = snapshotResultSet.getBigDecimal(7);
+                        BigDecimal diskReads = snapshotResultSet.getBigDecimal(8);
+                        BigDecimal rowsProcessed = snapshotResultSet.getBigDecimal(9);
 
                         SQLStatementSnapshot sqlStatementSnapshot = new SQLStatementSnapshot(
-                                SQLHelper.getSQLStatement(sqlId, address,
-                                        parsingSchema), executions,
-                                elapsedSeconds, cpuSeconds, bufferGets,
-                                diskReads, rowsProcessed);
+                                SQLHelper.getSQLStatement(sqlId, address, parsingSchema),
+                                executions,
+                                elapsedSeconds,
+                                cpuSeconds,
+                                bufferGets,
+                                diskReads,
+                                rowsProcessed);
 
                         snapshot.addSQLStatementSnapshot(sqlStatementSnapshot);
-                        
+
                         lines++;
                         progressListener.setCurrentValue(lines);
                     }

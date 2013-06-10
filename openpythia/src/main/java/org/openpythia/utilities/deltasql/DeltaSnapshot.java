@@ -33,14 +33,12 @@ public class DeltaSnapshot {
 
     /**
      * Create a new delta snapshot - the delta of two snapshots.
-     * 
+     * <p/>
      * When snapshotB is not younger than snapshotA, a runtime exception is
      * thrown.
-     * 
-     * @param snapshotA
-     *            The older snapshot.
-     * @param snapshotB
-     *            The newer snapshot.
+     *
+     * @param snapshotA The older snapshot.
+     * @param snapshotB The newer snapshot.
      */
     public DeltaSnapshot(Snapshot snapshotA, Snapshot snapshotB) {
         if (snapshotA.getSnapshotId().compareTo(snapshotB.getSnapshotId()) > 0) {
@@ -78,8 +76,7 @@ public class DeltaSnapshot {
                 // the new snapshot into account.
                 sortDeltaSQLStatementSnapshotIn(new DeltaSQLStatementSnapshot(
                         sqlStatementSnapshotB));
-            } else if (sqlStatementSnapshotA.getExecutions() >= sqlStatementSnapshotB
-                    .getExecutions()) {
+            } else if (sqlStatementSnapshotA.getExecutions().compareTo(sqlStatementSnapshotB.getExecutions()) >= 0) {
                 // the statement was not executed between the two snapshots. So
                 // it will be ignored for the delta snapshot.
                 //
@@ -101,8 +98,7 @@ public class DeltaSnapshot {
         boolean putten = false;
 
         for (DeltaSQLStatementSnapshot currentSnapshot : deltaSQLStatementSnapshots) {
-            if (currentSnapshot.getDeltaElapsedSeconds() < snapshot
-                    .getDeltaElapsedSeconds()) {
+            if (currentSnapshot.getDeltaElapsedSeconds().compareTo(snapshot.getDeltaElapsedSeconds()) < 0) {
                 deltaSQLStatementSnapshots.add(
                         deltaSQLStatementSnapshots.indexOf(currentSnapshot),
                         snapshot);

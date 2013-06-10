@@ -18,15 +18,17 @@ package org.openpythia.utilities.deltasql;
 import org.openpythia.utilities.sql.SQLStatement;
 import org.openpythia.utilities.sql.SQLStatementSnapshot;
 
+import java.math.BigDecimal;
+
 public class DeltaSQLStatementSnapshot {
 
     private SQLStatement sqlStatement;
-    private int deltaExecutions;
-    private int deltaElapsedSeconds;
-    private int deltaCpuSeconds;
-    private int deltaBufferGets;
-    private int deltaDiskReads;
-    private int deltaRowsProcessed;
+    private BigDecimal deltaExecutions;
+    private BigDecimal deltaElapsedSeconds;
+    private BigDecimal deltaCpuSeconds;
+    private BigDecimal deltaBufferGets;
+    private BigDecimal deltaDiskReads;
+    private BigDecimal deltaRowsProcessed;
 
     public DeltaSQLStatementSnapshot(
             SQLStatementSnapshot sqlStatementSnapshotA,
@@ -40,36 +42,30 @@ public class DeltaSQLStatementSnapshot {
         // the statement has given back some CPU seconds? We don't know why
         // Oracle sometimes reports such mess. We have decided to handle such
         // negative difference by setting them to zero.
-        this.deltaExecutions = sqlStatementSnapshotB.getExecutions()
-                - sqlStatementSnapshotA.getExecutions();
-        if (this.deltaExecutions < 0) {
+        this.deltaExecutions = sqlStatementSnapshotB.getExecutions().subtract(sqlStatementSnapshotA.getExecutions());
+        if (this.deltaExecutions.compareTo(BigDecimal.ZERO) < 0) {
             // should never happen as the caller should filter out this case
-            this.deltaExecutions = 0;
+            this.deltaExecutions = BigDecimal.ZERO;
         }
-        this.deltaElapsedSeconds = sqlStatementSnapshotB.getElapsedSeconds()
-                - sqlStatementSnapshotA.getElapsedSeconds();
-        if (this.deltaElapsedSeconds < 0) {
-            this.deltaElapsedSeconds = 0;
+        this.deltaElapsedSeconds = sqlStatementSnapshotB.getElapsedSeconds().subtract(sqlStatementSnapshotA.getElapsedSeconds());
+        if (this.deltaElapsedSeconds.compareTo(BigDecimal.ZERO) < 0) {
+            this.deltaElapsedSeconds = BigDecimal.ZERO;
         }
-        this.deltaCpuSeconds = sqlStatementSnapshotB.getCpuSeconds()
-                - sqlStatementSnapshotA.getCpuSeconds();
-        if (this.deltaCpuSeconds < 0) {
-            this.deltaCpuSeconds = 0;
+        this.deltaCpuSeconds = sqlStatementSnapshotB.getCpuSeconds().subtract(sqlStatementSnapshotA.getCpuSeconds());
+        if (this.deltaCpuSeconds.compareTo(BigDecimal.ZERO) < 0) {
+            this.deltaCpuSeconds = BigDecimal.ZERO;
         }
-        this.deltaBufferGets = sqlStatementSnapshotB.getBufferGets()
-                - sqlStatementSnapshotA.getBufferGets();
-        if (this.deltaBufferGets < 0) {
-            this.deltaBufferGets = 0;
+        this.deltaBufferGets = sqlStatementSnapshotB.getBufferGets().subtract( sqlStatementSnapshotA.getBufferGets());
+        if (this.deltaBufferGets.compareTo(BigDecimal.ZERO) < 0) {
+            this.deltaBufferGets = BigDecimal.ZERO;
         }
-        this.deltaDiskReads = sqlStatementSnapshotB.getDiskReads()
-                - sqlStatementSnapshotA.getDiskReads();
-        if (this.deltaDiskReads < 0) {
-            this.deltaDiskReads = 0;
+        this.deltaDiskReads = sqlStatementSnapshotB.getDiskReads().subtract(sqlStatementSnapshotA.getDiskReads());
+        if (this.deltaDiskReads.compareTo(BigDecimal.ZERO) < 0) {
+            this.deltaDiskReads = BigDecimal.ZERO;
         }
-        this.deltaRowsProcessed = sqlStatementSnapshotB.getRowsProcessed()
-                - sqlStatementSnapshotA.getRowsProcessed();
-        if (this.deltaRowsProcessed < 0) {
-            this.deltaRowsProcessed = 0;
+        this.deltaRowsProcessed = sqlStatementSnapshotB.getRowsProcessed().subtract(sqlStatementSnapshotA.getRowsProcessed());
+        if (this.deltaRowsProcessed.compareTo(BigDecimal.ZERO) < 0) {
+            this.deltaRowsProcessed = BigDecimal.ZERO;
         }
     }
 
@@ -88,27 +84,27 @@ public class DeltaSQLStatementSnapshot {
         return sqlStatement;
     }
 
-    public int getDeltaExecutions() {
+    public BigDecimal getDeltaExecutions() {
         return deltaExecutions;
     }
 
-    public int getDeltaElapsedSeconds() {
+    public BigDecimal getDeltaElapsedSeconds() {
         return deltaElapsedSeconds;
     }
 
-    public int getDeltaCpuSeconds() {
+    public BigDecimal getDeltaCpuSeconds() {
         return deltaCpuSeconds;
     }
 
-    public int getDeltaBufferGets() {
+    public BigDecimal getDeltaBufferGets() {
         return deltaBufferGets;
     }
 
-    public int getDeltaDiskReads() {
+    public BigDecimal getDeltaDiskReads() {
         return deltaDiskReads;
     }
 
-    public int getDeltaRowsProcessed() {
+    public BigDecimal getDeltaRowsProcessed() {
         return deltaRowsProcessed;
     }
 }

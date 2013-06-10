@@ -75,8 +75,7 @@ public class PrivilegesHelper {
 
             if (grantedObjectsResultSet != null) {
                 while (grantedObjectsResultSet.next()) {
-                    grantedObjects.add(grantedObjectsResultSet.getString(1)
-                            .toLowerCase());
+                    grantedObjects.add(grantedObjectsResultSet.getString(1).toLowerCase());
                 }
             }
 

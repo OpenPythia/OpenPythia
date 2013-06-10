@@ -130,7 +130,7 @@ public class WorstStatementsDetailController implements FinishedListener {
 
         if (sqlStatements.size() <= 100) {
             // no progress bar for just one bunch of statements
-            SQLHelper.loadSQLTextForStatements(sqlStatements,null);
+            SQLHelper.loadSQLTextForStatements(sqlStatements, null);
         } else {
             ProgressListener listener = new ProgressController(owner, this,
                     "Load SQL Text",
@@ -148,7 +148,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         private ProgressListener progressListener;
 
         public SQLTextLoader(List<SQLStatement> statementsToLoad,
-                ProgressListener progressListener) {
+                             ProgressListener progressListener) {
             this.statementsToLoad = statementsToLoad;
             this.progressListener = progressListener;
         }
@@ -161,22 +161,18 @@ public class WorstStatementsDetailController implements FinishedListener {
     }
 
     private void showDeltaSnapshot(DeltaSnapshot deltaSnapshot) {
-        view.getTfSnapshotA().setText(
-                deltaSnapshot.getSnapshotA().getSnapshotId());
-        view.getTfSnapshotB().setText(
-                deltaSnapshot.getSnapshotB().getSnapshotId());
+        view.getTfSnapshotA().setText(deltaSnapshot.getSnapshotA().getSnapshotId());
+        view.getTfSnapshotB().setText(deltaSnapshot.getSnapshotB().getSnapshotId());
         view.getTfNumberStatements().setText(
-                String.valueOf(deltaSnapshot.getDeltaSqlStatementSnapshots()
-                        .size()));
+                String.valueOf(deltaSnapshot.getDeltaSqlStatementSnapshots().size()));
 
-        view.getTableDeltaSQLStatements().setModel(
-                new DeltaSnapshotTableModel(deltaSnapshot));
+        view.getTableDeltaSQLStatements().setModel(new DeltaSnapshotTableModel(deltaSnapshot));
     }
 
     private void exportDeltaToExcel() {
         File excelFile = FileSelectorUtility.chooseExcelFileToWrite(view);
         if (excelFile != null) {
-            DeltaSnapshotWriter.saveDeltaSnapshot(excelFile,deltaSnapshot);
+            DeltaSnapshotWriter.saveDeltaSnapshot(excelFile, deltaSnapshot);
         }
     }
 

@@ -17,6 +17,7 @@ package org.openpythia.plugin.worststatements;
 
 import java.awt.Component;
 import java.io.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -154,20 +155,20 @@ public class DeltaSnapshotWriter {
                     currentSnapshot.getSqlStatement().getSqlText());
 
             currentRow.getCell(INDEX_COLUMN_DELTA_EXECUTIONS).setCellValue(
-                    currentSnapshot.getDeltaExecutions());
+                    currentSnapshot.getDeltaExecutions().doubleValue());
 
-            currentRow.getCell(INDEX_COLUMN_DELTA_ELAPSED_SECONDS)
-                    .setCellValue(currentSnapshot.getDeltaElapsedSeconds());
+            currentRow.getCell(INDEX_COLUMN_DELTA_ELAPSED_SECONDS).setCellValue(
+                    currentSnapshot.getDeltaElapsedSeconds().doubleValue());
             currentRow.getCell(INDEX_COLUMN_DELTA_CPU_SECONDS).setCellValue(
-                    currentSnapshot.getDeltaCpuSeconds());
+                    currentSnapshot.getDeltaCpuSeconds().doubleValue());
 
             currentRow.getCell(INDEX_COLUMN_DELTA_BUFFER_GETS).setCellValue(
-                    currentSnapshot.getDeltaBufferGets());
+                    currentSnapshot.getDeltaBufferGets().doubleValue());
             currentRow.getCell(INDEX_COLUMN_DELTA_DISK_READS).setCellValue(
-                    currentSnapshot.getDeltaDiskReads());
+                    currentSnapshot.getDeltaDiskReads().doubleValue());
 
             currentRow.getCell(INDEX_COLUMN_DELTA_ROWS_PROCESSED).setCellValue(
-                    currentSnapshot.getDeltaRowsProcessed());
+                    currentSnapshot.getDeltaRowsProcessed().doubleValue());
 
             currentRow.getCell(INDEX_COLUMN_SQL_ID).setCellValue(
                     currentSnapshot.getSqlStatement().getSqlId());
@@ -322,28 +323,21 @@ public class DeltaSnapshotWriter {
     // big amount of runtime, CPU, buffer gets...
     private static class WorstStatementIdentifier {
 
-        private BigInteger sumExecutions = BigInteger.ZERO;
-        private BigInteger sumElaspsedSeconds = BigInteger.ZERO;
-        private BigInteger sumCPUSeconds = BigInteger.ZERO;
-        private BigInteger sumBufferGets = BigInteger.ZERO;
-        private BigInteger sumDiskReads = BigInteger.ZERO;
+        private BigDecimal sumExecutions = BigDecimal.ZERO;
+        private BigDecimal sumElaspsedSeconds = BigDecimal.ZERO;
+        private BigDecimal sumCPUSeconds = BigDecimal.ZERO;
+        private BigDecimal sumBufferGets = BigDecimal.ZERO;
+        private BigDecimal sumDiskReads = BigDecimal.ZERO;
 
         public WorstStatementIdentifier(DeltaSnapshot deltaSnapshot) {
-            // Calculate and store some sums to compare against single
-            // statements
-            for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot
-                    .getDeltaSqlStatementSnapshots()) {
+            // Calculate and store some sums to compare against single statements
+            for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
 
-                sumExecutions = sumExecutions.add(BigInteger
-                        .valueOf(currentSnapshot.getDeltaExecutions()));
-                sumElaspsedSeconds = sumElaspsedSeconds.add(BigInteger
-                        .valueOf(currentSnapshot.getDeltaElapsedSeconds()));
-                sumCPUSeconds = sumCPUSeconds.add(BigInteger
-                        .valueOf(currentSnapshot.getDeltaCpuSeconds()));
-                sumBufferGets = sumBufferGets.add(BigInteger
-                        .valueOf(currentSnapshot.getDeltaBufferGets()));
-                sumDiskReads = sumDiskReads.add(BigInteger
-                        .valueOf(currentSnapshot.getDeltaDiskReads()));
+                sumExecutions = sumExecutions.add(currentSnapshot.getDeltaExecutions());
+                sumElaspsedSeconds = sumElaspsedSeconds.add(currentSnapshot.getDeltaElapsedSeconds());
+                sumCPUSeconds = sumCPUSeconds.add(currentSnapshot.getDeltaCpuSeconds());
+                sumBufferGets = sumBufferGets.add(currentSnapshot.getDeltaBufferGets());
+                sumDiskReads = sumDiskReads.add(currentSnapshot.getDeltaDiskReads());
             }
         }
 
@@ -352,24 +346,19 @@ public class DeltaSnapshotWriter {
             // Excel sheet
 
             // more than 1 % of the total
-            if (BigInteger.valueOf(snapshot.getDeltaExecutions() * 100)
-                    .compareTo(sumExecutions) > 0) {
+            if (snapshot.getDeltaExecutions().multiply(new BigDecimal(100)).compareTo(sumExecutions) > 0) {
                 return true;
             }
-            if (BigInteger.valueOf(snapshot.getDeltaElapsedSeconds() * 100)
-                    .compareTo(sumElaspsedSeconds) > 0) {
+            if (snapshot.getDeltaElapsedSeconds().multiply(new BigDecimal(100)).compareTo(sumElaspsedSeconds) > 0) {
                 return true;
             }
-            if (BigInteger.valueOf(snapshot.getDeltaCpuSeconds() * 100)
-                    .compareTo(sumCPUSeconds) > 0) {
+            if (snapshot.getDeltaCpuSeconds().multiply(new BigDecimal(100)).compareTo(sumCPUSeconds) > 0) {
                 return true;
             }
-            if (BigInteger.valueOf(snapshot.getDeltaBufferGets() * 100)
-                    .compareTo(sumBufferGets) > 0) {
+            if (snapshot.getDeltaBufferGets().multiply(new BigDecimal(100)).compareTo(sumBufferGets) > 0) {
                 return true;
             }
-            if (BigInteger.valueOf(snapshot.getDeltaDiskReads() * 100)
-                    .compareTo(sumDiskReads) > 0) {
+            if (snapshot.getDeltaDiskReads().multiply(new BigDecimal(100)).compareTo(sumDiskReads) > 0) {
                 return true;
             }
 
