@@ -1,11 +1,11 @@
-JFDML JFormDesigner: "5.1.0.2.64" Java: "1.6.0_37" encoding: "UTF-8"
+JFDML JFormDesigner: "5.1.1.0.120" Java: "1.7.0" encoding: "UTF-8"
 
 new FormModel {
 	contentType: "form/swing"
 	root: new FormRoot {
 		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class com.jgoodies.forms.layout.FormLayout ) {
-			"$columnSpecs": "labelcompgap, default, unrelgap, default, labelcompgap, default, unrelgap, pref, labelcompgap, 80dlu:grow, labelcompgap"
-			"$rowSpecs": "labelcompgap, pref, default, linegap, pref, linegap, default, linegap, default, linegap, default, linegap, default, pargap, default, linegap"
+			"$columnSpecs": "labelcompgap, default, unrelgap, default, labelcompgap, default, unrelgap, default, labelcompgap, pref, labelcompgap, 80dlu:grow, labelcompgap"
+			"$rowSpecs": "labelcompgap, pref, default, linegap, pref, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, pargap, default, linegap"
 		} ) {
 			name: "this"
 			"modal": true
@@ -50,7 +50,7 @@ new FormModel {
 				} )
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
 				"gridY": 3
-				"gridHeight": 13
+				"gridHeight": 17
 				"gridX": 2
 				"gridWidth": 5
 			} )
@@ -58,7 +58,7 @@ new FormModel {
 				name: "label11"
 				"text": "Connection name"
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 8
+				"gridX": 10
 				"gridY": 3
 			} )
 			add( new FormComponent( "javax.swing.JTextField" ) {
@@ -67,14 +67,14 @@ new FormModel {
 					"JavaCodeGenerator.variableGetter": true
 				}
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 10
+				"gridX": 12
 				"gridY": 3
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label5"
 				"text": "Host"
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 8
+				"gridX": 10
 				"gridY": 5
 			} )
 			add( new FormComponent( "javax.swing.JTextField" ) {
@@ -83,14 +83,14 @@ new FormModel {
 					"JavaCodeGenerator.variableGetter": true
 				}
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 10
+				"gridX": 12
 				"gridY": 5
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label6"
 				"text": "Port"
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 8
+				"gridX": 10
 				"gridY": 7
 			} )
 			add( new FormComponent( "javax.swing.JFormattedTextField" ) {
@@ -100,18 +100,14 @@ new FormModel {
 					"JavaCodeGenerator.variableGetter": true
 				}
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 10
+				"gridX": 12
 				"gridY": 7
 			} )
-			add( new FormComponent( "javax.swing.JLabel" ) {
-				name: "label7"
-				"text": "Database name"
-			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 8
-				"gridY": 9
-			} )
-			add( new FormComponent( "javax.swing.JTextField" ) {
-				name: "textFieldDatabaseName"
+			add( new FormComponent( "javax.swing.JRadioButton" ) {
+				name: "rbSID"
+				"text": "SID"
+				"selected": true
+				"$buttonGroup": &FormReference0 new FormReference( "buttonGroup" )
 				auxiliary() {
 					"JavaCodeGenerator.variableGetter": true
 				}
@@ -119,12 +115,61 @@ new FormModel {
 				"gridX": 10
 				"gridY": 9
 			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "textFieldSID"
+				auxiliary() {
+					"JavaCodeGenerator.variableGetter": true
+				}
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 12
+				"gridY": 9
+			} )
+			add( new FormComponent( "javax.swing.JRadioButton" ) {
+				name: "rbServiceName"
+				"text": "Service Name"
+				"$buttonGroup": #FormReference0
+				auxiliary() {
+					"JavaCodeGenerator.variableGetter": true
+				}
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 10
+				"gridY": 11
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "textFieldServiceName"
+				auxiliary() {
+					"JavaCodeGenerator.variableGetter": true
+				}
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 12
+				"gridY": 11
+			} )
+			add( new FormComponent( "javax.swing.JRadioButton" ) {
+				name: "rbTnsName"
+				"text": "TNS Name"
+				"$buttonGroup": new FormReference( "buttonGroup" )
+				auxiliary() {
+					"JavaCodeGenerator.variableGetter": true
+				}
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 10
+				"gridY": 13
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "textFieldTnsName"
+				auxiliary() {
+					"JavaCodeGenerator.variableGetter": true
+				}
+			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
+				"gridX": 12
+				"gridY": 13
+			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label8"
 				"text": "User / Schema"
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 8
-				"gridY": 11
+				"gridX": 10
+				"gridY": 15
 			} )
 			add( new FormComponent( "javax.swing.JTextField" ) {
 				name: "textFieldUser"
@@ -132,15 +177,15 @@ new FormModel {
 					"JavaCodeGenerator.variableGetter": true
 				}
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 10
-				"gridY": 11
+				"gridX": 12
+				"gridY": 15
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label9"
 				"text": "Password"
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 8
-				"gridY": 13
+				"gridX": 10
+				"gridY": 17
 			} )
 			add( new FormComponent( "javax.swing.JPasswordField" ) {
 				name: "textFieldPassword"
@@ -148,8 +193,8 @@ new FormModel {
 					"JavaCodeGenerator.variableGetter": true
 				}
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 10
-				"gridY": 13
+				"gridX": 12
+				"gridY": 17
 			} )
 			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.FlowLayout ) ) {
 				name: "panel4"
@@ -168,8 +213,8 @@ new FormModel {
 					}
 				} )
 			}, new FormLayoutConstraints( class com.jgoodies.forms.layout.CellConstraints ) {
-				"gridX": 8
-				"gridY": 15
+				"gridX": 10
+				"gridY": 19
 				"gridWidth": 3
 			} )
 			menuBar: new FormContainer( "javax.swing.JMenuBar", new FormLayoutManager( class javax.swing.JMenuBar ) ) {
@@ -189,6 +234,11 @@ new FormModel {
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )
 			"size": new java.awt.Dimension( 595, 350 )
+		} )
+		add( new FormNonVisual( "javax.swing.ButtonGroup" ) {
+			name: "buttonGroup"
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 60, 375 )
 		} )
 	}
 }

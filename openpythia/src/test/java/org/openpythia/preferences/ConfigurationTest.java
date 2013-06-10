@@ -34,7 +34,7 @@ public class ConfigurationTest {
 
     @Test
     public void writeConfigurationTest() throws IOException {
-        File file = File.createTempFile("test1","xml");
+        File file = File.createTempFile("test1", "xml");
         file.deleteOnExit();
 
         PythiaConfiguration originalConfiguration = buildTestConfiguration();
@@ -54,19 +54,23 @@ public class ConfigurationTest {
         pythiaConfiguration.setPathToJDBCDriver("/test/jdbc.jar");
 
         ConnectionConfiguration lastConnectionConfiguration = new ConnectionConfiguration(
-                "lastconnection","localhost", 1521, "xe", "pythia","confidential");
+                "lastconnection", "localhost", 1521,
+                ConnectionTypeEnum.SID, "xe", "", "",
+                "pythia", "confidential");
 
         pythiaConfiguration.setLastConfiguration(lastConnectionConfiguration);
 
         ConnectionConfiguration saveConnectionConfiguration = new ConnectionConfiguration(
-                "production","192.168.200.1", 1521, "orcl", "pythia","confidential");
+                "production", "192.168.200.1", 1521,
+                ConnectionTypeEnum.SID, "orcl", "", "",
+                "pythia", "confidential");
 
         List<ConnectionConfiguration> savedConnectionConfigurations = new LinkedList<ConnectionConfiguration>();
         savedConnectionConfigurations.add(saveConnectionConfiguration);
 
         pythiaConfiguration.setSavedConnectionConfigurations(savedConnectionConfigurations);
 
-        return  pythiaConfiguration;
+        return pythiaConfiguration;
     }
 
     private void checkTestConfiguration(PythiaConfiguration pythiaConfiguration) {
@@ -74,15 +78,17 @@ public class ConfigurationTest {
 
         Assert.assertEquals("lastconnection", pythiaConfiguration.getLastConfiguration().getConnectionName());
         Assert.assertEquals("localhost", pythiaConfiguration.getLastConfiguration().getHost());
-        Assert.assertEquals(1521, (int)pythiaConfiguration.getLastConfiguration().getPort());
-        Assert.assertEquals("xe", pythiaConfiguration.getLastConfiguration().getDatabaseName());
+        Assert.assertEquals(1521, (int) pythiaConfiguration.getLastConfiguration().getPort());
+        Assert.assertEquals(ConnectionTypeEnum.SID, pythiaConfiguration.getLastConfiguration().getConnectionType());
+        Assert.assertEquals("xe", pythiaConfiguration.getLastConfiguration().getSid());
         Assert.assertEquals("pythia", pythiaConfiguration.getLastConfiguration().getUser());
         Assert.assertNull(pythiaConfiguration.getLastConfiguration().getPassword());
 
         Assert.assertEquals("production", pythiaConfiguration.getSavedConnectionConfigurations().get(0).getConnectionName());
         Assert.assertEquals("192.168.200.1", pythiaConfiguration.getSavedConnectionConfigurations().get(0).getHost());
-        Assert.assertEquals(1521, (int)pythiaConfiguration.getSavedConnectionConfigurations().get(0).getPort());
-        Assert.assertEquals("orcl", pythiaConfiguration.getSavedConnectionConfigurations().get(0).getDatabaseName());
+        Assert.assertEquals(1521, (int) pythiaConfiguration.getSavedConnectionConfigurations().get(0).getPort());
+        Assert.assertEquals(ConnectionTypeEnum.SID, pythiaConfiguration.getSavedConnectionConfigurations().get(0).getConnectionType());
+        Assert.assertEquals("orcl", pythiaConfiguration.getSavedConnectionConfigurations().get(0).getSid());
         Assert.assertEquals("pythia", pythiaConfiguration.getSavedConnectionConfigurations().get(0).getUser());
         Assert.assertNull(pythiaConfiguration.getSavedConnectionConfigurations().get(0).getPassword());
 

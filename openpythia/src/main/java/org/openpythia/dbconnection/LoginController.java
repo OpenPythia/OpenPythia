@@ -16,6 +16,7 @@
 package org.openpythia.dbconnection;
 
 import org.openpythia.preferences.ConnectionConfiguration;
+import org.openpythia.preferences.ConnectionTypeEnum;
 import org.openpythia.preferences.PreferencesManager;
 import org.openpythia.schemaprivileges.PrivilegesHelper;
 import org.openpythia.utilities.FileSelectorUtility;
@@ -26,8 +27,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -42,7 +41,7 @@ import java.util.List;
 public class LoginController {
 
     public static enum LoginResult {
-        OK,CANCEL
+        OK, CANCEL
     }
 
     private static class ConnectionListModel extends AbstractListModel {
@@ -67,11 +66,10 @@ public class LoginController {
             int index = connections.indexOf(connectionConfiguration);
             int updatedIndex = -1;
 
-            if(index == -1) {
+            if (index == -1) {
                 connections.add(connectionConfiguration);
                 updatedIndex = connections.size();
-            }
-            else {
+            } else {
                 connections.remove(index);
                 connections.add(index, connectionConfiguration);
                 updatedIndex = index;
@@ -91,8 +89,10 @@ public class LoginController {
 
     }
 
-    private static final ConnectionConfiguration DEFAULT_CONNECTION_PREFERRENCES
-        = new ConnectionConfiguration("<unamed>","localhost",1521, "xe", "pythia", "");
+    private static final ConnectionConfiguration DEFAULT_CONNECTION_PREFERENCES
+            = new ConnectionConfiguration("<unamed>", "localhost", 1521,
+            ConnectionTypeEnum.SID, "xe", "", "",
+            "pythia", "");
 
     private final ConnectionListModel model;
     private final LoginView view;
@@ -100,7 +100,7 @@ public class LoginController {
     private LoginResult result = LoginResult.CANCEL;
 
     public LoginController() {
-        view  = new LoginView((Dialog)null);
+        view = new LoginView((Dialog) null);
 
         ConnectionConfiguration lastConnectionConfiguration = PreferencesManager.
                 getLastConfiguration();
@@ -108,10 +108,9 @@ public class LoginController {
         List<ConnectionConfiguration> savedConnectionConfiguration = PreferencesManager.
                 getSavedConnectionConfiguration();
 
-        if(lastConnectionConfiguration == null) {
-            updateView(DEFAULT_CONNECTION_PREFERRENCES);
-        }
-        else {
+        if (lastConnectionConfiguration == null) {
+            updateView(DEFAULT_CONNECTION_PREFERENCES);
+        } else {
             updateView(lastConnectionConfiguration);
         }
 
@@ -215,11 +214,10 @@ public class LoginController {
 
         try {
             ConnectionPoolUtils.configurePool(connectionConfiguration.toConnectionString(), credentials);
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             // The connection could not be established
             JOptionPane.showMessageDialog(view, "The connection could not be established.\n"
-                    + "The error message is "+ e.toString());
+                    + "The error message is " + e.toString());
 
 
         }
@@ -251,7 +249,7 @@ public class LoginController {
 
         ConnectionConfiguration connectionConfiguration = model.getElementAt(index);
 
-        if(index != -1) {
+        if (index != -1) {
             model.remove(index);
         }
 
@@ -263,16 +261,41 @@ public class LoginController {
         view.getTextFieldConnectionName().setText(connection.getConnectionName());
         view.getTextFieldHost().setText(connection.getHost());
         view.getTextFieldPort().setValue(connection.getPort());
-        view.getTextFieldDatabaseName().setText(connection.getDatabaseName());
+        switch (connection.getConnectionType()) {
+            case SID:
+                view.getRbSID().setSelected(true);
+                break;
+            case ServiceName:
+                view.getRbServiceName().setSelected(true);
+                break;
+            case TNSName:
+                view.getRbTnsName().setSelected(true);
+                break;
+        }
+        view.getTextFieldSID().setText(connection.getSid());
+        view.getTextFieldServiceName().setText(connection.getServiceName());
+        view.getTextFieldTnsName().setText(connection.getTnsName());
         view.getTextFieldUser().setText(connection.getUser());
     }
 
     private ConnectionConfiguration getConnectionPreferencesFromView() {
+        ConnectionTypeEnum connectionType;
+        if (view.getRbSID().isSelected()) {
+            connectionType = ConnectionTypeEnum.SID;
+        } else if (view.getRbServiceName().isSelected()) {
+            connectionType = ConnectionTypeEnum.ServiceName;
+        } else {
+            connectionType = ConnectionTypeEnum.TNSName;
+        }
+
         ConnectionConfiguration connectionConfiguration = new ConnectionConfiguration(
                 view.getTextFieldConnectionName().getText(),
                 view.getTextFieldHost().getText(),
                 (Integer) view.getTextFieldPort().getValue(),
-                view.getTextFieldDatabaseName().getText(),
+                connectionType,
+                view.getTextFieldSID().getText(),
+                view.getTextFieldServiceName().getText(),
+                view.getTextFieldTnsName().getText(),
                 view.getTextFieldUser().getText(),
                 view.getTextFieldPassword().getText());
 
@@ -300,12 +323,10 @@ public class LoginController {
                 output.println();
 
                 output.println(PrivilegesHelper.createGrantScript(
-                        PrivilegesHelper
-                                .getMissingObjectPrivileges((List<String>) null),
+                        PrivilegesHelper.getMissingObjectPrivileges((List<String>) null),
                         DEFAULT_SCHEMA_NAME));
 
-                JOptionPane.showMessageDialog(view,
-                        "Schema creation script generated.");
+                JOptionPane.showMessageDialog(view, "Schema creation script generated.");
             } catch (IOException e) {
                 JOptionPane.showMessageDialog((Component) null, e);
             } finally {

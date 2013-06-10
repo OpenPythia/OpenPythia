@@ -2,21 +2,32 @@ package org.openpythia.preferences;
 
 public class ConnectionConfiguration {
 
-    private String  connectionName;
-    private String  host;
+    private String connectionName;
+    private String host;
     private Integer port;
-    private String  databaseName;
-    private String  user;
-    private String  password;
+    private String databaseNameX;
+    private ConnectionTypeEnum connectionTypeEnum;
+    private String sid;
+    private String serviceName;
+    private String tnsName;
+    private String user;
+    private String password;
 
+    // used by persistence - do not delete even it seem not to be used
     public ConnectionConfiguration() {
+
     }
 
-    public ConnectionConfiguration(String connectionName, String host, Integer port, String databaseName, String user, String password) {
+    public ConnectionConfiguration(String connectionName, String host, Integer port,
+                                   ConnectionTypeEnum connectionTypeEnum, String sid, String serviceName, String tnsName,
+                                   String user, String password) {
         this.connectionName = connectionName;
         this.host = host;
         this.port = port;
-        this.databaseName = databaseName;
+        this.connectionTypeEnum = connectionTypeEnum;
+        this.sid = sid;
+        this.serviceName = serviceName;
+        this.tnsName = tnsName;
         this.user = user;
         this.password = password;
     }
@@ -25,55 +36,49 @@ public class ConnectionConfiguration {
         return connectionName;
     }
 
-    public void setConnectionName(String connectionName) {
-        this.connectionName = connectionName;
-    }
-
     public String getHost() {
         return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
     }
 
     public Integer getPort() {
         return port;
     }
 
-    public void setPort(Integer port) {
-        this.port = port;
+    public ConnectionTypeEnum getConnectionType() {
+        return connectionTypeEnum;
     }
 
-    public String getDatabaseName() {
-        return databaseName;
+    public String getSid() {
+        return sid;
     }
 
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public String getTnsName() {
+        return tnsName;
     }
 
     public String getUser() {
         return user;
     }
 
-    public void setUser(String user) {
-        this.user = user;
-    }
-
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String toConnectionString() {
-        // FIXME Andreas: Workaround for K + N
-        // We need to add a radio button for SID vs. Service Name.
-        // See http://www.razorsql.com/articles/oracle_jdbc_connect.html
-        return String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, databaseName);
+        switch (connectionTypeEnum) {
+            case SID:
+                return String.format("jdbc:oracle:thin:@%s:%d:%s", host, port, sid);
+            case ServiceName:
+                return String.format("jdbc:oracle:thin:@%s:%d/%s", host, port, serviceName);
+            case TNSName:
+                return String.format("jdbc:oracle:thin:@%s:%d/%s", host, port, tnsName);
+        }
+
+        return null;
     }
 
     @Override

@@ -46,8 +46,8 @@ public class LoginView extends JDialog {
         return textFieldPort;
     }
 
-    public JTextField getTextFieldDatabaseName() {
-        return textFieldDatabaseName;
+    public JTextField getTextFieldSID() {
+        return textFieldSID;
     }
 
     public JTextField getTextFieldUser() {
@@ -74,6 +74,26 @@ public class LoginView extends JDialog {
         return menuCreateSchemaScript;
     }
 
+    public JRadioButton getRbSID() {
+        return rbSID;
+    }
+
+    public JRadioButton getRbServiceName() {
+        return rbServiceName;
+    }
+
+    public JTextField getTextFieldServiceName() {
+        return textFieldServiceName;
+    }
+
+    public JRadioButton getRbTnsName() {
+        return rbTnsName;
+    }
+
+    public JTextField getTextFieldTnsName() {
+        return textFieldTnsName;
+    }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         menuBar1 = new JMenuBar();
@@ -90,8 +110,12 @@ public class LoginView extends JDialog {
         textFieldHost = new JTextField();
         label6 = new JLabel();
         textFieldPort = new JFormattedTextField();
-        label7 = new JLabel();
-        textFieldDatabaseName = new JTextField();
+        rbSID = new JRadioButton();
+        textFieldSID = new JTextField();
+        rbServiceName = new JRadioButton();
+        textFieldServiceName = new JTextField();
+        rbTnsName = new JRadioButton();
+        textFieldTnsName = new JTextField();
         label8 = new JLabel();
         textFieldUser = new JTextField();
         label9 = new JLabel();
@@ -104,8 +128,8 @@ public class LoginView extends JDialog {
         setModal(true);
         Container contentPane = getContentPane();
         contentPane.setLayout(new FormLayout(
-            "$lcgap, default, $ugap, default, $lcgap, default, $ugap, pref, $lcgap, 80dlu:grow, $lcgap",
-            "$lcgap, pref, default, $lgap, pref, 4*($lgap, default), $pgap, default, $lgap"));
+            "$lcgap, default, $ugap, default, $lcgap, default, $ugap, default, $lcgap, pref, $lcgap, 80dlu:grow, $lcgap",
+            "$lcgap, pref, default, $lgap, pref, 6*($lgap, default), $pgap, default, $lgap"));
 
         //======== menuBar1 ========
         {
@@ -142,40 +166,51 @@ public class LoginView extends JDialog {
         {
             scrollPane1.setViewportView(savedConnectionsList);
         }
-        contentPane.add(scrollPane1, CC.xywh(2, 3, 5, 13));
+        contentPane.add(scrollPane1, CC.xywh(2, 3, 5, 17));
 
         //---- label11 ----
         label11.setText("Connection name");
-        contentPane.add(label11, CC.xy(8, 3));
-        contentPane.add(textFieldConnectionName, CC.xy(10, 3));
+        contentPane.add(label11, CC.xy(10, 3));
+        contentPane.add(textFieldConnectionName, CC.xy(12, 3));
 
         //---- label5 ----
         label5.setText("Host");
-        contentPane.add(label5, CC.xy(8, 5));
-        contentPane.add(textFieldHost, CC.xy(10, 5));
+        contentPane.add(label5, CC.xy(10, 5));
+        contentPane.add(textFieldHost, CC.xy(12, 5));
 
         //---- label6 ----
         label6.setText("Port");
-        contentPane.add(label6, CC.xy(8, 7));
+        contentPane.add(label6, CC.xy(10, 7));
 
         //---- textFieldPort ----
         textFieldPort.setFormatterFactory(null);
-        contentPane.add(textFieldPort, CC.xy(10, 7));
+        contentPane.add(textFieldPort, CC.xy(12, 7));
 
-        //---- label7 ----
-        label7.setText("Database name");
-        contentPane.add(label7, CC.xy(8, 9));
-        contentPane.add(textFieldDatabaseName, CC.xy(10, 9));
+        //---- rbSID ----
+        rbSID.setText("SID");
+        rbSID.setSelected(true);
+        contentPane.add(rbSID, CC.xy(10, 9));
+        contentPane.add(textFieldSID, CC.xy(12, 9));
+
+        //---- rbServiceName ----
+        rbServiceName.setText("Service Name");
+        contentPane.add(rbServiceName, CC.xy(10, 11));
+        contentPane.add(textFieldServiceName, CC.xy(12, 11));
+
+        //---- rbTnsName ----
+        rbTnsName.setText("TNS Name");
+        contentPane.add(rbTnsName, CC.xy(10, 13));
+        contentPane.add(textFieldTnsName, CC.xy(12, 13));
 
         //---- label8 ----
         label8.setText("User / Schema");
-        contentPane.add(label8, CC.xy(8, 11));
-        contentPane.add(textFieldUser, CC.xy(10, 11));
+        contentPane.add(label8, CC.xy(10, 15));
+        contentPane.add(textFieldUser, CC.xy(12, 15));
 
         //---- label9 ----
         label9.setText("Password");
-        contentPane.add(label9, CC.xy(8, 13));
-        contentPane.add(textFieldPassword, CC.xy(10, 13));
+        contentPane.add(label9, CC.xy(10, 17));
+        contentPane.add(textFieldPassword, CC.xy(12, 17));
 
         //======== panel4 ========
         {
@@ -189,9 +224,15 @@ public class LoginView extends JDialog {
             buttonCancel.setText("Cancel");
             panel4.add(buttonCancel);
         }
-        contentPane.add(panel4, CC.xywh(8, 15, 3, 1));
+        contentPane.add(panel4, CC.xywh(10, 19, 3, 1));
         pack();
         setLocationRelativeTo(getOwner());
+
+        //---- buttonGroup ----
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(rbSID);
+        buttonGroup.add(rbServiceName);
+        buttonGroup.add(rbTnsName);
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -210,8 +251,12 @@ public class LoginView extends JDialog {
     private JTextField textFieldHost;
     private JLabel label6;
     private JFormattedTextField textFieldPort;
-    private JLabel label7;
-    private JTextField textFieldDatabaseName;
+    private JRadioButton rbSID;
+    private JTextField textFieldSID;
+    private JRadioButton rbServiceName;
+    private JTextField textFieldServiceName;
+    private JRadioButton rbTnsName;
+    private JTextField textFieldTnsName;
     private JLabel label8;
     private JTextField textFieldUser;
     private JLabel label9;
