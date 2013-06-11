@@ -259,11 +259,11 @@ public class LoginController {
         view.getTextFieldConnectionName().setText(connection.getConnectionName());
         view.getTextFieldHost().setText(connection.getHost());
         view.getTextFieldPort().setValue(connection.getPort());
-        if (connection.getConnectionType() == null) {
+        if (connection.getConnectionTypeEnum() == null) {
             // default is SID
             view.getRbSID().setSelected(true);
         } else {
-            switch (connection.getConnectionType()) {
+            switch (connection.getConnectionTypeEnum()) {
                 case SID:
                     view.getRbSID().setSelected(true);
                     break;

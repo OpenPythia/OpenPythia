@@ -38,7 +38,7 @@ public class ConnectionConfiguration {
         return port;
     }
 
-    public ConnectionTypeEnum getConnectionType() {
+    public ConnectionTypeEnum getConnectionTypeEnum() {
         return connectionTypeEnum;
     }
 
