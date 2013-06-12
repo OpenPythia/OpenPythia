@@ -212,21 +212,18 @@ public class LoginController {
 
         try {
             ConnectionPoolUtils.configurePool(connectionConfiguration.toConnectionString(), credentials);
+
+            result = LoginResult.OK;
+
+            PreferencesManager.setLastConfiguration(connectionConfiguration);
+            PreferencesManager.savePythiaConfiguration();
+
+            view.dispose();
         } catch (SQLException e) {
             // The connection could not be established
             JOptionPane.showMessageDialog(view, "The connection could not be established.\n"
                     + "The error message is " + e.toString());
-
-
         }
-
-        result = LoginResult.OK;
-
-        PreferencesManager.setLastConfiguration(connectionConfiguration);
-        PreferencesManager.savePythiaConfiguration();
-
-        view.dispose();
-
     }
 
     private void handleSaveButton() {
