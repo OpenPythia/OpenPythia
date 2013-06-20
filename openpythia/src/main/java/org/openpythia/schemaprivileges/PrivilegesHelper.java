@@ -15,15 +15,12 @@
  **/
 package org.openpythia.schemaprivileges;
 
-import java.awt.Component;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JOptionPane;
 
 import org.openpythia.dbconnection.ConnectionPoolUtils;
 
@@ -38,66 +35,63 @@ public class PrivilegesHelper {
             // snapshots, delta V$SQLARE
             "v$sqlarea", "v$sqltext_with_newlines", "v$sql_plan",
             // DB parameters
-            "v_$parameter",
+            "v$parameter",
             // missing/stale statistics
-            "dba_indexes", "dba_tables" };
+            "dba_indexes", "dba_tables"};
 
-    private static final String SELECT_USER_PRIVILEGES = "SELECT table_name "
-            + "FROM user_tab_privs "
-            + "WHERE grantor = 'SYS' AND privilege = 'SELECT'";
+    private static final String TRY_SELECT_FROM_TABLE = "SELECT 1 "
+            + "FROM %s "
+            + "WHERE ROWNUM <= 1";
 
-    public static List<String> getMissingObjectPrivileges(
-            List<String> grantedObjects) {
+    public static List<String> getMissingObjectPrivileges() {
+        List<String> grantedObjects = new ArrayList<String>();
+
+        Connection connection = ConnectionPoolUtils.getConnectionFromPool();
+        try {
+            for (String tableName : USED_TABLES) {
+                try {
+                    String sqlStatement = String.format(TRY_SELECT_FROM_TABLE, tableName);
+                    PreparedStatement trySelect = connection.prepareStatement(sqlStatement);
+
+                    ResultSet resultSet = trySelect.executeQuery();
+
+                    if (resultSet != null) {
+                        while (resultSet.next()) {
+                            grantedObjects.add(tableName);
+                        }
+                    }
+
+                    trySelect.close();
+
+                } catch (SQLException e) {
+                    // The user can't access this very table - nothing to do for the moment...
+                }
+            }
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return getMissingObjectPrivileges(grantedObjects);
+    }
+
+    public static List<String> getMissingObjectPrivileges(List<String> grantedObjects) {
         List<String> result = new ArrayList<String>();
 
         // check if there are objects missing
         for (String currentObject : USED_TABLES) {
             if (grantedObjects == null
-                    || !grantedObjects.contains(currentObject.toLowerCase()
-                            .replace("v$", "v_$"))) {
+                    || !grantedObjects.contains(currentObject)) {
                 result.add(currentObject);
             }
         }
         return result;
     }
 
-    public static List<String> getMissingObjectPrivileges() {
-
-        // get a list with all granted objects
-        List<String> grantedObjects = new ArrayList<String>();
-        Connection connection = ConnectionPoolUtils.getConnectionFromPool();
-        try {
-            PreparedStatement grantedObjectsStatement = connection
-                    .prepareStatement(SELECT_USER_PRIVILEGES);
-
-            ResultSet grantedObjectsResultSet = grantedObjectsStatement
-                    .executeQuery();
-
-            if (grantedObjectsResultSet != null) {
-                while (grantedObjectsResultSet.next()) {
-                    grantedObjects.add(grantedObjectsResultSet.getString(1).toLowerCase());
-                }
-            }
-
-            grantedObjectsStatement.close();
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
-        } finally {
-            try {
-                connection.close();
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return getMissingObjectPrivileges(grantedObjects);
-    }
-
-    public static String createGrantScript(List<String> objectsToGrant,
-            String grantee) {
-        StringBuffer result = new StringBuffer();
+    public static String createGrantScript(List<String> objectsToGrant, String grantee) {
+        StringBuilder result = new StringBuilder();
 
         for (String currentObject : objectsToGrant) {
             result.append("GRANT select ON SYS."
