@@ -22,8 +22,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -173,6 +172,8 @@ public class WorstStatementsDetailController implements FinishedListener {
         File excelFile = FileSelectorUtility.chooseExcelFileToWrite(view);
         if (excelFile != null) {
             DeltaSnapshotWriter.saveDeltaSnapshot(excelFile, deltaSnapshot);
+
+            JOptionPane.showMessageDialog(view, "Excel file successfully written.", "Excel Export", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
