@@ -35,7 +35,9 @@ public class PrivilegesHelper {
             // snapshots, delta V$SQLAREA
             "gv$sqlarea", "gv$sqltext_with_newlines", "gv$sql_plan",
             // DB parameters
-            "v$parameter"};
+            "v$parameter",
+            // missing/stale statistics
+            "dba_indexes", "dba_tables"};
 
     private static final String TRY_SELECT_FROM_TABLE = "SELECT 1 "
             + "FROM %s "
