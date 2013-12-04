@@ -37,11 +37,11 @@ import org.openpythia.utilities.sql.SQLHelper;
 public class WorstStatementsSmallController implements PythiaPluginController {
 
     private static String ELAPSED_TIME_TOP20 = "SELECT SUM(elapsed_time) "
-            + "FROM (SELECT elapsed_time FROM v$sqlarea "
+            + "FROM (SELECT elapsed_time FROM gv$sqlarea "
             + "WHERE rownum <= 20 " + "ORDER BY elapsed_time DESC)";
 
     private static String ELAPSED_TIME_TOTAL = "SELECT SUM(elapsed_time) "
-            + "FROM v$sqlarea ";
+            + "FROM gv$sqlarea ";
 
     private MainDialog mainDialog;
 

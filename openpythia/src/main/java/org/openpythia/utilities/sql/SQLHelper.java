@@ -34,20 +34,20 @@ import org.openpythia.progress.ProgressListener;
 public class SQLHelper {
 
     private static String NUMBER_STATEMENTS_IN_LIBRARY_CACHE = "SELECT COUNT(*) "
-            + "FROM v$sqlarea";
+            + "FROM gv$sqlarea";
 
     private final static String DATE_TIME_DATABASE = "SELECT sysdate "
             + "FROM dual";
 
-    private final static String SELECT_SQL_TEXT_FOR_ONE_STATEMENT = "SELECT address, sql_text "
-            + "FROM v$sqltext_with_newlines "
+    private final static String SELECT_SQL_TEXT_FOR_ONE_STATEMENT = "SELECT sql_text "
+            + "FROM gv$sqltext_with_newlines "
             + "WHERE address = ?"
-            + "ORDER BY address, piece";
+            + "ORDER BY piece";
 
     private final static int NUMBER_BIND_VARIABLES = 100;
-    private final static String SELECT_SQL_TEXT_FOR_100_STATEMENTS = "SELECT address, sql_text "
-            + "FROM v$sqltext_with_newlines "
-            + "WHERE address IN ("
+    private final static String SELECT_SQL_TEXT_FOR_100_STATEMENTS = "SELECT sql_id, sql_text "
+            + "FROM gv$sqltext_with_newlines "
+            + "WHERE sql_id IN ("
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
@@ -57,12 +57,12 @@ public class SQLHelper {
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " + "ORDER BY address, piece";
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " + "ORDER BY sql_id, piece";
 
     private final static String SELECT_EXECUTION_PLANS_FOR_100_STATEMENTS = "SELECT address, child_number, id, parent_id, operation, "
             + "options, object_owner, object_name, depth, position, cost, cardinality, "
             + "bytes, cpu_cost, io_cost, access_predicates, filter_predicates "
-            + "FROM v$sql_plan "
+            + "FROM gv$sql_plan "
             + "WHERE address IN ("
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
@@ -82,11 +82,11 @@ public class SQLHelper {
     private static SQLStatementLoader sqlStatementLoader;
 
     public static SQLStatement getSQLStatement(String sqlId, String address,
-            String parsingSchema) {
+                                               String parsingSchema, int instance) {
         SQLStatement result = null;
 
         SQLStatement newStatement = new SQLStatement(sqlId, address,
-                parsingSchema);
+                parsingSchema, instance);
 
         if (allSQLStatements.contains(newStatement)) {
             // reuse of an existing statement
@@ -139,7 +139,7 @@ public class SQLHelper {
 
                 StringBuffer sqlText = new StringBuffer();
                 while (sqlTextResultSet.next()) {
-                    sqlText.append(sqlTextResultSet.getString(2));
+                    sqlText.append(sqlTextResultSet.getString(1));
                 }
                 sqlStatement.setSqlText(sqlText.toString());
 
@@ -204,14 +204,12 @@ public class SQLHelper {
             Connection connection = null;
             try {
                 connection = ConnectionPoolUtils.getConnectionFromPool();
-                PreparedStatement sqlTextStatement = connection
-                        .prepareStatement(SELECT_SQL_TEXT_FOR_100_STATEMENTS);
+                PreparedStatement sqlTextStatement = connection.prepareStatement(SELECT_SQL_TEXT_FOR_100_STATEMENTS);
                 sqlTextStatement.setFetchSize(1000);
 
                 int indexPlaceholder = 1;
                 for (SQLStatement currentStatement : sqlStatementsToLoad) {
-                    sqlTextStatement.setString(indexPlaceholder,
-                            currentStatement.getAddress());
+                    sqlTextStatement.setString(indexPlaceholder, currentStatement.getSqlId());
                     indexPlaceholder++;
 
                     if (indexPlaceholder > NUMBER_BIND_VARIABLES) {
@@ -244,36 +242,36 @@ public class SQLHelper {
 
             ResultSet sqlTextResultSet = sqlTextStatement.executeQuery();
 
-            // use a definitely not used (invalid) address to get started
-            String address = "";
+            // use a definitely not used (invalid) sqlId to get started
+            String sqlId = "";
             StringBuffer sqlText = new StringBuffer();
             while (sqlTextResultSet.next()) {
-                if (address.equals(sqlTextResultSet.getString(1))) {
+                if (sqlId.equals(sqlTextResultSet.getString(1))) {
                     // found next piece of the SQL text
                     sqlText.append(sqlTextResultSet.getString(2));
                 } else {
-                    // new address
+                    // new sqlId
                     // save the SQL text of the prior statement
-                    sqlStatement = handleSQLStatementWithAddress(address);
+                    sqlStatement = handleSQLStatementWithSqlId(sqlId);
                     if (sqlStatement != null) {
                         sqlStatement.setSqlText(sqlText.toString());
                     }
 
                     // start gathering the next SQL string
-                    address = sqlTextResultSet.getString(1);
+                    sqlId = sqlTextResultSet.getString(1);
                     sqlText = new StringBuffer(sqlTextResultSet.getString(2));
                 }
             }
             // save the SQL text of the prior statement
-            sqlStatement = handleSQLStatementWithAddress(address);
+            sqlStatement = handleSQLStatementWithSqlId(sqlId);
             if (sqlStatement != null) {
                 sqlStatement.setSqlText(sqlText.toString());
             }
         }
 
-        private SQLStatement handleSQLStatementWithAddress(String address) {
+        private SQLStatement handleSQLStatementWithSqlId(String sqlId) {
             for (SQLStatement statement : unloadedSQLStatements) {
-                if (address.equals(statement.getAddress())) {
+                if (sqlId.equals(statement.getSqlId())) {
                     // we found the statement
                     unloadedSQLStatements.remove(statement);
                     return statement;
@@ -284,8 +282,8 @@ public class SQLHelper {
         }
     }
 
-    public static void loadExecutionPlansForStatements( List<SQLStatement> sqlStatements,
-            ProgressListener progressListener) {
+    public static void loadExecutionPlansForStatements(List<SQLStatement> sqlStatements,
+                                                       ProgressListener progressListener) {
         if (progressListener != null) {
             progressListener.setStartValue(0);
             progressListener.setEndValue(sqlStatements.size());
@@ -406,11 +404,11 @@ public class SQLHelper {
                 // there is no SQL statement with this address in the list
                 // this should never happen...
                 throw new RuntimeException(
-                        "Fatal Exception: Oracle returned a result not beeing asked for.");
+                        "Fatal Exception: Oracle returned a result not being asked for.");
             }
 
             ExecutionPlanStep newStep = new ExecutionPlanStep(
-            // id
+                    // id
                     executionPlansResultSet.getInt(3),
                     // parent id
                     executionPlansResultSet.getInt(4),
@@ -423,19 +421,19 @@ public class SQLHelper {
                     // objectName
                     executionPlansResultSet.getString(8),
                     // depth
-                    executionPlansResultSet.getInt(9),
+                    executionPlansResultSet.getBigDecimal(9),
                     // position
-                    executionPlansResultSet.getInt(10),
+                    executionPlansResultSet.getBigDecimal(10),
                     // cost
-                    executionPlansResultSet.getInt(11),
+                    executionPlansResultSet.getBigDecimal(11),
                     // cardinality
-                    executionPlansResultSet.getInt(12),
+                    executionPlansResultSet.getBigDecimal(12),
                     // bytes
-                    executionPlansResultSet.getInt(13),
+                    executionPlansResultSet.getBigDecimal(13),
                     // cpuCost
-                    executionPlansResultSet.getInt(14),
+                    executionPlansResultSet.getBigDecimal(14),
                     // ioCost
-                    executionPlansResultSet.getInt(15),
+                    executionPlansResultSet.getBigDecimal(15),
                     // accessPredicates
                     executionPlansResultSet.getString(16),
                     // filterPredicates

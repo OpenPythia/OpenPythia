@@ -61,9 +61,9 @@ public class SnapshotHelper {
 
     private static class SnapshotTaker implements Runnable {
 
-        private static String SNAPSHOT_SQL_AREA = "SELECT sql_id, address, parsing_schema_name, "
+        private static String SNAPSHOT_SQL_AREA = "SELECT sql_id, address, inst_id, parsing_schema_name, "
                 + "executions, elapsed_time / 1000000, cpu_time / 1000000, buffer_gets, disk_reads, rows_processed "
-                + "FROM v$sqlarea";
+                + "FROM gv$sqlarea";
 
         private ProgressListener progressListener;
 
@@ -117,16 +117,19 @@ public class SnapshotHelper {
                     while (snapshotResultSet.next()) {
                         String sqlId = snapshotResultSet.getString(1);
                         String address = snapshotResultSet.getString(2);
-                        String parsingSchema = snapshotResultSet.getString(3);
-                        BigDecimal executions = snapshotResultSet.getBigDecimal(4);
-                        BigDecimal elapsedSeconds = snapshotResultSet.getBigDecimal(5);
-                        BigDecimal cpuSeconds = snapshotResultSet.getBigDecimal(6);
-                        BigDecimal bufferGets = snapshotResultSet.getBigDecimal(7);
-                        BigDecimal diskReads = snapshotResultSet.getBigDecimal(8);
-                        BigDecimal rowsProcessed = snapshotResultSet.getBigDecimal(9);
+                        Integer instanceId = snapshotResultSet.getInt(3);
+
+                        String parsingSchema = snapshotResultSet.getString(4);
+                        BigDecimal executions = snapshotResultSet.getBigDecimal(5);
+                        BigDecimal elapsedSeconds = snapshotResultSet.getBigDecimal(6);
+                        BigDecimal cpuSeconds = snapshotResultSet.getBigDecimal(7);
+                        BigDecimal bufferGets = snapshotResultSet.getBigDecimal(8);
+                        BigDecimal diskReads = snapshotResultSet.getBigDecimal(9);
+                        BigDecimal rowsProcessed = snapshotResultSet.getBigDecimal(10);
 
                         SQLStatementSnapshot sqlStatementSnapshot = new SQLStatementSnapshot(
-                                SQLHelper.getSQLStatement(sqlId, address, parsingSchema),
+                                SQLHelper.getSQLStatement(sqlId, address, parsingSchema, instanceId),
+                                instanceId,
                                 executions,
                                 elapsedSeconds,
                                 cpuSeconds,

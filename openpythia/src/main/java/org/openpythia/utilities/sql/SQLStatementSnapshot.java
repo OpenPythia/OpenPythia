@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 public class SQLStatementSnapshot {
 
     private SQLStatement sqlStatement;
+    private int instanceId;
     private BigDecimal executions;
     private BigDecimal elapsedSeconds;
     private BigDecimal cpuSeconds;
@@ -28,6 +29,7 @@ public class SQLStatementSnapshot {
     private BigDecimal rowsProcessed;
 
     public SQLStatementSnapshot(SQLStatement sqlStatement,
+                                int instanceId,
                                 BigDecimal executions,
                                 BigDecimal elapsedSeconds,
                                 BigDecimal cpuSeconds,
@@ -35,6 +37,7 @@ public class SQLStatementSnapshot {
                                 BigDecimal diskReads,
                                 BigDecimal rowsProcessed) {
         this.sqlStatement = sqlStatement;
+        this.instanceId = instanceId;
         this.executions = executions;
         this.elapsedSeconds = elapsedSeconds;
         this.cpuSeconds = cpuSeconds;
@@ -45,6 +48,10 @@ public class SQLStatementSnapshot {
 
     public SQLStatement getSqlStatement() {
         return sqlStatement;
+    }
+
+    public int getInstanceId() {
+        return instanceId;
     }
 
     public BigDecimal getExecutions() {
@@ -70,5 +77,4 @@ public class SQLStatementSnapshot {
     public BigDecimal getRowsProcessed() {
         return rowsProcessed;
     }
-
 }

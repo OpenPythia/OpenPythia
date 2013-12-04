@@ -18,7 +18,6 @@ package org.openpythia.plugin.worststatements;
 import java.awt.Component;
 import java.io.*;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,7 +35,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.util.IOUtils;
 import org.openpythia.utilities.SSUtilities;
 import org.openpythia.utilities.deltasql.DeltaSQLStatementSnapshot;
@@ -52,15 +50,16 @@ public class DeltaSnapshotWriter {
     private static final int INDEX_ROW_START_SQL_STATEMENTS = 4;
     private static final int INDEX_ROW_SUM_FORMULAS = 2;
 
-    private static final int INDEX_COLUMN_ADDRESS = 17;
-    private static final int INDEX_COLUMN_SQL_ID = 16;
-    private static final int INDEX_COLUMN_DELTA_ROWS_PROCESSED = 14;
-    private static final int INDEX_COLUMN_DELTA_DISK_READS = 12;
-    private static final int INDEX_COLUMN_DELTA_BUFFER_GETS = 10;
-    private static final int INDEX_COLUMN_DELTA_CPU_SECONDS = 7;
-    private static final int INDEX_COLUMN_DELTA_ELAPSED_SECONDS = 4;
-    private static final int INDEX_COLUMN_DELTA_EXECUTIONS = 2;
-    private static final int INDEX_COLUMN_SQL_TEXT = 1;
+    private static final int INDEX_COLUMN_ADDRESS = 18;
+    private static final int INDEX_COLUMN_SQL_ID = 17;
+    private static final int INDEX_COLUMN_DELTA_ROWS_PROCESSED = 15;
+    private static final int INDEX_COLUMN_DELTA_DISK_READS = 13;
+    private static final int INDEX_COLUMN_DELTA_BUFFER_GETS = 11;
+    private static final int INDEX_COLUMN_DELTA_CPU_SECONDS = 8;
+    private static final int INDEX_COLUMN_DELTA_ELAPSED_SECONDS = 5;
+    private static final int INDEX_COLUMN_DELTA_EXECUTIONS = 3;
+    private static final int INDEX_COLUMN_SQL_TEXT = 2;
+    private static final int INDEX_COLUMN_INSTANCE = 1;
     private static final int INDEX_COLUMN_PARSING_SCHEMA = 0;
 
     private static final int INDEX_ROW_TEMPLATE_STATEMENT_HEADER_ROW = 3;
@@ -85,21 +84,7 @@ public class DeltaSnapshotWriter {
 
     private void saveDeltaSnapshot() {
         try {
-            InputStream inputStream = null;
-            OutputStream outputStream = null;
-
-            try {
-                inputStream = this.getClass().getResourceAsStream(TEMPLATE_DELTA_V_SQL_AREA_XLSX);
-                outputStream = new FileOutputStream(destination);
-                IOUtils.copy(inputStream, outputStream);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog((Component) null, e);
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-                IOUtils.closeQuietly(outputStream);
-            }
-
-            Workbook workbook = WorkbookFactory.create(new FileInputStream(destination));
+            Workbook workbook = WorkbookFactory.create(this.getClass().getResourceAsStream(TEMPLATE_DELTA_V_SQL_AREA_XLSX));
             statementsSheet = workbook.getSheet("Delta V$SQLAREA");
             executionPlansSheet = workbook.getSheet("Execution Plans");
             hyperlinkStyle = createHyperlinkStyle(workbook);
@@ -108,7 +93,7 @@ public class DeltaSnapshotWriter {
 
             writeExecutionPlansForWorstStatements();
 
-            outputStream = new FileOutputStream(destination);
+            OutputStream outputStream = new FileOutputStream(destination);
             workbook.write(outputStream);
             outputStream.close();
 
@@ -151,6 +136,8 @@ public class DeltaSnapshotWriter {
 
             currentRow.getCell(INDEX_COLUMN_PARSING_SCHEMA).setCellValue(
                     currentSnapshot.getSqlStatement().getParsingSchema());
+            currentRow.getCell(INDEX_COLUMN_INSTANCE).setCellValue(
+                    currentSnapshot.getSqlStatement().getInstanceId());
             currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
                     currentSnapshot.getSqlStatement().getSqlText());
 
@@ -289,11 +276,11 @@ public class DeltaSnapshotWriter {
             currentRow.getCell(1).setCellValue(
                     step.getObjectOwner() + "." + step.getObjectName());
         }
-        currentRow.getCell(2).setCellValue(step.getCost());
-        currentRow.getCell(3).setCellValue(step.getCardinality());
-        currentRow.getCell(4).setCellValue(step.getBytes());
-        currentRow.getCell(5).setCellValue(step.getCpuCost());
-        currentRow.getCell(6).setCellValue(step.getIoCost());
+        safeBigDecimalIntoCellWriter(currentRow.getCell(2), step.getCost());
+        safeBigDecimalIntoCellWriter(currentRow.getCell(3), step.getCardinality());
+        safeBigDecimalIntoCellWriter(currentRow.getCell(4), step.getBytes());
+        safeBigDecimalIntoCellWriter(currentRow.getCell(5), step.getCpuCost());
+        safeBigDecimalIntoCellWriter(currentRow.getCell(6), step.getIoCost());
         currentRow.getCell(7).setCellValue(step.getAccessPredicates());
         currentRow.getCell(8).setCellValue(step.getFilterPredicates());
         internalCurrentRowIndex++;
@@ -307,10 +294,18 @@ public class DeltaSnapshotWriter {
         return internalCurrentRowIndex;
     }
 
-    private String getIndentionAsString(int depth) {
+    private void safeBigDecimalIntoCellWriter(Cell cell, BigDecimal value) {
+        if (value == null) {
+            cell.setCellValue("");
+        } else {
+            cell.setCellValue(value.doubleValue());
+        }
+    }
+
+    private String getIndentionAsString(BigDecimal depth) {
         StringBuffer result = new StringBuffer("");
 
-        for (int i = 1; i <= depth; i++) {
+        for (int i = 1; i <= depth.intValue(); i++) {
             result.append("  ");
         }
 
@@ -324,7 +319,7 @@ public class DeltaSnapshotWriter {
     private static class WorstStatementIdentifier {
 
         private BigDecimal sumExecutions = BigDecimal.ZERO;
-        private BigDecimal sumElaspsedSeconds = BigDecimal.ZERO;
+        private BigDecimal sumElapsedSeconds = BigDecimal.ZERO;
         private BigDecimal sumCPUSeconds = BigDecimal.ZERO;
         private BigDecimal sumBufferGets = BigDecimal.ZERO;
         private BigDecimal sumDiskReads = BigDecimal.ZERO;
@@ -334,7 +329,7 @@ public class DeltaSnapshotWriter {
             for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
 
                 sumExecutions = sumExecutions.add(currentSnapshot.getDeltaExecutions());
-                sumElaspsedSeconds = sumElaspsedSeconds.add(currentSnapshot.getDeltaElapsedSeconds());
+                sumElapsedSeconds = sumElapsedSeconds.add(currentSnapshot.getDeltaElapsedSeconds());
                 sumCPUSeconds = sumCPUSeconds.add(currentSnapshot.getDeltaCpuSeconds());
                 sumBufferGets = sumBufferGets.add(currentSnapshot.getDeltaBufferGets());
                 sumDiskReads = sumDiskReads.add(currentSnapshot.getDeltaDiskReads());
@@ -349,7 +344,7 @@ public class DeltaSnapshotWriter {
             if (snapshot.getDeltaExecutions().multiply(new BigDecimal(100)).compareTo(sumExecutions) > 0) {
                 return true;
             }
-            if (snapshot.getDeltaElapsedSeconds().multiply(new BigDecimal(100)).compareTo(sumElaspsedSeconds) > 0) {
+            if (snapshot.getDeltaElapsedSeconds().multiply(new BigDecimal(100)).compareTo(sumElapsedSeconds) > 0) {
                 return true;
             }
             if (snapshot.getDeltaCpuSeconds().multiply(new BigDecimal(100)).compareTo(sumCPUSeconds) > 0) {

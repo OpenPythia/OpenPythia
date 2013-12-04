@@ -27,15 +27,17 @@ public class SQLStatement {
     private String sqlId;
     private String address;
     private String parsingSchema;
+    private int instanceId;
     private String sqlText;
     private String normalizedSQLText;
 
     private List<ExecutionPlan> executionPlans;
 
-    protected SQLStatement(String sqlId, String address, String parsingSchema) {
+    protected SQLStatement(String sqlId, String address, String parsingSchema, int instanceId) {
         this.sqlId = sqlId;
         this.address = address;
         this.parsingSchema = parsingSchema;
+        this.instanceId = instanceId;
 
         // just to be sure we don't run into problems when accessing the
         // execution plans from different threads
@@ -52,6 +54,10 @@ public class SQLStatement {
 
     public String getParsingSchema() {
         return parsingSchema;
+    }
+
+    public int getInstanceId() {
+        return instanceId;
     }
 
     public String getSqlText() {

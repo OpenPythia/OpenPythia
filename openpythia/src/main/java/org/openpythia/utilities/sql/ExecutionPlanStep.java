@@ -15,6 +15,7 @@
  **/
 package org.openpythia.utilities.sql;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,13 +33,13 @@ public class ExecutionPlanStep {
     private String options;
     private String objectOwner;
     private String objectName;
-    private int depth;
-    private int position;
-    private int cost;
-    private int cardinality;
-    private int bytes;
-    private int cpuCost;
-    private int ioCost;
+    private BigDecimal depth;
+    private BigDecimal position;
+    private BigDecimal cost;
+    private BigDecimal cardinality;
+    private BigDecimal bytes;
+    private BigDecimal cpuCost;
+    private BigDecimal ioCost;
     private String accessPredicates;
     private String filterPredicates;
 
@@ -47,8 +48,8 @@ public class ExecutionPlanStep {
 
     public ExecutionPlanStep(int executionPlanStepId,
             int parentExecutionPlanStepId, String operation, String options,
-            String objectOwner, String objectName, int depth, int position,
-            int cost, int cardinality, int bytes, int cpuCost, int ioCost,
+            String objectOwner, String objectName, BigDecimal depth, BigDecimal position,
+            BigDecimal cost, BigDecimal cardinality, BigDecimal bytes, BigDecimal cpuCost, BigDecimal ioCost,
             String accessPredicates, String filterPredicates) {
 
         this.executionPlanStepId = executionPlanStepId;
@@ -100,31 +101,31 @@ public class ExecutionPlanStep {
         return objectName;
     }
 
-    public int getDepth() {
+    public BigDecimal getDepth() {
         return depth;
     }
 
-    public int getPosition() {
+    public BigDecimal getPosition() {
         return position;
     }
 
-    public int getCost() {
+    public BigDecimal getCost() {
         return cost;
     }
 
-    public int getCardinality() {
+    public BigDecimal getCardinality() {
         return cardinality;
     }
 
-    public int getBytes() {
+    public BigDecimal getBytes() {
         return bytes;
     }
 
-    public int getCpuCost() {
+    public BigDecimal getCpuCost() {
         return cpuCost;
     }
 
-    public int getIoCost() {
+    public BigDecimal getIoCost() {
         return ioCost;
     }
 
@@ -165,7 +166,7 @@ public class ExecutionPlanStep {
     private void addChildStep(ExecutionPlanStep childStep) {
         int insertAt = -1;
         for (ExecutionPlanStep currentStep : childSteps) {
-            if (currentStep.position > childStep.position) {
+            if (currentStep.position.compareTo(childStep.position) > 0) {
                 insertAt = childSteps.indexOf(currentStep);
             }
         }
