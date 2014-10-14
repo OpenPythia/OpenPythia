@@ -90,7 +90,7 @@ public class LoginController {
     }
 
     private static final ConnectionConfiguration DEFAULT_CONNECTION_PREFERENCES
-            = new ConnectionConfiguration("<unamed>", "localhost", 1521,
+            = new ConnectionConfiguration("<unnamed>", "localhost", 1521,
             ConnectionTypeEnum.SID, "xe", "", "",
             "pythia", "");
 

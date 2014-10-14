@@ -15,10 +15,12 @@
  **/
 package org.openpythia.utilities.sql;
 
+import java.io.Serializable;
+
 /**
  * An execution plan as retrieved by the library cache of the Oracle database.
  */
-public class ExecutionPlan {
+public class ExecutionPlan implements Serializable {
 
     private int childNumber;
     private String address;

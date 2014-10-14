@@ -63,6 +63,10 @@ public class FileSelectorUtility {
         return chooseFileToWrite(owner, new FileFilterSQL(), ".sql", fileName);
     }
 
+    public static File chooseSnapshotFileToWrite(Component owner) {
+        return chooseFileToWrite(owner, new FileFilterSnapshot(), ".snap", null);
+    }
+
     private static File chooseFileToWrite(Component owner, FileFilter filter,
             String extension, String fileName) {
 
@@ -104,6 +108,10 @@ public class FileSelectorUtility {
 
     public static File chooseJarFileToRead() {
         return chooseFileToRead(null, new FileFilterJar());
+    }
+
+    public static File chooseSnapshotFileToRead(Component owner) {
+        return chooseFileToRead(owner, new FileFilterSnapshot());
     }
 
     private static File chooseFileToRead(Component owner, FileFilter filter) {

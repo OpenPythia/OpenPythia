@@ -16,6 +16,7 @@
 package org.openpythia.utilities.sql;
 
 import java.awt.Component;
+import java.io.*;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -27,6 +28,7 @@ import java.util.GregorianCalendar;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
@@ -52,6 +54,40 @@ public class SnapshotHelper {
     public static void addSnapshot(Snapshot snapshot) {
         if (snapshot != null) {
             snapshots.put(snapshot.getSnapshotId(), snapshot);
+        }
+    }
+
+    public static boolean saveSnapshot(String snapshotId, File snapshotFile) {
+        Snapshot toSave = getSnapshot(snapshotId);
+
+        try (
+                OutputStream file = new FileOutputStream(snapshotFile);
+                OutputStream buffer = new BufferedOutputStream(file);
+                ObjectOutput output = new ObjectOutputStream(buffer);
+        ){
+            output.writeObject(toSave);
+            return true;
+        }
+        catch(IOException ex){
+            return false;
+        }
+    }
+
+    public static boolean loadSnapshot(File snapshotFile) {
+        try(
+                InputStream file = new FileInputStream(snapshotFile);
+                InputStream buffer = new BufferedInputStream(file);
+                ObjectInput input = new ObjectInputStream (buffer);
+        ){
+            Snapshot loaded = (Snapshot)input.readObject();
+            addSnapshot(loaded);
+            return true;
+        }
+        catch(ClassNotFoundException ex){
+            return false;
+        }
+        catch(IOException ex){
+            return false;
         }
     }
 

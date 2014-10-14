@@ -68,12 +68,25 @@ public class WorstStatementsDetailController implements FinishedListener {
                 takeSnapshot();
             }
         });
+        view.getBtnSaveSnapshot().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveSnapshot();
+            }
+        });
+        view.getBtnLoadSnapshot().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadSnapshot();
+            }
+        });
         view.getBtnCompareSnapshot().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 compareSnapshot();
             }
         });
+
         view.getBtnExportExcel().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -102,6 +115,37 @@ public class WorstStatementsDetailController implements FinishedListener {
         SnapshotHelper.takeSnapshot(controller);
 
         SQLHelper.startSQLTextLoader();
+    }
+
+    private void saveSnapshot() {
+        int numberSelectedSnapshots = view.getListSnapshots()
+                .getSelectedIndices().length;
+        if (numberSelectedSnapshots != 1) {
+            JOptionPane.showMessageDialog(view, "Select the snapshot to save.", "Save Snapshot", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        File snapshotFile = FileSelectorUtility.chooseSnapshotFileToWrite(view);
+        if (snapshotFile != null) {
+            String snapshotIdToSave = (String) view.getListSnapshots()
+                    .getSelectedValues()[0];
+            if (SnapshotHelper.saveSnapshot(snapshotIdToSave, snapshotFile)) {
+                JOptionPane.showMessageDialog(view, "Snapshot successfully written.", "Snapshot Export", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(view, "Snapshot could not be written.", "Snapshot Export", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    private void loadSnapshot() {
+        File snapshotFile = FileSelectorUtility.chooseSnapshotFileToRead(view);
+        if (snapshotFile != null) {
+            if (SnapshotHelper.loadSnapshot(snapshotFile)) {
+                fillScenarios();
+            } else {
+                JOptionPane.showMessageDialog(view, "Snapshot could not be loaded.", "Snapshot Import", JOptionPane.WARNING_MESSAGE);
+            }
+        }
     }
 
     private void compareSnapshot() {

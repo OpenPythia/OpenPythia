@@ -15,9 +15,10 @@
  **/
 package org.openpythia.utilities.sql;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class SQLStatementSnapshot {
+public class SQLStatementSnapshot implements Serializable {
 
     private SQLStatement sqlStatement;
     private int instanceId;

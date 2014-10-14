@@ -55,6 +55,14 @@ public class WorstStatementsDetailView extends JPanel {
         return tableDeltaSQLStatements;
     }
 
+    public JButton getBtnSaveSnapshot() {
+        return btnSaveSnapshot;
+    }
+
+    public JButton getBtnLoadSnapshot() {
+        return btnLoadSnapshot;
+    }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         DefaultComponentFactory compFactory = DefaultComponentFactory.getInstance();
@@ -62,6 +70,8 @@ public class WorstStatementsDetailView extends JPanel {
         scrollPane1 = new JScrollPane();
         listSnapshots = new JList();
         btnTakeSnapshot = new JButton();
+        btnSaveSnapshot = new JButton();
+        btnLoadSnapshot = new JButton();
         btnCompareSnapshot = new JButton();
         separator1 = compFactory.createSeparator("Delta");
         label2 = new JLabel();
@@ -96,9 +106,17 @@ public class WorstStatementsDetailView extends JPanel {
         btnTakeSnapshot.setText("Take Snapshot");
         add(btnTakeSnapshot, CC.xy(6, 2));
 
+        //---- btnSaveSnapshot ----
+        btnSaveSnapshot.setText("Save Snapshot");
+        add(btnSaveSnapshot, CC.xy(6, 4));
+
+        //---- btnLoadSnapshot ----
+        btnLoadSnapshot.setText("Load Snapshot");
+        add(btnLoadSnapshot, CC.xy(6, 6));
+
         //---- btnCompareSnapshot ----
         btnCompareSnapshot.setText("Compare Snapshots...");
-        add(btnCompareSnapshot, CC.xy(6, 4));
+        add(btnCompareSnapshot, CC.xy(6, 8));
         add(separator1, CC.xywh(2, 10, 7, 1));
 
         //---- label2 ----
@@ -142,6 +160,8 @@ public class WorstStatementsDetailView extends JPanel {
     private JScrollPane scrollPane1;
     private JList listSnapshots;
     private JButton btnTakeSnapshot;
+    private JButton btnSaveSnapshot;
+    private JButton btnLoadSnapshot;
     private JButton btnCompareSnapshot;
     private JComponent separator1;
     private JLabel label2;

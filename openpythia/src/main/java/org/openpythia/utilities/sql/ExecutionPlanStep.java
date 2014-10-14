@@ -15,6 +15,7 @@
  **/
 package org.openpythia.utilities.sql;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -24,7 +25,7 @@ import java.util.List;
  * An ExecutionPlanStep represents one step on an execution plan as found in the
  * library cache of the Oracle database.
  */
-public class ExecutionPlanStep {
+public class ExecutionPlanStep implements Serializable {
 
     private int executionPlanStepId;
     private int parentExecutionPlanStepId;

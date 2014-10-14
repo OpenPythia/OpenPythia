@@ -15,10 +15,11 @@
  **/
 package org.openpythia.utilities.sql;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Snapshot {
+public class Snapshot implements Serializable {
     
     private String snapshotId;
     private List<SQLStatementSnapshot> sqlStatementSnapshots;

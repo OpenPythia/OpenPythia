@@ -15,6 +15,7 @@
  **/
 package org.openpythia.utilities.sql;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -22,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * A SQLStatement represents a SQL statement like found in the library cache of
  * the Oracle database.
  */
-public class SQLStatement {
+public class SQLStatement implements Serializable {
 
     private String sqlId;
     private String address;
