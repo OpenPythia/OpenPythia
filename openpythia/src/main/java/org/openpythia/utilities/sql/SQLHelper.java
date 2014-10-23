@@ -45,7 +45,7 @@ public class SQLHelper {
             + "ORDER BY piece";
 
     private final static int NUMBER_BIND_VARIABLES = 100;
-    private final static String SELECT_SQL_TEXT_FOR_100_STATEMENTS = "SELECT DISTINCT sql_id, sql_text "
+    private final static String SELECT_SQL_TEXT_FOR_100_STATEMENTS = "SELECT DISTINCT sql_id, sql_text, piece "
             + "FROM gv$sqltext_with_newlines "
             + "WHERE sql_id IN ("
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
