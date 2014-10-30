@@ -80,12 +80,18 @@ public class WorstStatementsDetailController implements FinishedListener {
                 loadSnapshot();
             }
         });
-        view.getBtnCompareSnapshot().addActionListener(new ActionListener() {
+        view.getBtnCompareSnapshots().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                compareSnapshot();
+                compareSnapshot(false);
             }
         });
+       view.getBtnCompareSnapshotsCondensed().addActionListener(new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+               compareSnapshot(true);
+           }
+       });
 
         view.getBtnExportExcel().addActionListener(new ActionListener() {
             @Override
@@ -99,13 +105,27 @@ public class WorstStatementsDetailController implements FinishedListener {
                     @Override
                     public void valueChanged(ListSelectionEvent e) {
                         if (view.getListSnapshots().getSelectedIndices().length > 1) {
-                            view.getBtnCompareSnapshot().setEnabled(true);
+                            view.getBtnCompareSnapshots().setEnabled(true);
+                            view.getBtnCompareSnapshotsCondensed().setEnabled(true);
+
+                            view.getBtnSaveSnapshot().setEnabled(false);
+                            view.getBtnLoadSnapshot().setEnabled(false);
                         } else {
-                            view.getBtnCompareSnapshot().setEnabled(false);
+                            view.getBtnCompareSnapshots().setEnabled(false);
+                            view.getBtnCompareSnapshotsCondensed().setEnabled(false);
+
+                            if (view.getListSnapshots().getSelectedIndices().length == 1) {
+                                view.getBtnSaveSnapshot().setEnabled(true);
+                                view.getBtnLoadSnapshot().setEnabled(true);
+                            }
                         }
                     }
                 });
-        view.getBtnCompareSnapshot().setEnabled(false);
+        view.getBtnCompareSnapshots().setEnabled(false);
+        view.getBtnCompareSnapshotsCondensed().setEnabled(false);
+
+        view.getBtnSaveSnapshot().setEnabled(false);
+        view.getBtnLoadSnapshot().setEnabled(false);
     }
 
     private void takeSnapshot() {
@@ -148,7 +168,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         }
     }
 
-    private void compareSnapshot() {
+    private void compareSnapshot(boolean condenseSnapshots) {
         int numberSelectedSnapshots = view.getListSnapshots()
                 .getSelectedIndices().length;
         if (numberSelectedSnapshots < 2) {
@@ -161,7 +181,8 @@ public class WorstStatementsDetailController implements FinishedListener {
                 .getSelectedValues()[numberSelectedSnapshots - 1];
         deltaSnapshot = new DeltaSnapshot(
                 SnapshotHelper.getSnapshot(oldSnapshotId),
-                SnapshotHelper.getSnapshot(newSnapshotId));
+                SnapshotHelper.getSnapshot(newSnapshotId),
+                condenseSnapshots);
         // make sure all the SQL text is loaded
         List<SQLStatement> sqlStatements = new ArrayList<SQLStatement>();
         for (DeltaSQLStatementSnapshot statement : deltaSnapshot

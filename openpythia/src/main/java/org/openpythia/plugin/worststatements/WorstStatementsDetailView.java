@@ -31,8 +31,8 @@ public class WorstStatementsDetailView extends JPanel {
         return btnTakeSnapshot;
     }
 
-    public JButton getBtnCompareSnapshot() {
-        return btnCompareSnapshot;
+    public JButton getBtnCompareSnapshots() {
+        return btnCompareSnapshots;
     }
 
     public JTextField getTfSnapshotA() {
@@ -63,6 +63,10 @@ public class WorstStatementsDetailView extends JPanel {
         return btnLoadSnapshot;
     }
 
+    public JButton getBtnCompareSnapshotsCondensed() {
+        return btnCompareSnapshotsCondensed;
+    }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         DefaultComponentFactory compFactory = DefaultComponentFactory.getInstance();
@@ -72,7 +76,8 @@ public class WorstStatementsDetailView extends JPanel {
         btnTakeSnapshot = new JButton();
         btnSaveSnapshot = new JButton();
         btnLoadSnapshot = new JButton();
-        btnCompareSnapshot = new JButton();
+        btnCompareSnapshots = new JButton();
+        btnCompareSnapshotsCondensed = new JButton();
         separator1 = compFactory.createSeparator("Delta");
         label2 = new JLabel();
         tfSnapshotA = new JTextField();
@@ -86,7 +91,7 @@ public class WorstStatementsDetailView extends JPanel {
 
         //======== this ========
         setLayout(new FormLayout(
-            "$lcgap, default, $lcgap, 100dlu, $lcgap, default, $lcgap, default:grow, $lcgap",
+            "$lcgap, default, $lcgap, 100dlu, 2*($lcgap, default), $lcgap, default:grow, $lcgap",
             "$lgap, top:default, 7*($lgap, default), $lgap, fill:default:grow, $lgap"));
 
         //---- label1 ----
@@ -114,10 +119,14 @@ public class WorstStatementsDetailView extends JPanel {
         btnLoadSnapshot.setText("Load Snapshot");
         add(btnLoadSnapshot, CC.xy(6, 6));
 
-        //---- btnCompareSnapshot ----
-        btnCompareSnapshot.setText("Compare Snapshots...");
-        add(btnCompareSnapshot, CC.xy(6, 8));
-        add(separator1, CC.xywh(2, 10, 7, 1));
+        //---- btnCompareSnapshots ----
+        btnCompareSnapshots.setText("Compare Snapshots...");
+        add(btnCompareSnapshots, CC.xy(6, 8));
+
+        //---- btnCompareSnapshotsCondensed ----
+        btnCompareSnapshotsCondensed.setText("Compare Snapshots Condensed...");
+        add(btnCompareSnapshotsCondensed, CC.xy(8, 8));
+        add(separator1, CC.xywh(2, 10, 9, 1));
 
         //---- label2 ----
         label2.setText("Snapshot A");
@@ -151,7 +160,7 @@ public class WorstStatementsDetailView extends JPanel {
         {
             scrollPane2.setViewportView(tableDeltaSQLStatements);
         }
-        add(scrollPane2, CC.xywh(2, 18, 8, 1));
+        add(scrollPane2, CC.xywh(2, 18, 10, 1));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -162,7 +171,8 @@ public class WorstStatementsDetailView extends JPanel {
     private JButton btnTakeSnapshot;
     private JButton btnSaveSnapshot;
     private JButton btnLoadSnapshot;
-    private JButton btnCompareSnapshot;
+    private JButton btnCompareSnapshots;
+    private JButton btnCompareSnapshotsCondensed;
     private JComponent separator1;
     private JLabel label2;
     private JTextField tfSnapshotA;

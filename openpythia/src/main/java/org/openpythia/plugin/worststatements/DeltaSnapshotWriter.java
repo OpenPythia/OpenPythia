@@ -137,7 +137,7 @@ public class DeltaSnapshotWriter {
             currentRow.getCell(INDEX_COLUMN_PARSING_SCHEMA).setCellValue(
                     currentSnapshot.getSqlStatement().getParsingSchema());
             currentRow.getCell(INDEX_COLUMN_INSTANCE).setCellValue(
-                    currentSnapshot.getSqlStatement().getInstanceId());
+                    currentSnapshot.getInstanceId());
             currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
                     currentSnapshot.getSqlStatement().getSqlText());
 

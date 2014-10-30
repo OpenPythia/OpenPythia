@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 public class DeltaSQLStatementSnapshot {
 
     private SQLStatement sqlStatement;
+    private int instanceId;
     private BigDecimal deltaExecutions;
     private BigDecimal deltaElapsedSeconds;
     private BigDecimal deltaCpuSeconds;
@@ -34,6 +35,9 @@ public class DeltaSQLStatementSnapshot {
             SQLStatementSnapshot sqlStatementSnapshotA,
             SQLStatementSnapshot sqlStatementSnapshotB) {
         this.sqlStatement = sqlStatementSnapshotB.getSqlStatement();
+        // as the instance id can be overwritten due to condensing the snapshots, we can't use the instance id
+        // of the original statement
+        this.instanceId = sqlStatementSnapshotB.getInstanceId();
 
         // For some reasons Oracle reports from time to time that one of the
         // metrics has decreased between two snapshots. For instance at 7:00
@@ -82,6 +86,10 @@ public class DeltaSQLStatementSnapshot {
 
     public SQLStatement getSqlStatement() {
         return sqlStatement;
+    }
+
+    public int getInstanceId() {
+        return instanceId;
     }
 
     public BigDecimal getDeltaExecutions() {

@@ -15,6 +15,8 @@
  **/
 package org.openpythia.utilities.deltasql;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,20 +38,91 @@ public class DeltaSnapshot {
      * <p/>
      * When snapshotB is not younger than snapshotA, a runtime exception is
      * thrown.
+     * On RAC (Real Application Cluster) one SQL statement can be executed on multiple
+     * instances / cluster nodes. This leads to having multiple versions of the statements.
+     * Sometimes it is easier to read the result if the statements from the different
+     * instances are condensed into one statement. This can be achieved using the option
+     * condenseResult. The condensed SQL statements get the instance ID -1.
      *
      * @param snapshotA The older snapshot.
      * @param snapshotB The newer snapshot.
+     * @param condenseResult Should the result be condensed?
      */
-    public DeltaSnapshot(Snapshot snapshotA, Snapshot snapshotB) {
+    public DeltaSnapshot(Snapshot snapshotA, Snapshot snapshotB, boolean condenseResult) {
         if (snapshotA.getSnapshotId().compareTo(snapshotB.getSnapshotId()) > 0) {
             throw new IllegalArgumentException(
                     "Snapshot B not younger than Snapshot A.");
         }
 
-        this.snapshotA = snapshotA;
-        this.snapshotB = snapshotB;
+        if (condenseResult) {
+            this.snapshotA = condenseSnapshot(snapshotA);
+            this.snapshotB = condenseSnapshot(snapshotB);
+        } else {
+            this.snapshotA = snapshotA;
+            this.snapshotB = snapshotB;
+        }
 
         createDelta();
+    }
+
+    /**
+     * If there are SQL statements that were executed in several instances / cluster nodes of the DB,
+     * condense these statements into one new statement containing the sum of all the statements.
+     * @param snapshot The snapshot to condense.
+     * @return A condensed snapshot containing each SQL statement only one time. The condensed statements
+     * have the instance id -1.
+     */
+    private static Snapshot condenseSnapshot(Snapshot snapshot) {
+        // for a faster lookup we put the snapshot into a hash map
+        Map<String, List<SQLStatementSnapshot>> snapshotLookup = new HashMap<>();
+        for (SQLStatementSnapshot sqlStatementSnapshot : snapshot.getSqlStatementSnapshots()) {
+            if (!snapshotLookup.containsKey(sqlStatementSnapshot.getSqlStatement().getSqlId())) {
+                snapshotLookup.put(sqlStatementSnapshot.getSqlStatement().getSqlId(), new ArrayList<SQLStatementSnapshot>());
+            }
+            snapshotLookup.get(sqlStatementSnapshot.getSqlStatement().getSqlId()).add(sqlStatementSnapshot);
+        }
+
+        Snapshot result = new Snapshot(snapshot.getSnapshotId());
+
+        for (SQLStatementSnapshot sqlStatementSnapshot : snapshot.getSqlStatementSnapshots()) {
+            String sqlId = sqlStatementSnapshot.getSqlStatement().getSqlId();
+            if (snapshotLookup.containsKey(sqlId)) {
+                // lookup table (still) contains the key - so we have to work in this statement
+                if (snapshotLookup.get(sqlId).size() == 1) {
+                    // there is only only one statement with this SQL-ID
+                    result.addSQLStatementSnapshot(sqlStatementSnapshot);
+                } else {
+                    // There are multiple entries for this SQL statement. All the entries from the
+                    // different instances have to be condensed into one new entry.
+                    BigDecimal sumExecutions = BigDecimal.valueOf(0);
+                    BigDecimal sumElapsedSeconds = BigDecimal.valueOf(0);
+                    BigDecimal sumCpuSeconds = BigDecimal.valueOf(0);
+                    BigDecimal sumBufferGets = BigDecimal.valueOf(0);
+                    BigDecimal sumDiskReads = BigDecimal.valueOf(0);
+                    BigDecimal sumRowsProcessed = BigDecimal.valueOf(0);
+                    for (SQLStatementSnapshot currentStatement :snapshotLookup.get(sqlId)) {
+                        sumExecutions = sumExecutions.add(currentStatement.getExecutions());
+                        sumElapsedSeconds = sumElapsedSeconds.add(currentStatement.getElapsedSeconds());
+                        sumCpuSeconds = sumCpuSeconds.add(currentStatement.getCpuSeconds());
+                        sumBufferGets = sumBufferGets.add(currentStatement.getBufferGets());
+                        sumDiskReads = sumDiskReads.add(currentStatement.getDiskReads());
+                        sumRowsProcessed = sumRowsProcessed.add(currentStatement.getRowsProcessed());
+                    }
+                    result.addSQLStatementSnapshot(new SQLStatementSnapshot(
+                            sqlStatementSnapshot.getSqlStatement(),
+                            // identifier for the condensed entry - no longer just one instance
+                            -1,
+                            sumExecutions,
+                            sumElapsedSeconds,
+                            sumCpuSeconds,
+                            sumBufferGets,
+                            sumDiskReads,
+                            sumRowsProcessed));
+                }
+                snapshotLookup.remove(sqlId);
+            }
+        }
+        return result;
     }
 
     private void createDelta() {
