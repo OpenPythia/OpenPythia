@@ -36,9 +36,11 @@ import org.openpythia.utilities.sql.SQLHelper;
 
 public class WorstStatementsSmallController implements PythiaPluginController {
 
-    private static String ELAPSED_TIME_TOP20 = "SELECT SUM(elapsed_time) "
-            + "FROM (SELECT elapsed_time FROM gv$sqlarea "
-            + "WHERE rownum <= 20 " + "ORDER BY elapsed_time DESC)";
+    private static String ELAPSED_TIME_TOP20 = "SELECT SUM(elapsed_time)" +
+            "  FROM (  SELECT elapsed_time" +
+            "            FROM gv$sqlarea" +
+            "        ORDER BY elapsed_time DESC)" +
+            " WHERE rownum <= 20";
 
     private static String ELAPSED_TIME_TOTAL = "SELECT SUM(elapsed_time) "
             + "FROM gv$sqlarea ";
@@ -133,12 +135,12 @@ public class WorstStatementsSmallController implements PythiaPluginController {
             } finally {
                 ConnectionPoolUtils.returnConnectionToPool(connection);
             }
-            return elapsedTimeTop20.divide(elapsedTimeTotal, RoundingMode.HALF_UP).floatValue();
+            return elapsedTimeTop20.divide(elapsedTimeTotal, 4, BigDecimal.ROUND_HALF_UP).floatValue();
         }
 
         private void updateView(int numberSQLStatements, float ratioTop20) {
             smallView.getTfTotalNumber().setText(
-                    String.valueOf(numberSQLStatements));
+                    String.format("%,d", numberSQLStatements));
 
             smallView.getTfElapsedTop20().setText(
                     String.format("%6.2f", ratioTop20 * 100));

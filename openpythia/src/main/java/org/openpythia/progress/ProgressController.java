@@ -62,7 +62,7 @@ public class ProgressController implements ProgressListener {
 
     @Override
     public void setEndValue(int endValue) {
-        view.getLblEnd().setText(String.valueOf(endValue));
+        view.getLblEnd().setText(String.format("%,d", endValue));
         view.getProgressBar().setMaximum(endValue);
     }
 
