@@ -74,14 +74,17 @@ public class DeltaSnapshotWriter {
 
     private File destination;
     private DeltaSnapshot deltaSnapshot;
+    private boolean moreExecutionPlans;
 
     private Sheet statementsSheet;
     private Sheet executionPlansSheet;
     private CellStyle hyperlinkStyle;
 
-    private DeltaSnapshotWriter(File destination, DeltaSnapshot deltaSnapshot) {
+    private DeltaSnapshotWriter(File destination, DeltaSnapshot deltaSnapshot, boolean moreExecutionPlans) {
         this.destination = destination;
         this.deltaSnapshot = deltaSnapshot;
+        this.moreExecutionPlans = moreExecutionPlans;
+        this.moreExecutionPlans = moreExecutionPlans;
     }
 
     private void saveDeltaSnapshot() {
@@ -108,8 +111,8 @@ public class DeltaSnapshotWriter {
         }
     }
 
-    public static void saveDeltaSnapshot(File destination, DeltaSnapshot deltaSnapshot) {
-        DeltaSnapshotWriter writer = new DeltaSnapshotWriter(destination, deltaSnapshot);
+    public static void saveDeltaSnapshot(File destination, DeltaSnapshot deltaSnapshot, boolean moreExecutionPlans) {
+        DeltaSnapshotWriter writer = new DeltaSnapshotWriter(destination, deltaSnapshot, moreExecutionPlans);
         writer.saveDeltaSnapshot();
     }
 
@@ -194,13 +197,15 @@ public class DeltaSnapshotWriter {
         Row templateChildHeaderRow = executionPlansSheet.getRow(INDEX_ROW_TEMPLATE_CHILD_HEADER_ROW);
         Row templateExecutionStepRow = executionPlansSheet.getRow(INDEX_ROW_TEMPLATE_EXECUTION_STEP_ROW);
 
-        WorstStatementIdentifier wsi = new WorstStatementIdentifier(deltaSnapshot);
+        WorstStatementIdentifier wsi = new WorstStatementIdentifier(deltaSnapshot, moreExecutionPlans);
 
         // Identify the worst statements and load their execution plans
-        List<SQLStatement> worstStatements = new ArrayList<SQLStatement>();
+        List<SQLStatement> worstStatements = new ArrayList<>();
+        int statementCount = 1;
         for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
 
-            if (wsi.isAWorstStatement(currentSnapshot)) {
+            if ((moreExecutionPlans && statementCount++ <= 100)
+                    || wsi.isAWorstStatement(currentSnapshot)) {
                 worstStatements.add(currentSnapshot.getSqlStatement());
             }
         }
@@ -210,9 +215,11 @@ public class DeltaSnapshotWriter {
         int currentRowIndex = INDEX_START_EXECUTION_PLANS;
         Row currentRow;
 
+        statementCount = 1;
         for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
 
-            if (wsi.isAWorstStatement(currentSnapshot)) {
+            if ((moreExecutionPlans && statementCount++ <= 100)
+                    || wsi.isAWorstStatement(currentSnapshot)) {
                 // Header for statement
                 currentRow = SSUtilities.copyRow(executionPlansSheet, templateStatementHeaderRow, currentRowIndex);
 
@@ -329,13 +336,16 @@ public class DeltaSnapshotWriter {
     // big amount of runtime, CPU, buffer gets...
     private static class WorstStatementIdentifier {
 
+        private boolean moreExecutionPlans;
         private BigDecimal sumExecutions = BigDecimal.ZERO;
         private BigDecimal sumElapsedSeconds = BigDecimal.ZERO;
         private BigDecimal sumCPUSeconds = BigDecimal.ZERO;
         private BigDecimal sumBufferGets = BigDecimal.ZERO;
         private BigDecimal sumDiskReads = BigDecimal.ZERO;
 
-        public WorstStatementIdentifier(DeltaSnapshot deltaSnapshot) {
+        public WorstStatementIdentifier(DeltaSnapshot deltaSnapshot, boolean moreExecutionPlans) {
+            this.moreExecutionPlans = moreExecutionPlans;
+
             // Calculate and store some sums to compare against single statements
             for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
 
@@ -352,19 +362,25 @@ public class DeltaSnapshotWriter {
             // Excel sheet
 
             // more than 1 % of the total
-            if (snapshot.getDeltaExecutions().multiply(new BigDecimal(100)).compareTo(sumExecutions) > 0) {
+            float percentThreshold = 1;
+            if (moreExecutionPlans) {
+                percentThreshold = 0.5f;
+            }
+            float multiplyFactor = 100.0f / percentThreshold;
+
+            if (snapshot.getDeltaExecutions().multiply(new BigDecimal(multiplyFactor)).compareTo(sumExecutions) > 0) {
                 return true;
             }
-            if (snapshot.getDeltaElapsedSeconds().multiply(new BigDecimal(100)).compareTo(sumElapsedSeconds) > 0) {
+            if (snapshot.getDeltaElapsedSeconds().multiply(new BigDecimal(multiplyFactor)).compareTo(sumElapsedSeconds) > 0) {
                 return true;
             }
-            if (snapshot.getDeltaCpuSeconds().multiply(new BigDecimal(100)).compareTo(sumCPUSeconds) > 0) {
+            if (snapshot.getDeltaCpuSeconds().multiply(new BigDecimal(multiplyFactor)).compareTo(sumCPUSeconds) > 0) {
                 return true;
             }
-            if (snapshot.getDeltaBufferGets().multiply(new BigDecimal(100)).compareTo(sumBufferGets) > 0) {
+            if (snapshot.getDeltaBufferGets().multiply(new BigDecimal(multiplyFactor)).compareTo(sumBufferGets) > 0) {
                 return true;
             }
-            if (snapshot.getDeltaDiskReads().multiply(new BigDecimal(100)).compareTo(sumDiskReads) > 0) {
+            if (snapshot.getDeltaDiskReads().multiply(new BigDecimal(multiplyFactor)).compareTo(sumDiskReads) > 0) {
                 return true;
             }
 

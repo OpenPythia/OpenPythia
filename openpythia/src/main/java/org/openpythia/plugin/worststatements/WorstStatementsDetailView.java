@@ -67,6 +67,10 @@ public class WorstStatementsDetailView extends JPanel {
         return btnCompareSnapshotsCondensed;
     }
 
+    public JCheckBox getCbMoreExecutionPlans() {
+        return cbMoreExecutionPlans;
+    }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         DefaultComponentFactory compFactory = DefaultComponentFactory.getInstance();
@@ -82,6 +86,7 @@ public class WorstStatementsDetailView extends JPanel {
         label2 = new JLabel();
         tfSnapshotA = new JTextField();
         btnExportExcel = new JButton();
+        cbMoreExecutionPlans = new JCheckBox();
         label3 = new JLabel();
         tfSnapshotB = new JTextField();
         label4 = new JLabel();
@@ -140,6 +145,10 @@ public class WorstStatementsDetailView extends JPanel {
         btnExportExcel.setText("Export to Excel");
         add(btnExportExcel, CC.xy(6, 12));
 
+        //---- cbMoreExecutionPlans ----
+        cbMoreExecutionPlans.setText("Load More Executation Plans");
+        add(cbMoreExecutionPlans, CC.xy(8, 12));
+
         //---- label3 ----
         label3.setText("Snapshot B");
         add(label3, CC.xy(2, 14));
@@ -177,6 +186,7 @@ public class WorstStatementsDetailView extends JPanel {
     private JLabel label2;
     private JTextField tfSnapshotA;
     private JButton btnExportExcel;
+    private JCheckBox cbMoreExecutionPlans;
     private JLabel label3;
     private JTextField tfSnapshotB;
     private JLabel label4;
