@@ -50,17 +50,18 @@ public class DeltaSnapshotWriter {
     private static final int INDEX_ROW_START_SQL_STATEMENTS = 4;
     private static final int INDEX_ROW_SUM_FORMULAS = 2;
 
-    private static final int INDEX_COLUMN_ADDRESS = 18;
-    private static final int INDEX_COLUMN_SQL_ID = 17;
-    private static final int INDEX_COLUMN_DELTA_ROWS_PROCESSED = 15;
-    private static final int INDEX_COLUMN_DELTA_DISK_READS = 13;
-    private static final int INDEX_COLUMN_DELTA_BUFFER_GETS = 11;
-    private static final int INDEX_COLUMN_DELTA_CPU_SECONDS = 8;
-    private static final int INDEX_COLUMN_DELTA_ELAPSED_SECONDS = 5;
-    private static final int INDEX_COLUMN_DELTA_EXECUTIONS = 3;
-    private static final int INDEX_COLUMN_SQL_TEXT = 2;
-    private static final int INDEX_COLUMN_INSTANCE = 1;
-    private static final int INDEX_COLUMN_PARSING_SCHEMA = 0;
+    private static final int INDEX_COLUMN_ADDRESS = 19;
+    private static final int INDEX_COLUMN_SQL_ID = 18;
+    private static final int INDEX_COLUMN_DELTA_ROWS_PROCESSED = 16;
+    private static final int INDEX_COLUMN_DELTA_DISK_READS = 14;
+    private static final int INDEX_COLUMN_DELTA_BUFFER_GETS = 12;
+    private static final int INDEX_COLUMN_DELTA_CPU_SECONDS = 9;
+    private static final int INDEX_COLUMN_DELTA_ELAPSED_SECONDS = 6;
+    private static final int INDEX_COLUMN_DELTA_EXECUTIONS = 4;
+    private static final int INDEX_COLUMN_SQL_TEXT = 3;
+    private static final int INDEX_COLUMN_INSTANCE = 2;
+    private static final int INDEX_COLUMN_PARSING_SCHEMA = 1;
+    private static final int INDEX_COLUMN_NO = 0;
 
     private static final int INDEX_ROW_TEMPLATE_STATEMENT_HEADER_ROW = 3;
     private static final int INDEX_ROW_TEMPLATE_CHILD_HEADER_ROW = 4;
@@ -130,9 +131,12 @@ public class DeltaSnapshotWriter {
         Row templateRow = statementsSheet.getRow(INDEX_ROW_TEMPLATE_DELTA_SQL_STATEMENT);
 
         int currentRowIndex = INDEX_ROW_START_SQL_STATEMENTS;
+        int currentNumber = 1;
 
         for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
             Row currentRow = SSUtilities.copyRow(statementsSheet, templateRow, currentRowIndex);
+
+            currentRow.getCell(INDEX_COLUMN_NO).setCellValue(currentNumber++);
 
             currentRow.getCell(INDEX_COLUMN_PARSING_SCHEMA).setCellValue(
                     currentSnapshot.getSqlStatement().getParsingSchema());
