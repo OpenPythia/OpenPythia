@@ -22,11 +22,13 @@ import java.io.Serializable;
  */
 public class ExecutionPlan implements Serializable {
 
+    private int instanceId;
     private int childNumber;
     private String address;
     private ExecutionPlanStep parentStep;
 
-    public ExecutionPlan(int childNumber, String address) {
+    public ExecutionPlan(int instanceId, int childNumber, String address) {
+        this.instanceId = instanceId;
         this.childNumber = childNumber;
         this.address = address;
     }
@@ -38,6 +40,8 @@ public class ExecutionPlan implements Serializable {
     public void setParentStep(ExecutionPlanStep parentStep) {
         this.parentStep = parentStep;
     }
+
+    public int getInstanceId() {return instanceId; }
 
     public int getChildNumber() {
         return childNumber;

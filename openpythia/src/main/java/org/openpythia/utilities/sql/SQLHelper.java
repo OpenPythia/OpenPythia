@@ -39,13 +39,13 @@ public class SQLHelper {
     private final static String DATE_TIME_DATABASE = "SELECT sysdate "
             + "FROM dual";
 
-    private final static String SELECT_SQL_TEXT_FOR_ONE_STATEMENT = "SELECT sql_text "
+    private final static String SELECT_SQL_TEXT_FOR_ONE_STATEMENT = "SELECT DISTINCT sql_text, piece "
             + "FROM gv$sqltext_with_newlines "
-            + "WHERE address = ?"
+            + "WHERE sql_id = ?"
             + "ORDER BY piece";
 
-    private final static int NUMBER_BIND_VARIABLES = 100;
-    private final static String SELECT_SQL_TEXT_FOR_100_STATEMENTS = "SELECT DISTINCT sql_id, sql_text, piece "
+    private final static int NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT = 200;
+    private final static String SELECT_SQL_TEXT_FOR_200_STATEMENTS = "SELECT DISTINCT sql_id, sql_text, piece "
             + "FROM gv$sqltext_with_newlines "
             + "WHERE sql_id IN ("
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
@@ -57,13 +57,24 @@ public class SQLHelper {
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " + "ORDER BY sql_id, piece";
 
-    private final static String SELECT_EXECUTION_PLANS_FOR_100_STATEMENTS = "SELECT address, child_number, id, parent_id, operation, "
+    private final static int NUMBER_BIND_VARIABLES_SELECT_EXECUTION_PLAN = 100;
+    private final static String SELECT_EXECUTION_PLANS_FOR_100_STATEMENTS = "SELECT sql_id, inst_id, child_number, id, parent_id, operation, "
             + "options, object_owner, object_name, depth, position, cost, cardinality, "
             + "bytes, cpu_cost, io_cost, access_predicates, filter_predicates "
             + "FROM gv$sql_plan "
-            + "WHERE address IN ("
+            + "WHERE sql_id IN ("
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
@@ -74,7 +85,7 @@ public class SQLHelper {
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
-            + "ORDER BY address, child_number, id, position";
+            + "ORDER BY sql_id, inst_id, child_number, id, position";
 
     private static List<SQLStatement> allSQLStatements = new ArrayList<SQLStatement>();
     private static List<SQLStatement> unloadedSQLStatements = new CopyOnWriteArrayList<SQLStatement>();
@@ -133,7 +144,7 @@ public class SQLHelper {
                 connection = ConnectionPoolUtils.getConnectionFromPool();
                 sqlTextStatement = connection
                         .prepareStatement(SELECT_SQL_TEXT_FOR_ONE_STATEMENT);
-                sqlTextStatement.setString(1, sqlStatement.getAddress());
+                sqlTextStatement.setString(1, sqlStatement.getSqlId());
 
                 ResultSet sqlTextResultSet = sqlTextStatement.executeQuery();
 
@@ -204,7 +215,7 @@ public class SQLHelper {
             Connection connection = null;
             try {
                 connection = ConnectionPoolUtils.getConnectionFromPool();
-                PreparedStatement sqlTextStatement = connection.prepareStatement(SELECT_SQL_TEXT_FOR_100_STATEMENTS);
+                PreparedStatement sqlTextStatement = connection.prepareStatement(SELECT_SQL_TEXT_FOR_200_STATEMENTS);
                 sqlTextStatement.setFetchSize(1000);
 
                 int indexPlaceholder = 1;
@@ -212,7 +223,7 @@ public class SQLHelper {
                     sqlTextStatement.setString(indexPlaceholder, currentStatement.getSqlId());
                     indexPlaceholder++;
 
-                    if (indexPlaceholder > NUMBER_BIND_VARIABLES) {
+                    if (indexPlaceholder > NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT) {
                         // all place holders are filled - so fetch the sql text
                         // from the db
                         getTextFromDB(sqlTextStatement);
@@ -224,7 +235,7 @@ public class SQLHelper {
                 if (indexPlaceholder > 1) {
                     // there are some statements left...
                     // fill the empty bind variables with invalid IDs
-                    for (int index = indexPlaceholder; index <= NUMBER_BIND_VARIABLES; index++) {
+                    for (int index = indexPlaceholder; index <= NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT; index++) {
                         sqlTextStatement.setString(index, "");
                     }
                     getTextFromDB(sqlTextStatement);
@@ -351,10 +362,10 @@ public class SQLHelper {
             int indexPlaceholder = 1;
             for (SQLStatement currentStatement : sqlStatementsToLoad) {
                 sqlExecutionPlansStatement.setString(indexPlaceholder,
-                        currentStatement.getAddress());
+                        currentStatement.getSqlId());
                 indexPlaceholder++;
 
-                if (indexPlaceholder > NUMBER_BIND_VARIABLES) {
+                if (indexPlaceholder > NUMBER_BIND_VARIABLES_SELECT_EXECUTION_PLAN) {
                     // all place holders are filled - so fetch the execution
                     // plans from the DB
                     getExecutionPlansFromDB(sqlStatementsToLoad,
@@ -367,7 +378,7 @@ public class SQLHelper {
             if (indexPlaceholder > 1) {
                 // there are some statements left...
                 // fill the empty bind variables with invalid addresses
-                for (int index = indexPlaceholder; index <= NUMBER_BIND_VARIABLES; index++) {
+                for (int index = indexPlaceholder; index <= NUMBER_BIND_VARIABLES_SELECT_EXECUTION_PLAN; index++) {
                     sqlExecutionPlansStatement.setString(index, "");
                 }
                 getExecutionPlansFromDB(sqlStatementsToLoad,
@@ -387,19 +398,22 @@ public class SQLHelper {
 
         ResultSet executionPlansResultSet = sqlTextStatement.executeQuery();
 
-        // use a definitely not used (invalid) address and ChildId to get
+        // use a definitely not used (invalid) SQL ID and ChildId to get
         // started
-        String lastAddress = "";
+        String lastSqlId = "";
+        int lastInstanceNumber = -1;
         int lastChildNumber = -1;
         ExecutionPlan lastExecutionPlan = null;
         while (executionPlansResultSet.next()) {
 
-            String currentAddress = executionPlansResultSet.getString(1);
-            int currentChildNumber = executionPlansResultSet.getInt(2);
+            int resultIndex = 1;
+            String currentSqlId = executionPlansResultSet.getString(resultIndex++);
+            int currentInstanceNumber = executionPlansResultSet.getInt(resultIndex++);
+            int currentChildNumber = executionPlansResultSet.getInt(resultIndex++);
 
             // find the SQL statement with this address
-            sqlStatement = findSQLStatementWithAddress(sqlStatementsToLoad,
-                    currentAddress);
+            sqlStatement = findSQLStatementWithSqlId(sqlStatementsToLoad,
+                    currentSqlId);
             if (sqlStatement == null) {
                 // there is no SQL statement with this address in the list
                 // this should never happen...
@@ -409,42 +423,42 @@ public class SQLHelper {
 
             ExecutionPlanStep newStep = new ExecutionPlanStep(
                     // id
-                    executionPlansResultSet.getInt(3),
+                    executionPlansResultSet.getInt(resultIndex++),
                     // parent id
-                    executionPlansResultSet.getInt(4),
+                    executionPlansResultSet.getInt(resultIndex++),
                     // operation
-                    executionPlansResultSet.getString(5),
+                    executionPlansResultSet.getString(resultIndex++),
                     // options
-                    executionPlansResultSet.getString(6),
+                    executionPlansResultSet.getString(resultIndex++),
                     // objectOwner
-                    executionPlansResultSet.getString(7),
+                    executionPlansResultSet.getString(resultIndex++),
                     // objectName
-                    executionPlansResultSet.getString(8),
+                    executionPlansResultSet.getString(resultIndex++),
                     // depth
-                    executionPlansResultSet.getBigDecimal(9),
+                    executionPlansResultSet.getBigDecimal(resultIndex++),
                     // position
-                    executionPlansResultSet.getBigDecimal(10),
+                    executionPlansResultSet.getBigDecimal(resultIndex++),
                     // cost
-                    executionPlansResultSet.getBigDecimal(11),
+                    executionPlansResultSet.getBigDecimal(resultIndex++),
                     // cardinality
-                    executionPlansResultSet.getBigDecimal(12),
+                    executionPlansResultSet.getBigDecimal(resultIndex++),
                     // bytes
-                    executionPlansResultSet.getBigDecimal(13),
+                    executionPlansResultSet.getBigDecimal(resultIndex++),
                     // cpuCost
-                    executionPlansResultSet.getBigDecimal(14),
+                    executionPlansResultSet.getBigDecimal(resultIndex++),
                     // ioCost
-                    executionPlansResultSet.getBigDecimal(15),
+                    executionPlansResultSet.getBigDecimal(resultIndex++),
                     // accessPredicates
-                    executionPlansResultSet.getString(16),
+                    executionPlansResultSet.getString(resultIndex++),
                     // filterPredicates
-                    executionPlansResultSet.getString(17));
+                    executionPlansResultSet.getString(resultIndex++));
 
-            if (lastAddress.equals(currentAddress)
+            if (lastSqlId.equals(currentSqlId)
+                    && lastInstanceNumber == currentInstanceNumber
                     && lastChildNumber == currentChildNumber) {
-                // a new step for the current child of the current address/SQL
-                // statement
+                // a new step for the current child of the current instance of the current SQL statement
                 if (!lastExecutionPlan.getParentStep()
-                        .insertStepToCorrectionPositionInStepOrChilds(newStep)) {
+                        .insertStepToCorrectPositionInStepOrChilds(newStep)) {
                     // the new step could not be integrated into the execution
                     // plan.
                     // this should never happen...
@@ -457,21 +471,23 @@ public class SQLHelper {
                 // no matter - in both cases we need a new execution plan for
                 // the
                 // current statement
-                lastExecutionPlan = new ExecutionPlan(currentChildNumber,
-                        currentAddress);
+                lastExecutionPlan = new ExecutionPlan(currentInstanceNumber,
+                        currentChildNumber,
+                        currentSqlId);
                 lastExecutionPlan.setParentStep(newStep);
                 sqlStatement.addExecutionPlan(lastExecutionPlan);
             }
 
-            lastAddress = currentAddress;
+            lastSqlId = currentSqlId;
+            lastInstanceNumber = currentInstanceNumber;
             lastChildNumber = currentChildNumber;
         }
     }
 
-    private static SQLStatement findSQLStatementWithAddress(
-            List<SQLStatement> sqlStatements, String address) {
+    private static SQLStatement findSQLStatementWithSqlId(
+            List<SQLStatement> sqlStatements, String sqlId) {
         for (SQLStatement statement : sqlStatements) {
-            if (address.equals(statement.getAddress())) {
+            if (sqlId.equals(statement.getSqlId())) {
                 return statement;
             }
         }

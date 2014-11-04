@@ -109,14 +109,12 @@ public class WorstStatementsDetailController implements FinishedListener {
                             view.getBtnCompareSnapshotsCondensed().setEnabled(true);
 
                             view.getBtnSaveSnapshot().setEnabled(false);
-                            view.getBtnLoadSnapshot().setEnabled(false);
                         } else {
                             view.getBtnCompareSnapshots().setEnabled(false);
                             view.getBtnCompareSnapshotsCondensed().setEnabled(false);
 
                             if (view.getListSnapshots().getSelectedIndices().length == 1) {
                                 view.getBtnSaveSnapshot().setEnabled(true);
-                                view.getBtnLoadSnapshot().setEnabled(true);
                             }
                         }
                     }
@@ -125,7 +123,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         view.getBtnCompareSnapshotsCondensed().setEnabled(false);
 
         view.getBtnSaveSnapshot().setEnabled(false);
-        view.getBtnLoadSnapshot().setEnabled(false);
+        view.getBtnLoadSnapshot().setEnabled(true);
     }
 
     private void takeSnapshot() {

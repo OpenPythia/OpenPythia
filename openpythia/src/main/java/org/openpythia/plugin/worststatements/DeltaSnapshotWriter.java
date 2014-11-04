@@ -222,7 +222,8 @@ public class DeltaSnapshotWriter {
                     // Header for Child / Execution Plan
                     // There may be more than one execution plans...
                     currentRow = SSUtilities.copyRow(executionPlansSheet, templateChildHeaderRow, currentRowIndex);
-                    currentRow.getCell(0).setCellValue(currentPlan.getChildNumber());
+                    currentRow.getCell(0).setCellValue(currentPlan.getInstanceId());
+                    currentRow.getCell(1).setCellValue(currentPlan.getChildNumber());
                     currentRowIndex++;
 
                     currentRowIndex = writeExecutionPlanStepToExcel(

@@ -142,7 +142,7 @@ public class ExecutionPlanStep implements Serializable {
         return childSteps;
     }
 
-    public boolean insertStepToCorrectionPositionInStepOrChilds(
+    public boolean insertStepToCorrectPositionInStepOrChilds(
             ExecutionPlanStep stepToAdd) {
         boolean stepStored = false;
 
@@ -158,7 +158,7 @@ public class ExecutionPlanStep implements Serializable {
             while (!stepStored && stepIterator.hasNext()) {
                 stepStored = stepIterator
                         .next()
-                        .insertStepToCorrectionPositionInStepOrChilds(stepToAdd);
+                        .insertStepToCorrectPositionInStepOrChilds(stepToAdd);
             }
         }
         return stepStored;
