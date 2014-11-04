@@ -27,6 +27,8 @@ public class SQLStatementSnapshot implements Serializable {
     private BigDecimal cpuSeconds;
     private BigDecimal bufferGets;
     private BigDecimal diskReads;
+    private BigDecimal concurrencySeconds;
+    private BigDecimal clusterSeconds;
     private BigDecimal rowsProcessed;
 
     public SQLStatementSnapshot(SQLStatement sqlStatement,
@@ -36,6 +38,8 @@ public class SQLStatementSnapshot implements Serializable {
                                 BigDecimal cpuSeconds,
                                 BigDecimal bufferGets,
                                 BigDecimal diskReads,
+                                BigDecimal concurrencySeconds,
+                                BigDecimal clusterSeconds,
                                 BigDecimal rowsProcessed) {
         this.sqlStatement = sqlStatement;
         this.instanceId = instanceId;
@@ -44,6 +48,8 @@ public class SQLStatementSnapshot implements Serializable {
         this.cpuSeconds = cpuSeconds;
         this.bufferGets = bufferGets;
         this.diskReads = diskReads;
+        this.concurrencySeconds = concurrencySeconds;
+        this.clusterSeconds = clusterSeconds;
         this.rowsProcessed = rowsProcessed;
     }
 
@@ -73,6 +79,12 @@ public class SQLStatementSnapshot implements Serializable {
 
     public BigDecimal getDiskReads() {
         return diskReads;
+    }
+
+    public BigDecimal getConcurrencySeconds() { return concurrencySeconds; }
+
+    public BigDecimal getClusterSeconds() {
+        return clusterSeconds;
     }
 
     public BigDecimal getRowsProcessed() {

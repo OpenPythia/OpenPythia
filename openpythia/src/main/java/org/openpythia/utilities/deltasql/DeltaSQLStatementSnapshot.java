@@ -29,6 +29,9 @@ public class DeltaSQLStatementSnapshot {
     private BigDecimal deltaCpuSeconds;
     private BigDecimal deltaBufferGets;
     private BigDecimal deltaDiskReads;
+    private BigDecimal deltaConcurrencySeconds;
+    private BigDecimal deltaClusterSeconds;
+
     private BigDecimal deltaRowsProcessed;
 
     public DeltaSQLStatementSnapshot(
@@ -67,6 +70,14 @@ public class DeltaSQLStatementSnapshot {
         if (this.deltaDiskReads.compareTo(BigDecimal.ZERO) < 0) {
             this.deltaDiskReads = BigDecimal.ZERO;
         }
+        this.deltaConcurrencySeconds = sqlStatementSnapshotB.getConcurrencySeconds().subtract(sqlStatementSnapshotA.getConcurrencySeconds());
+        if (this.deltaConcurrencySeconds.compareTo(BigDecimal.ZERO) < 0) {
+            this.deltaConcurrencySeconds = BigDecimal.ZERO;
+        }
+        this.deltaClusterSeconds = sqlStatementSnapshotB.getClusterSeconds().subtract(sqlStatementSnapshotA.getClusterSeconds());
+        if (this.deltaClusterSeconds.compareTo(BigDecimal.ZERO) < 0) {
+            this.deltaClusterSeconds = BigDecimal.ZERO;
+        }
         this.deltaRowsProcessed = sqlStatementSnapshotB.getRowsProcessed().subtract(sqlStatementSnapshotA.getRowsProcessed());
         if (this.deltaRowsProcessed.compareTo(BigDecimal.ZERO) < 0) {
             this.deltaRowsProcessed = BigDecimal.ZERO;
@@ -81,6 +92,8 @@ public class DeltaSQLStatementSnapshot {
         this.deltaCpuSeconds = sqlStatementSnapshotB.getCpuSeconds();
         this.deltaBufferGets = sqlStatementSnapshotB.getBufferGets();
         this.deltaDiskReads = sqlStatementSnapshotB.getDiskReads();
+        this.deltaConcurrencySeconds = sqlStatementSnapshotB.getConcurrencySeconds();
+        this.deltaClusterSeconds = sqlStatementSnapshotB.getClusterSeconds();
         this.deltaRowsProcessed = sqlStatementSnapshotB.getRowsProcessed();
     }
 
@@ -110,6 +123,12 @@ public class DeltaSQLStatementSnapshot {
 
     public BigDecimal getDeltaDiskReads() {
         return deltaDiskReads;
+    }
+
+    public BigDecimal getDeltaConcurrencySeconds() { return deltaConcurrencySeconds; }
+
+    public BigDecimal getDeltaClusterSeconds() {
+        return deltaClusterSeconds;
     }
 
     public BigDecimal getDeltaRowsProcessed() {

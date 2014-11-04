@@ -35,7 +35,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.util.IOUtils;
 import org.openpythia.utilities.SSUtilities;
 import org.openpythia.utilities.deltasql.DeltaSQLStatementSnapshot;
 import org.openpythia.utilities.deltasql.DeltaSnapshot;
@@ -50,9 +49,11 @@ public class DeltaSnapshotWriter {
     private static final int INDEX_ROW_START_SQL_STATEMENTS = 4;
     private static final int INDEX_ROW_SUM_FORMULAS = 2;
 
-    private static final int INDEX_COLUMN_ADDRESS = 19;
-    private static final int INDEX_COLUMN_SQL_ID = 18;
-    private static final int INDEX_COLUMN_DELTA_ROWS_PROCESSED = 16;
+    private static final int INDEX_COLUMN_ADDRESS = 23;
+    private static final int INDEX_COLUMN_SQL_ID = 22;
+    private static final int INDEX_COLUMN_DELTA_ROWS_PROCESSED = 20;
+    private static final int INDEX_COLUMN_DELTA_CLUSTER_SECONDS = 18;
+    private static final int INDEX_COLUMN_DELTA_CONCURRENCY_SECONDS = 16;
     private static final int INDEX_COLUMN_DELTA_DISK_READS = 14;
     private static final int INDEX_COLUMN_DELTA_BUFFER_GETS = 12;
     private static final int INDEX_COLUMN_DELTA_CPU_SECONDS = 9;
@@ -157,6 +158,11 @@ public class DeltaSnapshotWriter {
                     currentSnapshot.getDeltaBufferGets().doubleValue());
             currentRow.getCell(INDEX_COLUMN_DELTA_DISK_READS).setCellValue(
                     currentSnapshot.getDeltaDiskReads().doubleValue());
+
+            currentRow.getCell(INDEX_COLUMN_DELTA_CONCURRENCY_SECONDS).setCellValue(
+                    currentSnapshot.getDeltaConcurrencySeconds().doubleValue());
+            currentRow.getCell(INDEX_COLUMN_DELTA_CLUSTER_SECONDS).setCellValue(
+                    currentSnapshot.getDeltaClusterSeconds().doubleValue());
 
             currentRow.getCell(INDEX_COLUMN_DELTA_ROWS_PROCESSED).setCellValue(
                     currentSnapshot.getDeltaRowsProcessed().doubleValue());

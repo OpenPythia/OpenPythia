@@ -98,7 +98,8 @@ public class SnapshotHelper {
     private static class SnapshotTaker implements Runnable {
 
         private static String SNAPSHOT_SQL_AREA = "SELECT sql_id, address, inst_id, parsing_schema_name, "
-                + "executions, elapsed_time / 1000000, cpu_time / 1000000, buffer_gets, disk_reads, rows_processed "
+                + "executions, elapsed_time / 1000000, cpu_time / 1000000, buffer_gets, disk_reads, "
+                + "concurrency_wait_time / 1000000, cluster_wait_time / 1000000, rows_processed "
                 + "FROM gv$sqlarea";
 
         private ProgressListener progressListener;
@@ -151,17 +152,20 @@ public class SnapshotHelper {
                 int lines = 0;
                 if (snapshotResultSet != null) {
                     while (snapshotResultSet.next()) {
-                        String sqlId = snapshotResultSet.getString(1);
-                        String address = snapshotResultSet.getString(2);
-                        Integer instanceId = snapshotResultSet.getInt(3);
+                        int columnIndex = 1;
+                        String sqlId = snapshotResultSet.getString(columnIndex++);
+                        String address = snapshotResultSet.getString(columnIndex++);
+                        Integer instanceId = snapshotResultSet.getInt(columnIndex++);
 
-                        String parsingSchema = snapshotResultSet.getString(4);
-                        BigDecimal executions = snapshotResultSet.getBigDecimal(5);
-                        BigDecimal elapsedSeconds = snapshotResultSet.getBigDecimal(6);
-                        BigDecimal cpuSeconds = snapshotResultSet.getBigDecimal(7);
-                        BigDecimal bufferGets = snapshotResultSet.getBigDecimal(8);
-                        BigDecimal diskReads = snapshotResultSet.getBigDecimal(9);
-                        BigDecimal rowsProcessed = snapshotResultSet.getBigDecimal(10);
+                        String parsingSchema = snapshotResultSet.getString(columnIndex++);
+                        BigDecimal executions = snapshotResultSet.getBigDecimal(columnIndex++);
+                        BigDecimal elapsedSeconds = snapshotResultSet.getBigDecimal(columnIndex++);
+                        BigDecimal cpuSeconds = snapshotResultSet.getBigDecimal(columnIndex++);
+                        BigDecimal bufferGets = snapshotResultSet.getBigDecimal(columnIndex++);
+                        BigDecimal diskReads = snapshotResultSet.getBigDecimal(columnIndex++);
+                        BigDecimal concurrencySeconds = snapshotResultSet.getBigDecimal(columnIndex++);
+                        BigDecimal clusterSeconds = snapshotResultSet.getBigDecimal(columnIndex++);
+                        BigDecimal rowsProcessed = snapshotResultSet.getBigDecimal(columnIndex++);
 
                         SQLStatementSnapshot sqlStatementSnapshot = new SQLStatementSnapshot(
                                 SQLHelper.getSQLStatement(sqlId, address, parsingSchema, instanceId),
@@ -171,6 +175,8 @@ public class SnapshotHelper {
                                 cpuSeconds,
                                 bufferGets,
                                 diskReads,
+                                concurrencySeconds,
+                                clusterSeconds,
                                 rowsProcessed);
 
                         snapshot.addSQLStatementSnapshot(sqlStatementSnapshot);

@@ -99,13 +99,17 @@ public class DeltaSnapshot {
                     BigDecimal sumCpuSeconds = BigDecimal.valueOf(0);
                     BigDecimal sumBufferGets = BigDecimal.valueOf(0);
                     BigDecimal sumDiskReads = BigDecimal.valueOf(0);
+                    BigDecimal sumConcurrencySeconds = BigDecimal.valueOf(0);
+                    BigDecimal sumClusterSeconds = BigDecimal.valueOf(0);
                     BigDecimal sumRowsProcessed = BigDecimal.valueOf(0);
-                    for (SQLStatementSnapshot currentStatement :snapshotLookup.get(sqlId)) {
+                    for (SQLStatementSnapshot currentStatement : snapshotLookup.get(sqlId)) {
                         sumExecutions = sumExecutions.add(currentStatement.getExecutions());
                         sumElapsedSeconds = sumElapsedSeconds.add(currentStatement.getElapsedSeconds());
                         sumCpuSeconds = sumCpuSeconds.add(currentStatement.getCpuSeconds());
                         sumBufferGets = sumBufferGets.add(currentStatement.getBufferGets());
                         sumDiskReads = sumDiskReads.add(currentStatement.getDiskReads());
+                        sumConcurrencySeconds = sumConcurrencySeconds.add(currentStatement.getConcurrencySeconds());
+                        sumClusterSeconds = sumClusterSeconds.add(currentStatement.getClusterSeconds());
                         sumRowsProcessed = sumRowsProcessed.add(currentStatement.getRowsProcessed());
                     }
                     result.addSQLStatementSnapshot(new SQLStatementSnapshot(
@@ -117,6 +121,8 @@ public class DeltaSnapshot {
                             sumCpuSeconds,
                             sumBufferGets,
                             sumDiskReads,
+                            sumConcurrencySeconds,
+                            sumClusterSeconds,
                             sumRowsProcessed));
                 }
                 snapshotLookup.remove(sqlId);
