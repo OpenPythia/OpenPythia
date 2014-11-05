@@ -33,7 +33,7 @@ public class PrivilegesHelper {
             // library cache hit ratio
             "v$librarycache",
             // snapshots, delta V$SQLAREA
-            "gv$sqlarea", "gv$sqltext_with_newlines", "gv$sql_plan",
+            "gv$sqlarea", "gv$sqltext_with_newlines", "gv$sql_plan", "gv$active_session_history",
             // DB parameters
             "v$parameter",
             // missing/stale statistics
@@ -56,9 +56,7 @@ public class PrivilegesHelper {
                     ResultSet resultSet = trySelect.executeQuery();
 
                     if (resultSet != null) {
-                        while (resultSet.next()) {
-                            grantedObjects.add(tableName);
-                        }
+                        grantedObjects.add(tableName);
                     }
 
                     trySelect.close();
