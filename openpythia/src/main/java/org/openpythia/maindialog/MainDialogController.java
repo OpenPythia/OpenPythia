@@ -106,7 +106,7 @@ public class MainDialogController implements MainDialog {
                     .browse(new URI(
                             "https://andy-net.de/pythia/wiki/bin/view/Main/OnlineHelpStart"));
         } catch (Exception e) {
-            JOptionPane.showMessageDialog((Component) view,
+            JOptionPane.showMessageDialog(view,
                     "The online help could not be opened.\n"
                             + "The error message is " + e.toString());
         }

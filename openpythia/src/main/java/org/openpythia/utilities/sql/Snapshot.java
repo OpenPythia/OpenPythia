@@ -17,21 +17,37 @@ package org.openpythia.utilities.sql;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class Snapshot implements Serializable {
     
-    private String snapshotId;
+    private Calendar snapshotTime;
     private List<SQLStatementSnapshot> sqlStatementSnapshots;
     
-    public Snapshot(String snapshotId) {
-        this.snapshotId = snapshotId;
-        
-        sqlStatementSnapshots = new ArrayList<SQLStatementSnapshot>();
+    public Snapshot(Calendar snapshotTime) {
+        this.snapshotTime = snapshotTime;
+
+        sqlStatementSnapshots = new ArrayList<>();
     }
-    
+
+    public Calendar getSnapshotTime() { return snapshotTime; }
+
     public String getSnapshotId() {
-        return snapshotId;
+        return snapshotTime.get(Calendar.YEAR) + "."
+                + fillLeadingZero(snapshotTime.get(Calendar.MONTH)) + "."
+                + fillLeadingZero(snapshotTime.get(Calendar.DAY_OF_MONTH)) + " "
+                + fillLeadingZero(snapshotTime.get(Calendar.HOUR_OF_DAY)) + ":"
+                + fillLeadingZero(snapshotTime.get(Calendar.MINUTE)) + ":"
+                + fillLeadingZero(snapshotTime.get(Calendar.SECOND));
+    }
+
+    private static String fillLeadingZero(int value) {
+        if (value >= 10) {
+            return String.valueOf(value);
+        } else {
+            return "0" + String.valueOf(value);
+        }
     }
 
     public List<SQLStatementSnapshot> getSqlStatementSnapshots() {

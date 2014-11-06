@@ -75,7 +75,7 @@ public class JDBCHandler {
             } else {
                 // The file provided by the user contains NOT a valid JDBC
                 // driver
-                JOptionPane.showMessageDialog((Component) null,
+                JOptionPane.showMessageDialog(null,
                     "The file you provided does not contain a valid JDBC driver from Oracle.");
             }
         }

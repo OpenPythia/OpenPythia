@@ -170,9 +170,9 @@ public class FileRessourceUtility {
             outputStream.close();
             inputStream.close();
         } catch (FileNotFoundException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         }
     }
 
@@ -193,9 +193,9 @@ public class FileRessourceUtility {
                     outChannel.close();
             }
         } catch (FileNotFoundException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         }
     }
 
@@ -222,9 +222,9 @@ public class FileRessourceUtility {
             }
             inputReader.close();
         } catch (FileNotFoundException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         }
 
         return result.toString();

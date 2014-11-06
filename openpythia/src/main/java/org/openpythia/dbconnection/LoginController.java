@@ -328,7 +328,7 @@ public class LoginController {
 
                 JOptionPane.showMessageDialog(view, "Schema creation script generated.");
             } catch (IOException e) {
-                JOptionPane.showMessageDialog((Component) null, e);
+                JOptionPane.showMessageDialog(null, e);
             } finally {
                 if (output != null) {
                     output.close();

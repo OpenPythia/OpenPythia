@@ -43,7 +43,7 @@ public class AboutController {
             InputStream inputStream = this.getClass().getResourceAsStream(ABOUT_HTML);
             aboutText = IOUtils.toString(inputStream);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         }
 
         view.getEditorPaneAbout().setText(aboutText);

@@ -62,7 +62,7 @@ public class MissingJDBCDriverController {
             missingJDBCdriverText = IOUtils.toString(inputStream);
         }
         catch (Exception e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         }
 
         view.getEditorPaneMissingJDBCDriver().setText(missingJDBCdriverText);

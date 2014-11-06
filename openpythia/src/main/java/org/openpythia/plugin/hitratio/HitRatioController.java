@@ -99,7 +99,7 @@ public class HitRatioController implements PythiaPluginController {
                 bufferCacheStatement.close();
 
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog((Component) null, e);
+                JOptionPane.showMessageDialog(null, e);
             } finally {
                 ConnectionPoolUtils.returnConnectionToPool(connection);
             }

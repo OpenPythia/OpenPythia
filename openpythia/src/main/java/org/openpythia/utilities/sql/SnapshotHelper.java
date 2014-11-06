@@ -114,31 +114,13 @@ public class SnapshotHelper {
             progressListener.setEndValue(SQLHelper.getNumberSQLStatements());
             progressListener.setCurrentValue(0);
 
-            Date snapshotDate = SQLHelper.getCurrentDBDateTime();
-            Calendar snapshotCalendar = new GregorianCalendar();
-            snapshotCalendar.setTime(snapshotDate);
-            String snapshotID = snapshotCalendar.get(Calendar.YEAR) + "."
-                    + fillLeadingZero(snapshotCalendar.get(Calendar.MONTH)) + "."
-                    + fillLeadingZero(snapshotCalendar.get(Calendar.DAY_OF_MONTH)) + " "
-                    + fillLeadingZero(snapshotCalendar.get(Calendar.HOUR_OF_DAY)) + ":"
-                    + fillLeadingZero(snapshotCalendar.get(Calendar.MINUTE)) + ":"
-                    + fillLeadingZero(snapshotCalendar.get(Calendar.SECOND));
-
-            Snapshot snapshot = new Snapshot(snapshotID);
+            Snapshot snapshot = new Snapshot(SQLHelper.getCurrentDBDateTime());
 
             fillSnapshot(snapshot);
 
             addSnapshot(snapshot);
 
             progressListener.informFinished();
-        }
-
-        private String fillLeadingZero(int value) {
-            if (value >= 10) {
-                return String.valueOf(value);
-            } else {
-                return "0" + String.valueOf(value);
-            }
         }
 
         private void fillSnapshot(Snapshot snapshot) {
@@ -189,7 +171,7 @@ public class SnapshotHelper {
                 snapshotStatement.close();
 
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog((Component) null, e);
+                JOptionPane.showMessageDialog(null, e);
             } finally {
                 ConnectionPoolUtils.returnConnectionToPool(connection);
             }

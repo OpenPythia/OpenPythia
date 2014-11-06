@@ -82,7 +82,7 @@ public class DeltaSnapshot {
             snapshotLookup.get(sqlStatementSnapshot.getSqlStatement().getSqlId()).add(sqlStatementSnapshot);
         }
 
-        Snapshot result = new Snapshot(snapshot.getSnapshotId());
+        Snapshot result = new Snapshot(snapshot.getSnapshotTime());
 
         for (SQLStatementSnapshot sqlStatementSnapshot : snapshot.getSqlStatementSnapshots()) {
             String sqlId = sqlStatementSnapshot.getSqlStatement().getSqlId();

@@ -15,25 +15,22 @@
  **/
 package org.openpythia.utilities.sql;
 
-import java.awt.Component;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
+import org.openpythia.dbconnection.ConnectionPoolUtils;
+import org.openpythia.progress.ProgressListener;
+import org.openpythia.utilities.deltasql.DeltaSQLStatementSnapshot;
+import org.openpythia.utilities.waitevent.WaitEventTuple;
+
+import javax.swing.*;
+import java.awt.*;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.util.*;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.swing.JOptionPane;
-
-import org.openpythia.dbconnection.ConnectionPoolUtils;
-import org.openpythia.progress.ProgressListener;
-
 public class SQLHelper {
 
-    private static String NUMBER_STATEMENTS_IN_LIBRARY_CACHE = "SELECT COUNT(*) "
+    private final static String NUMBER_STATEMENTS_IN_LIBRARY_CACHE = "SELECT COUNT(*) "
             + "FROM gv$sqlarea";
 
     private final static String DATE_TIME_DATABASE = "SELECT sysdate "
@@ -87,14 +84,33 @@ public class SQLHelper {
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
             + "ORDER BY sql_id, inst_id, child_number, id, position";
 
-    private static List<SQLStatement> allSQLStatements = new ArrayList<SQLStatement>();
-    private static List<SQLStatement> unloadedSQLStatements = new CopyOnWriteArrayList<SQLStatement>();
+    private final static int NUMBER_BIND_VARIABLES_SELECT_WAIT_EVENTS_SQL = 100;
+    private final static String SELECT_WAIT_EVENTS_FOR_100_STATEMENTS = "  SELECT sql_id, event, sum(time_waited) / 1000000 "
+            + "FROM gv$active_session_history "
+            + "WHERE session_state = 'WAITING' "
+            + "AND sql_id IN ("
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+            + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+            + "AND sample_time BETWEEN ? AND ? "
+            + "GROUP BY sql_id, event "
+            + "ORDER BY sql_id, sum(time_waited) DESC";
+
+    private static List<SQLStatement> allSQLStatements = new ArrayList<>();
+    private static List<SQLStatement> unloadedSQLStatements = new CopyOnWriteArrayList<>();
 
     private static SQLStatementLoader sqlStatementLoader;
 
     public static SQLStatement getSQLStatement(String sqlId, String address,
                                                String parsingSchema, int instance) {
-        SQLStatement result = null;
+        SQLStatement result;
 
         SQLStatement newStatement = new SQLStatement(sqlId, address,
                 parsingSchema, instance);
@@ -148,7 +164,7 @@ public class SQLHelper {
 
                 ResultSet sqlTextResultSet = sqlTextStatement.executeQuery();
 
-                StringBuffer sqlText = new StringBuffer();
+                StringBuilder sqlText = new StringBuilder();
                 while (sqlTextResultSet.next()) {
                     sqlText.append(sqlTextResultSet.getString(1));
                 }
@@ -156,7 +172,7 @@ public class SQLHelper {
 
                 unloadedSQLStatements.remove(sqlStatement);
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog((Component) null, e);
+                JOptionPane.showMessageDialog(null, e);
             } finally {
                 if (sqlTextStatement != null) {
                     try {
@@ -177,6 +193,146 @@ public class SQLHelper {
         }
     }
 
+    public static Map<DeltaSQLStatementSnapshot, List<WaitEventTuple>> loadWaitEventsForStatements(
+            List<DeltaSQLStatementSnapshot> worstStatements,
+            Calendar startTime,
+            Calendar stopTime,
+            ProgressListener progressListener) {
+
+        Map<DeltaSQLStatementSnapshot, List<WaitEventTuple>> result = new HashMap<>();
+
+        if (progressListener != null) {
+            progressListener.setStartValue(0);
+            progressListener.setEndValue(worstStatements.size());
+            progressListener.setCurrentValue(0);
+        }
+
+        int progressCounter = 0;
+
+        List<DeltaSQLStatementSnapshot> missingWaitEventSqlStatements = new ArrayList<>(worstStatements);
+        List<DeltaSQLStatementSnapshot> sqlStatementsToLoad = new ArrayList<>();
+
+        int numberStatements;
+
+        while (missingWaitEventSqlStatements.size() > 0) {
+            sqlStatementsToLoad.clear();
+            numberStatements = 0;
+
+            Iterator<DeltaSQLStatementSnapshot> iterator = missingWaitEventSqlStatements.iterator();
+
+            while (iterator.hasNext() && numberStatements <= NUMBER_BIND_VARIABLES_SELECT_WAIT_EVENTS_SQL) {
+                sqlStatementsToLoad.add(iterator.next());
+                numberStatements++;
+            }
+
+            // remove those statements from the initial for which the loading is
+            // going on
+            for (DeltaSQLStatementSnapshot statement : sqlStatementsToLoad) {
+                missingWaitEventSqlStatements.remove(statement);
+            }
+
+            loadWaitEventsForSQLStatements(sqlStatementsToLoad, startTime, stopTime, result);
+
+            progressCounter += sqlStatementsToLoad.size();
+
+            if (progressListener != null) {
+                progressListener.setCurrentValue(progressCounter);
+            }
+
+            // sleep for 0.1 seconds so all the other tasks can do their
+            // work
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // we don't care for being interrupted
+            }
+        }
+
+        if (progressListener != null) {
+            progressListener.informFinished();
+        }
+
+        return result;
+    }
+
+    private static void loadWaitEventsForSQLStatements(List<DeltaSQLStatementSnapshot> sqlStatementsToLoad,
+                                                       Calendar startTime, Calendar stopTime,
+                                                       Map<DeltaSQLStatementSnapshot, List<WaitEventTuple>> result) {
+
+        Connection connection = null;
+        try {
+            connection = ConnectionPoolUtils.getConnectionFromPool();
+            PreparedStatement sqlWaitEventsStatement = connection
+                    .prepareStatement(SELECT_WAIT_EVENTS_FOR_100_STATEMENTS);
+            sqlWaitEventsStatement.setFetchSize(1000);
+
+            int indexPlaceholder = 1;
+            for (DeltaSQLStatementSnapshot currentStatement : sqlStatementsToLoad) {
+                sqlWaitEventsStatement.setString(indexPlaceholder,
+                        currentStatement.getSqlStatement().getSqlId());
+                indexPlaceholder++;
+
+                if (indexPlaceholder > NUMBER_BIND_VARIABLES_SELECT_WAIT_EVENTS_SQL) {
+                    // all place holders are filled - so fetch the wait events from the DB
+                    getWaitEventsFromDB(sqlStatementsToLoad, sqlWaitEventsStatement, result);
+
+                    indexPlaceholder = 1;
+                }
+            }
+
+            if (indexPlaceholder > 1) {
+                // there are some statements left...
+                // fill the empty bind variables with invalid addresses
+                for (int index = indexPlaceholder; index <= NUMBER_BIND_VARIABLES_SELECT_WAIT_EVENTS_SQL; index++) {
+                    sqlWaitEventsStatement.setString(index, "");
+                }
+
+                // set the time window for the samples
+                sqlWaitEventsStatement.setDate(NUMBER_BIND_VARIABLES_SELECT_WAIT_EVENTS_SQL + 1, new java.sql.Date(startTime.getTimeInMillis()));
+                sqlWaitEventsStatement.setDate(NUMBER_BIND_VARIABLES_SELECT_WAIT_EVENTS_SQL + 2, new java.sql.Date(stopTime.getTimeInMillis()));
+
+                getWaitEventsFromDB(sqlStatementsToLoad, sqlWaitEventsStatement, result);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e);
+        } finally {
+            ConnectionPoolUtils.returnConnectionToPool(connection);
+        }
+    }
+
+    private static void getWaitEventsFromDB(
+            List<DeltaSQLStatementSnapshot> sqlStatementsToLoad,
+            PreparedStatement sqlTextStatement,
+            Map<DeltaSQLStatementSnapshot, List<WaitEventTuple>> result) throws SQLException {
+
+        ResultSet waitEventsResultSet = sqlTextStatement.executeQuery();
+
+        // use a definitely not used (invalid) SQL ID
+        String lastSqlId = "";
+        DeltaSQLStatementSnapshot currentStatement = null;
+        while (waitEventsResultSet.next()) {
+
+            int resultIndex = 1;
+            String currentSqlId = waitEventsResultSet.getString(resultIndex++);
+            String currentEvent = waitEventsResultSet.getString(resultIndex++);
+            BigDecimal currentWaitedSeconds = waitEventsResultSet.getBigDecimal(resultIndex++);
+
+            if (!lastSqlId.equals(currentSqlId)) {
+                // find the SQL statement for the returned SQL id
+                for (DeltaSQLStatementSnapshot lookupStatement : sqlStatementsToLoad) {
+                    if (lookupStatement.getSqlStatement().getSqlId().equals(currentSqlId)) {
+                        currentStatement = lookupStatement;
+                        break;
+                    }
+                }
+                result.put(currentStatement, new ArrayList<WaitEventTuple>());
+            }
+            result.get(currentStatement).add(new WaitEventTuple(currentEvent, currentWaitedSeconds));
+
+            lastSqlId = currentSqlId;
+        }
+    }
+
     private static class SQLStatementLoader implements Runnable {
 
         public void run() {
@@ -192,7 +348,7 @@ public class SQLHelper {
                     Iterator<SQLStatement> iterator = unloadedSQLStatements
                             .iterator();
 
-                    while (iterator.hasNext() && numberStatements <= 200) {
+                    while (iterator.hasNext() && numberStatements <= NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT) {
                         sqlStatementsToLoad.add(iterator.next());
                         numberStatements++;
                     }
@@ -241,7 +397,7 @@ public class SQLHelper {
                     getTextFromDB(sqlTextStatement);
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog((Component) null, e);
+                JOptionPane.showMessageDialog(null, e);
             } finally {
                 ConnectionPoolUtils.returnConnectionToPool(connection);
             }
@@ -291,9 +447,10 @@ public class SQLHelper {
             // we didn't find the statement
             return null;
         }
+
     }
 
-    public static void loadExecutionPlansForStatements(List<SQLStatement> sqlStatements,
+    public static void loadExecutionPlansForStatements(List<DeltaSQLStatementSnapshot> sqlStatements,
                                                        ProgressListener progressListener) {
         if (progressListener != null) {
             progressListener.setStartValue(0);
@@ -303,8 +460,8 @@ public class SQLHelper {
 
         int progressCounter = 0;
 
-        List<SQLStatement> missingExecutionPlanSqlStatements = sqlStatements;
-        List<SQLStatement> sqlStatementsToLoad = new ArrayList<SQLStatement>();
+        List<DeltaSQLStatementSnapshot> missingExecutionPlanSqlStatements = new ArrayList<>(sqlStatements);
+        List<DeltaSQLStatementSnapshot> sqlStatementsToLoad = new ArrayList<>();
 
         int numberStatements;
 
@@ -312,19 +469,15 @@ public class SQLHelper {
             sqlStatementsToLoad.clear();
             numberStatements = 0;
 
-            Iterator<SQLStatement> iterator = missingExecutionPlanSqlStatements
-                    .iterator();
+            Iterator<DeltaSQLStatementSnapshot> iterator = missingExecutionPlanSqlStatements.iterator();
 
-            // add up to 200 statements on the lict of statements, for which the
-            // execution plan will be loaded
-            while (iterator.hasNext() && numberStatements <= 200) {
+            while (iterator.hasNext() && numberStatements <= NUMBER_BIND_VARIABLES_SELECT_EXECUTION_PLAN) {
                 sqlStatementsToLoad.add(iterator.next());
                 numberStatements++;
             }
 
-            // remove those statements from the initial for which the loading is
-            // going on
-            for (SQLStatement statement : sqlStatementsToLoad) {
+            // remove those statements from the initial for which the loading is going on
+            for (DeltaSQLStatementSnapshot statement : sqlStatementsToLoad) {
                 missingExecutionPlanSqlStatements.remove(statement);
             }
 
@@ -350,7 +503,7 @@ public class SQLHelper {
         }
     }
 
-    private static void loadExecutionPlansForSQLStatements(List<SQLStatement> sqlStatementsToLoad) {
+    private static void loadExecutionPlansForSQLStatements(List<DeltaSQLStatementSnapshot> sqlStatementsToLoad) {
 
         Connection connection = null;
         try {
@@ -360,9 +513,9 @@ public class SQLHelper {
             sqlExecutionPlansStatement.setFetchSize(1000);
 
             int indexPlaceholder = 1;
-            for (SQLStatement currentStatement : sqlStatementsToLoad) {
+            for (DeltaSQLStatementSnapshot currentStatement : sqlStatementsToLoad) {
                 sqlExecutionPlansStatement.setString(indexPlaceholder,
-                        currentStatement.getSqlId());
+                        currentStatement.getSqlStatement().getSqlId());
                 indexPlaceholder++;
 
                 if (indexPlaceholder > NUMBER_BIND_VARIABLES_SELECT_EXECUTION_PLAN) {
@@ -385,21 +538,19 @@ public class SQLHelper {
                         sqlExecutionPlansStatement);
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         } finally {
             ConnectionPoolUtils.returnConnectionToPool(connection);
         }
     }
 
     private static void getExecutionPlansFromDB(
-            List<SQLStatement> sqlStatementsToLoad,
+            List<DeltaSQLStatementSnapshot> sqlStatementsToLoad,
             PreparedStatement sqlTextStatement) throws SQLException {
-        SQLStatement sqlStatement;
 
         ResultSet executionPlansResultSet = sqlTextStatement.executeQuery();
 
-        // use a definitely not used (invalid) SQL ID and ChildId to get
-        // started
+        // use a definitely not used (invalid) SQL ID and ChildId to get started
         String lastSqlId = "";
         int lastInstanceNumber = -1;
         int lastChildNumber = -1;
@@ -412,9 +563,9 @@ public class SQLHelper {
             int currentChildNumber = executionPlansResultSet.getInt(resultIndex++);
 
             // find the SQL statement with this address
-            sqlStatement = findSQLStatementWithSqlId(sqlStatementsToLoad,
+            DeltaSQLStatementSnapshot deltaSQLStatementSnapshot = findSQLStatementWithSqlId(sqlStatementsToLoad,
                     currentSqlId);
-            if (sqlStatement == null) {
+            if (deltaSQLStatementSnapshot == null) {
                 // there is no SQL statement with this address in the list
                 // this should never happen...
                 throw new RuntimeException(
@@ -459,8 +610,7 @@ public class SQLHelper {
                 // a new step for the current child of the current instance of the current SQL statement
                 if (!lastExecutionPlan.getParentStep()
                         .insertStepToCorrectPositionInStepOrChilds(newStep)) {
-                    // the new step could not be integrated into the execution
-                    // plan.
+                    // the new step could not be integrated into the execution plan.
                     // this should never happen...
                     throw new RuntimeException(
                             "Fatal Exception: Oracle returned a step of an execution plan that could not be integrated.");
@@ -475,7 +625,7 @@ public class SQLHelper {
                         currentChildNumber,
                         currentSqlId);
                 lastExecutionPlan.setParentStep(newStep);
-                sqlStatement.addExecutionPlan(lastExecutionPlan);
+                deltaSQLStatementSnapshot.getSqlStatement().addExecutionPlan(lastExecutionPlan);
             }
 
             lastSqlId = currentSqlId;
@@ -484,10 +634,10 @@ public class SQLHelper {
         }
     }
 
-    private static SQLStatement findSQLStatementWithSqlId(
-            List<SQLStatement> sqlStatements, String sqlId) {
-        for (SQLStatement statement : sqlStatements) {
-            if (sqlId.equals(statement.getSqlId())) {
+    private static DeltaSQLStatementSnapshot findSQLStatementWithSqlId(
+            List<DeltaSQLStatementSnapshot> sqlStatements, String sqlId) {
+        for (DeltaSQLStatementSnapshot statement : sqlStatements) {
+            if (sqlId.equals(statement.getSqlStatement().getSqlId())) {
                 return statement;
             }
         }
@@ -515,15 +665,15 @@ public class SQLHelper {
             numberStatementsStatement.close();
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         } finally {
             ConnectionPoolUtils.returnConnectionToPool(connection);
         }
         return result;
     }
 
-    public static Date getCurrentDBDateTime() {
-        Date result = null;
+    public static Calendar getCurrentDBDateTime() {
+        Calendar result = null;
 
         Connection connection = ConnectionPoolUtils.getConnectionFromPool();
         try {
@@ -533,21 +683,22 @@ public class SQLHelper {
             ResultSet dateTimeResultSet = dateTimeStatement.executeQuery();
 
             if (dateTimeResultSet != null) {
+                Timestamp currentDBTime = null;
                 while (dateTimeResultSet.next()) {
-                    java.sql.Date currentDBDate = dateTimeResultSet.getDate(1);
-                    java.sql.Time currentDBTime = dateTimeResultSet.getTime(1);
-                    result = new Date(currentDBDate.getTime()
-                            + currentDBTime.getTime());
+                    currentDBTime = dateTimeResultSet.getTimestamp(1);
                 }
+                result = new GregorianCalendar();
+                result.setTimeInMillis(currentDBTime.getTime());
             }
 
             dateTimeStatement.close();
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog((Component) null, e);
+            JOptionPane.showMessageDialog(null, e);
         } finally {
             ConnectionPoolUtils.returnConnectionToPool(connection);
         }
+
         return result;
     }
 }
