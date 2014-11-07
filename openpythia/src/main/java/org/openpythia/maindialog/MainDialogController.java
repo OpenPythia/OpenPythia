@@ -48,6 +48,7 @@ public class MainDialogController implements MainDialog {
         view.getPanelDetails().setVisible(false);
         view.pack();
 
+        view.setLocationRelativeTo(null);
         view.setVisible(true);
     }
 
@@ -126,6 +127,6 @@ public class MainDialogController implements MainDialog {
         view.getPanelDetails().add(new JScrollPane(detailView));
         view.pack();
         view.repaint();
+        view.setLocationRelativeTo(null);
     }
-
 }

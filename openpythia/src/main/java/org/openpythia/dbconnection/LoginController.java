@@ -119,6 +119,7 @@ public class LoginController {
     }
 
     public LoginResult showDialog() {
+        view.setLocationRelativeTo(null);
         view.setVisible(true);
         return result;
     }
