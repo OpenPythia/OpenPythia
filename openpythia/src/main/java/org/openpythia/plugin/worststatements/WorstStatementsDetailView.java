@@ -63,12 +63,16 @@ public class WorstStatementsDetailView extends JPanel {
         return btnLoadSnapshot;
     }
 
-    public JButton getBtnCompareSnapshotsCondensed() {
-        return btnCompareSnapshotsCondensed;
-    }
-
     public JCheckBox getCbMoreExecutionPlans() {
         return cbMoreExecutionPlans;
+    }
+
+    public JCheckBox getCbCondenseInstances() {
+        return cbCondenseInstances;
+    }
+
+    public JCheckBox getCbCondenseMissingBindvariables() {
+        return cbCondenseMissingBindvariables;
     }
 
     private void initComponents() {
@@ -80,15 +84,17 @@ public class WorstStatementsDetailView extends JPanel {
         btnTakeSnapshot = new JButton();
         btnSaveSnapshot = new JButton();
         btnLoadSnapshot = new JButton();
+        separator2 = compFactory.createSeparator("Compare Snapshots");
+        cbCondenseInstances = new JCheckBox();
+        cbCondenseMissingBindvariables = new JCheckBox();
         btnCompareSnapshots = new JButton();
-        btnCompareSnapshotsCondensed = new JButton();
         separator1 = compFactory.createSeparator("Delta");
         label2 = new JLabel();
         tfSnapshotA = new JTextField();
-        btnExportExcel = new JButton();
         cbMoreExecutionPlans = new JCheckBox();
         label3 = new JLabel();
         tfSnapshotB = new JTextField();
+        btnExportExcel = new JButton();
         label4 = new JLabel();
         tfNumberStatements = new JTextField();
         scrollPane2 = new JScrollPane();
@@ -96,8 +102,8 @@ public class WorstStatementsDetailView extends JPanel {
 
         //======== this ========
         setLayout(new FormLayout(
-            "$lcgap, default, $lcgap, 100dlu, 2*($lcgap, default), $lcgap, default:grow, $lcgap",
-            "$lgap, top:default, 7*($lgap, default), $lgap, fill:default:grow, $lgap"));
+            "$lcgap, default, $lcgap, 100dlu, $lcgap, default, $lcgap, default:grow, $lcgap",
+            "$lgap, top:default, 10*($lgap, default), $lgap, fill:default:grow, $lgap"));
 
         //---- label1 ----
         label1.setText("Snapshots");
@@ -110,7 +116,7 @@ public class WorstStatementsDetailView extends JPanel {
             listSnapshots.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
             scrollPane1.setViewportView(listSnapshots);
         }
-        add(scrollPane1, CC.xywh(4, 2, 1, 7));
+        add(scrollPane1, CC.xywh(4, 2, 1, 13));
 
         //---- btnTakeSnapshot ----
         btnTakeSnapshot.setText("Take Snapshot");
@@ -123,53 +129,58 @@ public class WorstStatementsDetailView extends JPanel {
         //---- btnLoadSnapshot ----
         btnLoadSnapshot.setText("Load Snapshot");
         add(btnLoadSnapshot, CC.xy(6, 6));
+        add(separator2, CC.xywh(6, 8, 2, 1));
+
+        //---- cbCondenseInstances ----
+        cbCondenseInstances.setText("Condense Instances");
+        add(cbCondenseInstances, CC.xy(6, 10));
+
+        //---- cbCondenseMissingBindvariables ----
+        cbCondenseMissingBindvariables.setText("Condense Missing Bindvariables");
+        add(cbCondenseMissingBindvariables, CC.xy(6, 12));
 
         //---- btnCompareSnapshots ----
         btnCompareSnapshots.setText("Compare Snapshots...");
-        add(btnCompareSnapshots, CC.xy(6, 8));
-
-        //---- btnCompareSnapshotsCondensed ----
-        btnCompareSnapshotsCondensed.setText("Compare Snapshots Condensed...");
-        add(btnCompareSnapshotsCondensed, CC.xy(8, 8));
-        add(separator1, CC.xywh(2, 10, 9, 1));
+        add(btnCompareSnapshots, CC.xy(6, 14));
+        add(separator1, CC.xywh(2, 16, 7, 1));
 
         //---- label2 ----
         label2.setText("Snapshot A");
-        add(label2, CC.xy(2, 12));
+        add(label2, CC.xy(2, 18));
 
         //---- tfSnapshotA ----
         tfSnapshotA.setEditable(false);
-        add(tfSnapshotA, CC.xy(4, 12));
-
-        //---- btnExportExcel ----
-        btnExportExcel.setText("Export to Excel");
-        add(btnExportExcel, CC.xy(6, 12));
+        add(tfSnapshotA, CC.xy(4, 18));
 
         //---- cbMoreExecutionPlans ----
         cbMoreExecutionPlans.setText("Load More Executation Plans");
-        add(cbMoreExecutionPlans, CC.xy(8, 12));
+        add(cbMoreExecutionPlans, CC.xy(6, 18));
 
         //---- label3 ----
         label3.setText("Snapshot B");
-        add(label3, CC.xy(2, 14));
+        add(label3, CC.xy(2, 20));
 
         //---- tfSnapshotB ----
         tfSnapshotB.setEditable(false);
-        add(tfSnapshotB, CC.xy(4, 14));
+        add(tfSnapshotB, CC.xy(4, 20));
+
+        //---- btnExportExcel ----
+        btnExportExcel.setText("Export to Excel");
+        add(btnExportExcel, CC.xy(6, 20));
 
         //---- label4 ----
         label4.setText("Number Statements");
-        add(label4, CC.xy(2, 16));
+        add(label4, CC.xy(2, 22));
 
         //---- tfNumberStatements ----
         tfNumberStatements.setEditable(false);
-        add(tfNumberStatements, CC.xy(4, 16));
+        add(tfNumberStatements, CC.xy(4, 22));
 
         //======== scrollPane2 ========
         {
             scrollPane2.setViewportView(tableDeltaSQLStatements);
         }
-        add(scrollPane2, CC.xywh(2, 18, 10, 1));
+        add(scrollPane2, CC.xywh(2, 24, 8, 1));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -180,15 +191,17 @@ public class WorstStatementsDetailView extends JPanel {
     private JButton btnTakeSnapshot;
     private JButton btnSaveSnapshot;
     private JButton btnLoadSnapshot;
+    private JComponent separator2;
+    private JCheckBox cbCondenseInstances;
+    private JCheckBox cbCondenseMissingBindvariables;
     private JButton btnCompareSnapshots;
-    private JButton btnCompareSnapshotsCondensed;
     private JComponent separator1;
     private JLabel label2;
     private JTextField tfSnapshotA;
-    private JButton btnExportExcel;
     private JCheckBox cbMoreExecutionPlans;
     private JLabel label3;
     private JTextField tfSnapshotB;
+    private JButton btnExportExcel;
     private JLabel label4;
     private JTextField tfNumberStatements;
     private JScrollPane scrollPane2;

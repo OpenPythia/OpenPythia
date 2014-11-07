@@ -122,7 +122,6 @@ public class SQLStatement implements Serializable {
             SQLStatement statement = (SQLStatement) obj;
 
             return sqlId.equals(statement.sqlId)
-                    && address.equals(statement.address)
                     && isEqual(parsingSchema, statement.parsingSchema);
         } else {
             return false;
@@ -146,9 +145,9 @@ public class SQLStatement implements Serializable {
     @Override
     public int hashCode() {
         if (parsingSchema != null) {
-            return (sqlId + "|" + address + "|" + parsingSchema).hashCode();
+            return (sqlId + "|" + parsingSchema).hashCode();
         } else {
-            return (sqlId + "|" + address).hashCode();
+            return sqlId.hashCode();
         }
     }
 }

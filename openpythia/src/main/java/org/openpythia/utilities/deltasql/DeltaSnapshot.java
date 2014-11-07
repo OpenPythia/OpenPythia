@@ -16,7 +16,6 @@
 package org.openpythia.utilities.deltasql;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +30,9 @@ public class DeltaSnapshot {
     private Snapshot snapshotA;
     private Snapshot snapshotB;
 
+    public final static int NO_INSTANCE = -2;
+    public final static int MULTIPLE_INSTANCES = -1;
+
     private List<DeltaSQLStatementSnapshot> deltaSQLStatementSnapshots;
 
     /**
@@ -42,25 +44,42 @@ public class DeltaSnapshot {
      * instances / cluster nodes. This leads to having multiple versions of the statements.
      * Sometimes it is easier to read the result if the statements from the different
      * instances are condensed into one statement. This can be achieved using the option
-     * condenseResult. The condensed SQL statements get the instance ID -1.
+     * condenseInstances. The condensed SQL statements get the instance ID -1.
      *
+     * When not using bind variables Oracle doesn't identify statements as different which
+     * only differ by the parameters. For a overall rating of the statements it is essential
+     * to condense all these statements. This can be achieved by using the option
+     * condenseMissingBindVariables. The statements with missing bind variables can be
+     * identified by the number of identical statements.
      * @param snapshotA The older snapshot.
      * @param snapshotB The newer snapshot.
-     * @param condenseResult Should the result be condensed?
+     * @param condenseInstances Should the result be condensed by instances?
+     * @param condenseMissingBindVariables Should the result be condensed by missing bind variables?
      */
-    public DeltaSnapshot(Snapshot snapshotA, Snapshot snapshotB, boolean condenseResult) {
+    public DeltaSnapshot(Snapshot snapshotA,
+                         Snapshot snapshotB,
+                         boolean condenseInstances,
+                         boolean condenseMissingBindVariables) {
         if (snapshotA.getSnapshotId().compareTo(snapshotB.getSnapshotId()) > 0) {
             throw new IllegalArgumentException(
                     "Snapshot B not younger than Snapshot A.");
         }
 
-        if (condenseResult) {
-            this.snapshotA = condenseSnapshot(snapshotA);
-            this.snapshotB = condenseSnapshot(snapshotB);
-        } else {
-            this.snapshotA = snapshotA;
-            this.snapshotB = snapshotB;
+        Snapshot tempSnapshotA = snapshotA;
+        Snapshot tempSnapshotB = snapshotB;
+
+        if (condenseInstances) {
+            tempSnapshotA = condenseSnapshotByInstance(tempSnapshotA);
+            tempSnapshotB = condenseSnapshotByInstance(tempSnapshotB);
         }
+
+        if (condenseMissingBindVariables) {
+            tempSnapshotA = condenseSnapshotByMissingBindVariables(tempSnapshotA);
+            tempSnapshotB = condenseSnapshotByMissingBindVariables(tempSnapshotB);
+        }
+
+        this.snapshotA = tempSnapshotA;
+        this.snapshotB = tempSnapshotB;
 
         createDelta();
     }
@@ -72,7 +91,7 @@ public class DeltaSnapshot {
      * @return A condensed snapshot containing each SQL statement only one time. The condensed statements
      * have the instance id -1.
      */
-    private static Snapshot condenseSnapshot(Snapshot snapshot) {
+    private static Snapshot condenseSnapshotByInstance(Snapshot snapshot) {
         // for a faster lookup we put the snapshot into a hash map
         Map<String, List<SQLStatementSnapshot>> snapshotLookup = new HashMap<>();
         for (SQLStatementSnapshot sqlStatementSnapshot : snapshot.getSqlStatementSnapshots()) {
@@ -115,7 +134,7 @@ public class DeltaSnapshot {
                     result.addSQLStatementSnapshot(new SQLStatementSnapshot(
                             sqlStatementSnapshot.getSqlStatement(),
                             // identifier for the condensed entry - no longer just one instance
-                            -1,
+                            MULTIPLE_INSTANCES,
                             sumExecutions,
                             sumElapsedSeconds,
                             sumCpuSeconds,
@@ -131,22 +150,90 @@ public class DeltaSnapshot {
         return result;
     }
 
-    private void createDelta() {
-        deltaSQLStatementSnapshots = new ArrayList<DeltaSQLStatementSnapshot>();
+    private static Snapshot condenseSnapshotByMissingBindVariables(Snapshot snapshot) {
+        // for a faster lookup we put the snapshot into a hash map
+        Map<String, List<SQLStatementSnapshot>> snapshotLookup = new HashMap<>();
+        for (SQLStatementSnapshot sqlStatementSnapshot : snapshot.getSqlStatementSnapshots()) {
+            if (!snapshotLookup.containsKey(sqlStatementSnapshot.getSqlStatement().getNormalizedSQLText())) {
+                snapshotLookup.put(sqlStatementSnapshot.getSqlStatement().getNormalizedSQLText(), new ArrayList<SQLStatementSnapshot>());
+            }
+            snapshotLookup.get(sqlStatementSnapshot.getSqlStatement().getNormalizedSQLText()).add(sqlStatementSnapshot);
+        }
 
-        // for a faster lookup we put snapshot A into a hash map
-        Map<SQLStatement, SQLStatementSnapshot> snapshotALookup = new HashMap<SQLStatement, SQLStatementSnapshot>();
-        for (SQLStatementSnapshot sqlStatementSnapshot : snapshotA
-                .getSqlStatementSnapshots()) {
-            snapshotALookup.put(sqlStatementSnapshot.getSqlStatement(),
-                    sqlStatementSnapshot);
+        Snapshot result = new Snapshot(snapshot.getSnapshotTime());
+
+        for (SQLStatementSnapshot sqlStatementSnapshot : snapshot.getSqlStatementSnapshots()) {
+            String normalizedSQLText = sqlStatementSnapshot.getSqlStatement().getNormalizedSQLText();
+            if (snapshotLookup.containsKey(normalizedSQLText)) {
+                // lookup table (still) contains the key - so we have to work in this statement
+                if (snapshotLookup.get(normalizedSQLText).size() == 1 ||
+                        normalizedSQLText.equals(sqlStatementSnapshot.getSqlStatement().getSqlText())) {
+                    // there is only only one statement with this normalized text or
+                    // the statement does not contain missing bind variables
+                    result.addSQLStatementSnapshot(sqlStatementSnapshot);
+                } else {
+                    // There are multiple entries for this SQL statement. All the entries with missing
+                    // bind variables have to be condensed into one new entry.
+                    int instanceId = NO_INSTANCE;
+                    BigDecimal sumExecutions = BigDecimal.valueOf(0);
+                    BigDecimal sumElapsedSeconds = BigDecimal.valueOf(0);
+                    BigDecimal sumCpuSeconds = BigDecimal.valueOf(0);
+                    BigDecimal sumBufferGets = BigDecimal.valueOf(0);
+                    BigDecimal sumDiskReads = BigDecimal.valueOf(0);
+                    BigDecimal sumConcurrencySeconds = BigDecimal.valueOf(0);
+                    BigDecimal sumClusterSeconds = BigDecimal.valueOf(0);
+                    BigDecimal sumRowsProcessed = BigDecimal.valueOf(0);
+
+                    BigDecimal numberStatements = BigDecimal.ONE;
+                    for (SQLStatementSnapshot currentStatement : snapshotLookup.get(normalizedSQLText)) {
+                        if (instanceId == NO_INSTANCE) {
+                            instanceId = currentStatement.getInstanceId();
+                        } else if (instanceId != currentStatement.getInstanceId()) {
+                            instanceId = MULTIPLE_INSTANCES;
+                        }
+                        sumExecutions = sumExecutions.add(currentStatement.getExecutions());
+                        sumElapsedSeconds = sumElapsedSeconds.add(currentStatement.getElapsedSeconds());
+                        sumCpuSeconds = sumCpuSeconds.add(currentStatement.getCpuSeconds());
+                        sumBufferGets = sumBufferGets.add(currentStatement.getBufferGets());
+                        sumDiskReads = sumDiskReads.add(currentStatement.getDiskReads());
+                        sumConcurrencySeconds = sumConcurrencySeconds.add(currentStatement.getConcurrencySeconds());
+                        sumClusterSeconds = sumClusterSeconds.add(currentStatement.getClusterSeconds());
+                        sumRowsProcessed = sumRowsProcessed.add(currentStatement.getRowsProcessed());
+
+                        numberStatements = numberStatements.add(BigDecimal.ONE);
+                    }
+                    result.addSQLStatementSnapshot(new SQLStatementSnapshot(
+                            sqlStatementSnapshot.getSqlStatement(),
+                            instanceId,
+                            sumExecutions,
+                            sumElapsedSeconds,
+                            sumCpuSeconds,
+                            sumBufferGets,
+                            sumDiskReads,
+                            sumConcurrencySeconds,
+                            sumClusterSeconds,
+                            sumRowsProcessed,
+                            numberStatements));
+                }
+                snapshotLookup.remove(normalizedSQLText);
+            }
+        }
+        return result;
+    }
+
+    private void createDelta() {
+        deltaSQLStatementSnapshots = new ArrayList<>();
+
+        // for a fast lookup we put snapshot A into a map
+        Map<SQLStatementSnapshot, SQLStatementSnapshot> snapshotALookup = new HashMap<>();
+        for (SQLStatementSnapshot sqlStatementSnapshot : snapshotA.getSqlStatementSnapshots()) {
+            snapshotALookup.put(sqlStatementSnapshot, sqlStatementSnapshot);
         }
 
         // now we iterate over the younger snapshot
-        for (SQLStatementSnapshot sqlStatementSnapshotB : snapshotB
-                .getSqlStatementSnapshots()) {
-            SQLStatementSnapshot sqlStatementSnapshotA = snapshotALookup
-                    .get(sqlStatementSnapshotB.getSqlStatement());
+        for (SQLStatementSnapshot sqlStatementSnapshotB : snapshotB.getSqlStatementSnapshots()) {
+            // the magic of this lookup is done by the hash and equals methods of SQLStatementSnapshot
+            SQLStatementSnapshot sqlStatementSnapshotA = snapshotALookup.get(sqlStatementSnapshotB);
 
             if (sqlStatementSnapshotA == null) {
                 // if there is no old snapshot of this statement, the statement

@@ -31,8 +31,8 @@ public class DeltaSQLStatementSnapshot {
     private BigDecimal deltaDiskReads;
     private BigDecimal deltaConcurrencySeconds;
     private BigDecimal deltaClusterSeconds;
-
     private BigDecimal deltaRowsProcessed;
+    private BigDecimal deltaNumberStatements;
 
     public DeltaSQLStatementSnapshot(
             SQLStatementSnapshot sqlStatementSnapshotA,
@@ -82,6 +82,15 @@ public class DeltaSQLStatementSnapshot {
         if (this.deltaRowsProcessed.compareTo(BigDecimal.ZERO) < 0) {
             this.deltaRowsProcessed = BigDecimal.ZERO;
         }
+        if (this.deltaNumberStatements != null || sqlStatementSnapshotA.getNumberStatements() != null) {
+            BigDecimal thisNumberStatements = this.deltaNumberStatements != null ? this.deltaNumberStatements : BigDecimal.ONE;
+            BigDecimal thatNumberStatements = sqlStatementSnapshotA.getNumberStatements() != null ? sqlStatementSnapshotA.getNumberStatements() : BigDecimal.ONE;
+
+            this.deltaNumberStatements = thisNumberStatements.subtract(thatNumberStatements);
+            if (this.deltaNumberStatements.compareTo(BigDecimal.ZERO) < 0) {
+                this.deltaNumberStatements = BigDecimal.ZERO;
+            }
+        }
     }
 
     public DeltaSQLStatementSnapshot(SQLStatementSnapshot sqlStatementSnapshotB) {
@@ -95,6 +104,7 @@ public class DeltaSQLStatementSnapshot {
         this.deltaConcurrencySeconds = sqlStatementSnapshotB.getConcurrencySeconds();
         this.deltaClusterSeconds = sqlStatementSnapshotB.getClusterSeconds();
         this.deltaRowsProcessed = sqlStatementSnapshotB.getRowsProcessed();
+        this.deltaNumberStatements = sqlStatementSnapshotB.getNumberStatements();
     }
 
     public SQLStatement getSqlStatement() {
@@ -133,5 +143,9 @@ public class DeltaSQLStatementSnapshot {
 
     public BigDecimal getDeltaRowsProcessed() {
         return deltaRowsProcessed;
+    }
+
+    public BigDecimal getDeltaNumberStatements() {
+        return deltaNumberStatements;
     }
 }

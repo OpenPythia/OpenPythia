@@ -83,15 +83,9 @@ public class WorstStatementsDetailController implements FinishedListener {
         view.getBtnCompareSnapshots().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                compareSnapshot(false);
+                compareSnapshot();
             }
         });
-       view.getBtnCompareSnapshotsCondensed().addActionListener(new ActionListener() {
-           @Override
-           public void actionPerformed(ActionEvent e) {
-               compareSnapshot(true);
-           }
-       });
 
         view.getBtnExportExcel().addActionListener(new ActionListener() {
             @Override
@@ -106,12 +100,14 @@ public class WorstStatementsDetailController implements FinishedListener {
                     public void valueChanged(ListSelectionEvent e) {
                         if (view.getListSnapshots().getSelectedIndices().length > 1) {
                             view.getBtnCompareSnapshots().setEnabled(true);
-                            view.getBtnCompareSnapshotsCondensed().setEnabled(true);
+                            view.getCbCondenseInstances().setEnabled(true);
+                            view.getCbCondenseMissingBindvariables().setEnabled(true);
 
                             view.getBtnSaveSnapshot().setEnabled(false);
                         } else {
                             view.getBtnCompareSnapshots().setEnabled(false);
-                            view.getBtnCompareSnapshotsCondensed().setEnabled(false);
+                            view.getCbCondenseInstances().setEnabled(false);
+                            view.getCbCondenseMissingBindvariables().setEnabled(false);
 
                             if (view.getListSnapshots().getSelectedIndices().length == 1) {
                                 view.getBtnSaveSnapshot().setEnabled(true);
@@ -120,7 +116,8 @@ public class WorstStatementsDetailController implements FinishedListener {
                     }
                 });
         view.getBtnCompareSnapshots().setEnabled(false);
-        view.getBtnCompareSnapshotsCondensed().setEnabled(false);
+        view.getCbCondenseInstances().setEnabled(false);
+        view.getCbCondenseMissingBindvariables().setEnabled(false);
 
         view.getBtnSaveSnapshot().setEnabled(false);
         view.getBtnLoadSnapshot().setEnabled(true);
@@ -166,7 +163,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         }
     }
 
-    private void compareSnapshot(boolean condenseSnapshots) {
+    private void compareSnapshot() {
         int numberSelectedSnapshots = view.getListSnapshots()
                 .getSelectedIndices().length;
         if (numberSelectedSnapshots < 2) {
@@ -177,10 +174,16 @@ public class WorstStatementsDetailController implements FinishedListener {
                 .getSelectedValues()[0];
         String newSnapshotId = (String) view.getListSnapshots()
                 .getSelectedValues()[numberSelectedSnapshots - 1];
+
+        boolean condenseInstances = view.getCbCondenseInstances().isSelected();
+        boolean condenseMissingBindVariables = view.getCbCondenseMissingBindvariables().isSelected();
+
         deltaSnapshot = new DeltaSnapshot(
                 SnapshotHelper.getSnapshot(oldSnapshotId),
                 SnapshotHelper.getSnapshot(newSnapshotId),
-                condenseSnapshots);
+                condenseInstances,
+                condenseMissingBindVariables);
+
         // make sure all the SQL text is loaded
         List<SQLStatement> sqlStatements = new ArrayList<SQLStatement>();
         for (DeltaSQLStatementSnapshot statement : deltaSnapshot

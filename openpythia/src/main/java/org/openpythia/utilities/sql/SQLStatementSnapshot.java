@@ -30,6 +30,7 @@ public class SQLStatementSnapshot implements Serializable {
     private BigDecimal concurrencySeconds;
     private BigDecimal clusterSeconds;
     private BigDecimal rowsProcessed;
+    private BigDecimal numberStatements;
 
     public SQLStatementSnapshot(SQLStatement sqlStatement,
                                 int instanceId,
@@ -51,6 +52,24 @@ public class SQLStatementSnapshot implements Serializable {
         this.concurrencySeconds = concurrencySeconds;
         this.clusterSeconds = clusterSeconds;
         this.rowsProcessed = rowsProcessed;
+    }
+
+    public SQLStatementSnapshot(SQLStatement sqlStatement,
+                                int instanceId,
+                                BigDecimal executions,
+                                BigDecimal elapsedSeconds,
+                                BigDecimal cpuSeconds,
+                                BigDecimal bufferGets,
+                                BigDecimal diskReads,
+                                BigDecimal concurrencySeconds,
+                                BigDecimal clusterSeconds,
+                                BigDecimal rowsProcessed,
+                                BigDecimal numberStatements) {
+
+        this(sqlStatement, instanceId, executions, elapsedSeconds, cpuSeconds, bufferGets,
+                diskReads, concurrencySeconds, clusterSeconds, rowsProcessed);
+
+        this.numberStatements = numberStatements;
     }
 
     public SQLStatement getSqlStatement() {
@@ -89,5 +108,37 @@ public class SQLStatementSnapshot implements Serializable {
 
     public BigDecimal getRowsProcessed() {
         return rowsProcessed;
+    }
+
+    public BigDecimal getNumberStatements() {
+        return numberStatements;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SQLStatementSnapshot) {
+            SQLStatementSnapshot that = (SQLStatementSnapshot) obj;
+
+            if (this.numberStatements == null && that.numberStatements == null) {
+                // not condensed for missing bind variables
+                return this.getSqlStatement().equals(that.getSqlStatement());
+            } else {
+                // SQL statements with missing bind variables have to be compared by the
+                // normalized SQL statement
+                return this.getSqlStatement().getNormalizedSQLText().equals(
+                        that.getSqlStatement().getNormalizedSQLText());
+            }
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        if (this.numberStatements == null) {
+            return this.getSqlStatement().hashCode();
+        } else {
+            return this.getSqlStatement().getNormalizedSQLText().hashCode();
+        }
     }
 }

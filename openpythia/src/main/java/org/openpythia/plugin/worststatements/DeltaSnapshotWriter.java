@@ -40,16 +40,17 @@ public class DeltaSnapshotWriter {
     private static final int INDEX_ROW_START_SQL_STATEMENTS = 4;
     private static final int INDEX_ROW_SUM_FORMULAS = 2;
 
-    private static final int INDEX_COLUMN_ADDRESS = 25;
-    private static final int INDEX_COLUMN_SQL_ID = 24;
-    private static final int INDEX_COLUMN_DELTA_ROWS_PROCESSED = 22;
-    private static final int INDEX_COLUMN_DELTA_CLUSTER_SECONDS = 20;
-    private static final int INDEX_COLUMN_DELTA_CONCURRENCY_SECONDS = 18;
-    private static final int INDEX_COLUMN_DELTA_DISK_READS = 16;
-    private static final int INDEX_COLUMN_DELTA_BUFFER_GETS = 14;
-    private static final int INDEX_COLUMN_DELTA_CPU_SECONDS = 11;
-    private static final int INDEX_COLUMN_DELTA_ELAPSED_SECONDS = 8;
-    private static final int INDEX_COLUMN_DELTA_EXECUTIONS = 6;
+    private static final int INDEX_COLUMN_ADDRESS = 26;
+    private static final int INDEX_COLUMN_SQL_ID = 25;
+    private static final int INDEX_COLUMN_DELTA_ROWS_PROCESSED = 23;
+    private static final int INDEX_COLUMN_DELTA_CLUSTER_SECONDS = 21;
+    private static final int INDEX_COLUMN_DELTA_CONCURRENCY_SECONDS = 19;
+    private static final int INDEX_COLUMN_DELTA_DISK_READS = 17;
+    private static final int INDEX_COLUMN_DELTA_BUFFER_GETS = 15;
+    private static final int INDEX_COLUMN_DELTA_CPU_SECONDS = 12;
+    private static final int INDEX_COLUMN_DELTA_ELAPSED_SECONDS = 9;
+    private static final int INDEX_COLUMN_DELTA_EXECUTIONS = 7;
+    private static final int INDEX_COLUMN_NUMBER_IDENTICAL_STATEMENTS = 6;
     private static final int INDEX_COLUMN_HAS_WAIT = 5;
     private static final int INDEX_COLUMN_HAS_PLAN = 4;
     private static final int INDEX_COLUMN_SQL_TEXT = 3;
@@ -162,6 +163,13 @@ public class DeltaSnapshotWriter {
                     currentSnapshot.getInstanceId());
             currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
                     currentSnapshot.getSqlStatement().getSqlText());
+
+            if (currentSnapshot.getDeltaNumberStatements() == null) {
+                currentRow.getCell(INDEX_COLUMN_NUMBER_IDENTICAL_STATEMENTS).setCellValue(" ");
+            } else {
+                currentRow.getCell(INDEX_COLUMN_NUMBER_IDENTICAL_STATEMENTS).setCellValue(
+                        currentSnapshot.getDeltaNumberStatements().doubleValue());
+            }
 
             currentRow.getCell(INDEX_COLUMN_DELTA_EXECUTIONS).setCellValue(
                     currentSnapshot.getDeltaExecutions().doubleValue());
