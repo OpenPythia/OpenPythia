@@ -68,6 +68,7 @@ public class DeltaSnapshotWriter {
     private static final int WAIT_EVENTS_SQL_INDEX_START_WAIT_EVENTS = 4;
 
     public static final String TEMPLATE_DELTA_V_SQL_AREA_XLSX = "Template_DELTA_V$SQLAREA.xlsx";
+    public static final int EXCEL_MAX_CHAR_PER_CELL = 32767;
 
     private File destination;
     private DeltaSnapshot deltaSnapshot;
@@ -161,8 +162,18 @@ public class DeltaSnapshotWriter {
                     currentSnapshot.getSqlStatement().getParsingSchema());
             currentRow.getCell(INDEX_COLUMN_INSTANCE).setCellValue(
                     currentSnapshot.getInstanceId());
-            currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
-                    currentSnapshot.getSqlStatement().getSqlText());
+            // Excel is limited to 32.767 chars per cell
+            if (currentSnapshot.getSqlStatement().getSqlText().length() <= EXCEL_MAX_CHAR_PER_CELL) {
+                currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
+                        currentSnapshot.getSqlStatement().getSqlText());
+            } else {
+                // truncate the text and add some information of how much was truncated
+                String truncatedText = currentSnapshot.getSqlStatement().getSqlText().substring(0, EXCEL_MAX_CHAR_PER_CELL - 50) +
+                        String.format("SQL statement truncated; %d more characters",
+                                currentSnapshot.getSqlStatement().getSqlText().length() - EXCEL_MAX_CHAR_PER_CELL - 50 /* this text */);
+
+                currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(truncatedText);
+            }
 
             if (currentSnapshot.getDeltaNumberStatements() == null) {
                 currentRow.getCell(INDEX_COLUMN_NUMBER_IDENTICAL_STATEMENTS).setCellValue(" ");
