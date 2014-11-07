@@ -35,7 +35,7 @@ public class Snapshot implements Serializable {
 
     public String getSnapshotId() {
         return snapshotTime.get(Calendar.YEAR) + "."
-                + fillLeadingZero(snapshotTime.get(Calendar.MONTH)) + "."
+                + fillLeadingZero(snapshotTime.get(Calendar.MONTH) + 1) + "."
                 + fillLeadingZero(snapshotTime.get(Calendar.DAY_OF_MONTH)) + " "
                 + fillLeadingZero(snapshotTime.get(Calendar.HOUR_OF_DAY)) + ":"
                 + fillLeadingZero(snapshotTime.get(Calendar.MINUTE)) + ":"
