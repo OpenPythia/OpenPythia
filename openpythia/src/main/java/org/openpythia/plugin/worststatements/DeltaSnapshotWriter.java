@@ -152,6 +152,7 @@ public class DeltaSnapshotWriter {
 
         int currentRowIndex = INDEX_ROW_START_SQL_STATEMENTS;
         int currentNumber = 1;
+        boolean snapshotContainsMissingBindVariables = false;
 
         for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
             Row currentRow = SSUtilities.copyRow(statementsSheet, templateRow, currentRowIndex);
@@ -180,6 +181,7 @@ public class DeltaSnapshotWriter {
             } else {
                 currentRow.getCell(INDEX_COLUMN_NUMBER_IDENTICAL_STATEMENTS).setCellValue(
                         currentSnapshot.getDeltaNumberStatements().doubleValue());
+                snapshotContainsMissingBindVariables = true;
             }
 
             currentRow.getCell(INDEX_COLUMN_DELTA_EXECUTIONS).setCellValue(
@@ -209,6 +211,11 @@ public class DeltaSnapshotWriter {
                     currentSnapshot.getSqlStatement().getAddress());
 
             currentRowIndex++;
+        }
+
+        if (!snapshotContainsMissingBindVariables) {
+            // if there are no statements with missing bind variables this column is not needed.
+            statementsSheet.setColumnHidden(INDEX_COLUMN_NUMBER_IDENTICAL_STATEMENTS, true);
         }
 
         // delete the template row
