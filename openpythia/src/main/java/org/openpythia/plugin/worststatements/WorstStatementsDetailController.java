@@ -140,10 +140,10 @@ public class WorstStatementsDetailController implements FinishedListener {
             return;
         }
 
-        File snapshotFile = FileSelectorUtility.chooseSnapshotFileToWrite(view);
+        String snapshotIdToSave = (String) view.getListSnapshots()
+                .getSelectedValues()[0];
+        File snapshotFile = FileSelectorUtility.chooseSnapshotFileToWrite(view, snapshotIdToSave);
         if (snapshotFile != null) {
-            String snapshotIdToSave = (String) view.getListSnapshots()
-                    .getSelectedValues()[0];
             if (SnapshotHelper.saveSnapshot(snapshotIdToSave, snapshotFile)) {
                 JOptionPane.showMessageDialog(view, "Snapshot successfully written.", "Snapshot Export", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -185,7 +185,7 @@ public class WorstStatementsDetailController implements FinishedListener {
                 condenseMissingBindVariables);
 
         // make sure all the SQL text is loaded
-        List<SQLStatement> sqlStatements = new ArrayList<SQLStatement>();
+        List<SQLStatement> sqlStatements = new ArrayList<>();
         for (DeltaSQLStatementSnapshot statement : deltaSnapshot
                 .getDeltaSqlStatementSnapshots()) {
             if (statement.getSqlStatement().getSqlText() == null) {

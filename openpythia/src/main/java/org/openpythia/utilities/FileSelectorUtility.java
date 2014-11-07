@@ -51,20 +51,17 @@ public class FileSelectorUtility {
         return chooseFileToWrite(owner, new FileFilterExcel(), ".xlsx", null);
     }
 
-    public static File chooseExcelFileToWrite(Component owner, String fileName) {
-        return chooseFileToWrite(owner, new FileFilterExcel(), ".xlsx", fileName);
-    }
-
-    public static File chooseSQLFileToWrite(Component owner) {
-        return chooseFileToWrite(owner, new FileFilterSQL(), ".sql", null);
-    }
-
     public static File chooseSQLFileToWrite(Component owner, String fileName) {
         return chooseFileToWrite(owner, new FileFilterSQL(), ".sql", fileName);
     }
 
-    public static File chooseSnapshotFileToWrite(Component owner) {
-        return chooseFileToWrite(owner, new FileFilterSnapshot(), ".snap", null);
+    public static File chooseSnapshotFileToWrite(Component owner, String snapshotIdToSave) {
+        String fileNameSuggestion = snapshotIdToSave
+                .replaceAll(" ", "_")
+                .replaceAll("\\.", "")
+                .replaceAll(":", "") + ".snap";
+
+        return chooseFileToWrite(owner, new FileFilterSnapshot(), ".snap", fileNameSuggestion);
     }
 
     private static File chooseFileToWrite(Component owner, FileFilter filter,
@@ -100,10 +97,6 @@ public class FileSelectorUtility {
             }
         }
         return result;
-    }
-
-    public static File chooseExcelFileToRead(Component owner) {
-        return chooseFileToRead(owner, new FileFilterExcel());
     }
 
     public static File chooseJarFileToRead() {
