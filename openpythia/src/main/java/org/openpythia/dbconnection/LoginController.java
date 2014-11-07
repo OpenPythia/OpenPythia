@@ -49,7 +49,7 @@ public class LoginController {
         private List<ConnectionConfiguration> connections;
 
         public ConnectionListModel(List<ConnectionConfiguration> connections) {
-            this.connections = new LinkedList<ConnectionConfiguration>(connections);
+            this.connections = new LinkedList<>(connections);
         }
 
         @Override
@@ -323,7 +323,7 @@ public class LoginController {
                 output.println();
 
                 output.println(PrivilegesHelper.createGrantScript(
-                        PrivilegesHelper.getMissingObjectPrivileges((List<String>) null),
+                        PrivilegesHelper.getMissingObjectPrivileges(null),
                         DEFAULT_SCHEMA_NAME));
 
                 JOptionPane.showMessageDialog(view, "Schema creation script generated.");

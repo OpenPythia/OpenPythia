@@ -81,7 +81,7 @@ public class SSUtilities {
     public static void deleteRow(Sheet sheet, Row rowToDelete) {
 
         // if the row contains merged regions, delete them
-        List<Integer> mergedRegionsToDelete = new ArrayList<Integer>();
+        List<Integer> mergedRegionsToDelete = new ArrayList<>();
         int numberMergedRegions = sheet.getNumMergedRegions();
         for (int i = 0; i < numberMergedRegions; i++) {
             CellRangeAddress mergedRegion = sheet.getMergedRegion(i);

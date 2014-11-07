@@ -15,20 +15,15 @@
  **/
 package org.openpythia.utilities.sql;
 
-import java.awt.Component;
 import java.io.*;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
@@ -37,7 +32,7 @@ import org.openpythia.progress.ProgressListener;
 
 public class SnapshotHelper {
 
-    private static SortedMap<String, Snapshot> snapshots = new ConcurrentSkipListMap<String, Snapshot>();
+    private static SortedMap<String, Snapshot> snapshots = new ConcurrentSkipListMap<>();
 
     public static Set<String> getAllSnapshotIds() {
         return snapshots.keySet();
@@ -51,7 +46,7 @@ public class SnapshotHelper {
         }
     }
 
-    public static void addSnapshot(Snapshot snapshot) {
+    private static void addSnapshot(Snapshot snapshot) {
         if (snapshot != null) {
             snapshots.put(snapshot.getSnapshotId(), snapshot);
         }

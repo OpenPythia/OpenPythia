@@ -7,7 +7,6 @@ package org.openpythia.dbconnection;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.text.MaskFormatter;
 
 import com.jgoodies.forms.factories.*;
 import com.jgoodies.forms.layout.*;

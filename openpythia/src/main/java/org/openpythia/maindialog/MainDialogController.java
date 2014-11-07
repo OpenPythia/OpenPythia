@@ -52,7 +52,7 @@ public class MainDialogController implements MainDialog {
     }
 
     private void fillSmallViews() {
-        pluginControllers = new ArrayList<PythiaPluginController>();
+        pluginControllers = new ArrayList<>();
         pluginControllers.add(new HitRatioController());
         pluginControllers.add(new WorstStatementsSmallController(view, this));
 

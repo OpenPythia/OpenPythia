@@ -45,7 +45,7 @@ public class ExecutionPlanStep implements Serializable {
     private String filterPredicates;
 
     // The Child-Steps of this step
-    private List<ExecutionPlanStep> childSteps = new ArrayList<ExecutionPlanStep>();;
+    private List<ExecutionPlanStep> childSteps = new ArrayList<>();
 
     public ExecutionPlanStep(int executionPlanStepId,
             int parentExecutionPlanStepId, String operation, String options,

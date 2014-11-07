@@ -65,7 +65,7 @@ public class ConfigurationTest {
                 ConnectionTypeEnum.SID, "orcl", "", "",
                 "pythia", "confidential");
 
-        List<ConnectionConfiguration> savedConnectionConfigurations = new LinkedList<ConnectionConfiguration>();
+        List<ConnectionConfiguration> savedConnectionConfigurations = new LinkedList<>();
         savedConnectionConfigurations.add(saveConnectionConfiguration);
 
         pythiaConfiguration.setSavedConnectionConfigurations(savedConnectionConfigurations);

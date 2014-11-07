@@ -16,7 +16,6 @@
 package org.openpythia.utilities;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.jar.JarFile;
@@ -208,7 +207,7 @@ public class FileRessourceUtility {
     }
 
     private static String getStringFromJar(String ressourceIdentifier) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         try {
             JarFile jar = new JarFile(privateInstance.getHome());
             ZipEntry entry = jar.getEntry(ressourceIdentifier);

@@ -15,12 +15,10 @@
  **/
 package org.openpythia.plugin.worststatements;
 
-import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,13 +34,13 @@ import org.openpythia.utilities.sql.SQLHelper;
 
 public class WorstStatementsSmallController implements PythiaPluginController {
 
-    private static String ELAPSED_TIME_TOP20 = "SELECT SUM(elapsed_time)" +
+    private static final String ELAPSED_TIME_TOP20 = "SELECT SUM(elapsed_time)" +
             "  FROM (  SELECT elapsed_time" +
             "            FROM gv$sqlarea" +
             "        ORDER BY elapsed_time DESC)" +
             " WHERE rownum <= 20";
 
-    private static String ELAPSED_TIME_TOTAL = "SELECT SUM(elapsed_time) "
+    private static final String ELAPSED_TIME_TOTAL = "SELECT SUM(elapsed_time) "
             + "FROM gv$sqlarea ";
 
     private MainDialog mainDialog;

@@ -30,7 +30,7 @@ import org.openpythia.plugin.PythiaPluginController;
 
 public class HitRatioController implements PythiaPluginController {
 
-    private static String BUFFER_CACHE_SQL_STATEMENT = "SELECT ( 1 - (( phy_reads - phy_direct ) / ( blk_gets + con_gets - phy_direct ))) "
+    private static final String BUFFER_CACHE_SQL_STATEMENT = "SELECT ( 1 - (( phy_reads - phy_direct ) / ( blk_gets + con_gets - phy_direct ))) "
             + "FROM ( SELECT SUM( DECODE( name, 'db block gets', VALUE, 0 ) ) blk_gets, "
             + "              SUM( DECODE( name, 'consistent gets', VALUE, 0 ) ) con_gets, "
             + "              SUM( DECODE( name, 'physical reads', VALUE, 0 ) ) phy_reads, "
@@ -43,7 +43,7 @@ public class HitRatioController implements PythiaPluginController {
             + "        WHERE name IN( 'db block gets', 'consistent gets', 'physical reads' ) "
             + "           OR name LIKE( 'physical reads direct%' ) )";
 
-    private static String LIBRARY_CACHE_SQL_STATEMENT = "SELECT SUM( pins - reloads ) / SUM( pins ) "
+    private static final String LIBRARY_CACHE_SQL_STATEMENT = "SELECT SUM( pins - reloads ) / SUM( pins ) "
             + "FROM v$librarycache";
 
     private Updater updater;
@@ -126,7 +126,7 @@ public class HitRatioController implements PythiaPluginController {
                 libraryCacheStatement.close();
 
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog((Component) null, e);
+                JOptionPane.showMessageDialog(null, e);
             } finally {
                 ConnectionPoolUtils.returnConnectionToPool(connection);
             }

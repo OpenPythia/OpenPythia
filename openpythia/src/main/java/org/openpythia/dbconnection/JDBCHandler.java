@@ -15,7 +15,6 @@
  **/
 package org.openpythia.dbconnection;
 
-import java.awt.Component;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,10 +24,9 @@ import java.sql.Driver;
 import javax.swing.JOptionPane;
 
 import org.openpythia.preferences.PreferencesManager;
-import org.openpythia.preferences.PythiaConfiguration;
 
 public class JDBCHandler {
-    final static String JDBC_DRIVER_CLASS_NAME = "oracle.jdbc.driver.OracleDriver";
+    private final static String JDBC_DRIVER_CLASS_NAME = "oracle.jdbc.driver.OracleDriver";
     private static Driver oracleJDBCDriver = null;
 
     /**

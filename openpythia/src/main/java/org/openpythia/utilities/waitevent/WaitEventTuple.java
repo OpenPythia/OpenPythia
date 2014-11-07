@@ -1,7 +1,6 @@
 package org.openpythia.utilities.waitevent;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 public class WaitEventTuple {
 

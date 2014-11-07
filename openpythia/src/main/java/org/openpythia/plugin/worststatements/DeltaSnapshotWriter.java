@@ -67,8 +67,8 @@ public class DeltaSnapshotWriter {
     private static final int WAIT_EVENTS_SQL_INDEX_ROW_TEMPLATE_WAIT_EVENT_ROW = 3;
     private static final int WAIT_EVENTS_SQL_INDEX_START_WAIT_EVENTS = 4;
 
-    public static final String TEMPLATE_DELTA_V_SQL_AREA_XLSX = "Template_DELTA_V$SQLAREA.xlsx";
-    public static final int EXCEL_MAX_CHAR_PER_CELL = 32767;
+    private static final String TEMPLATE_DELTA_V_SQL_AREA_XLSX = "Template_DELTA_V$SQLAREA.xlsx";
+    private static final int EXCEL_MAX_CHAR_PER_CELL = 32767;
 
     private File destination;
     private DeltaSnapshot deltaSnapshot;

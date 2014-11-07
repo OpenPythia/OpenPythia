@@ -42,7 +42,7 @@ public class SQLStatement implements Serializable {
 
         // just to be sure we don't run into problems when accessing the
         // execution plans from different threads
-        executionPlans = new CopyOnWriteArrayList<ExecutionPlan>();
+        executionPlans = new CopyOnWriteArrayList<>();
     }
 
     public String getSqlId() {

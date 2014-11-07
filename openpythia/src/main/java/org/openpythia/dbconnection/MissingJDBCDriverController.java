@@ -26,12 +26,11 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 import org.apache.commons.io.IOUtils;
-import org.openpythia.utilities.FileRessourceUtility;
 import org.openpythia.utilities.FileSelectorUtility;
 
 public class MissingJDBCDriverController {
 
-    public static final String MISSING_JDBCDRIVER_HTML = "missingJDBCdriver.html";
+    private static final String MISSING_JDBCDRIVER_HTML = "missingJDBCdriver.html";
     private MissingJDBCDriverView view;
 
     private String pathJDBCDriver = null;

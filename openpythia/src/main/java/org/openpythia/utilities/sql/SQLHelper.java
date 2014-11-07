@@ -21,7 +21,6 @@ import org.openpythia.utilities.deltasql.DeltaSQLStatementSnapshot;
 import org.openpythia.utilities.waitevent.WaitEventTuple;
 
 import javax.swing.*;
-import java.awt.*;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
@@ -149,7 +148,7 @@ public class SQLHelper {
         }
     }
 
-    public static void loadSQLTextForStatement(SQLStatement sqlStatement) {
+    private static void loadSQLTextForStatement(SQLStatement sqlStatement) {
 
         if (sqlStatement.getSqlText() == null) {
             // statement has no sql text assigned - so load it...
@@ -336,7 +335,7 @@ public class SQLHelper {
     private static class SQLStatementLoader implements Runnable {
 
         public void run() {
-            List<SQLStatement> sqlStatementsToLoad = new ArrayList<SQLStatement>();
+            List<SQLStatement> sqlStatementsToLoad = new ArrayList<>();
             int numberStatements;
 
             while (true) {

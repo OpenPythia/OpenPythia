@@ -44,7 +44,7 @@ public class PrivilegesHelper {
             + "WHERE ROWNUM <= 1";
 
     public static List<String> getMissingObjectPrivileges() {
-        List<String> grantedObjects = new ArrayList<String>();
+        List<String> grantedObjects = new ArrayList<>();
 
         Connection connection = ConnectionPoolUtils.getConnectionFromPool();
         try {
@@ -76,7 +76,7 @@ public class PrivilegesHelper {
     }
 
     public static List<String> getMissingObjectPrivileges(List<String> grantedObjects) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         // check if there are objects missing
         for (String currentObject : USED_TABLES) {

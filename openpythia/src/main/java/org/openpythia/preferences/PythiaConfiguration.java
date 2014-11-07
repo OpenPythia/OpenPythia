@@ -28,7 +28,7 @@ public class PythiaConfiguration {
     private List<ConnectionConfiguration> savedConnectionConfigurations;
 
     public PythiaConfiguration() {
-        savedConnectionConfigurations = new LinkedList<ConnectionConfiguration>();
+        savedConnectionConfigurations = new LinkedList<>();
     }
 
     public String getPathToJDBCDriver() {

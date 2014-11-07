@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openpythia.utilities.sql.SQLStatement;
 import org.openpythia.utilities.sql.SQLStatementSnapshot;
 import org.openpythia.utilities.sql.Snapshot;
 
@@ -30,8 +29,8 @@ public class DeltaSnapshot {
     private Snapshot snapshotA;
     private Snapshot snapshotB;
 
-    public final static int NO_INSTANCE = -2;
-    public final static int MULTIPLE_INSTANCES = -1;
+    private final static int NO_INSTANCE = -2;
+    private final static int MULTIPLE_INSTANCES = -1;
 
     private List<DeltaSQLStatementSnapshot> deltaSQLStatementSnapshots;
 
