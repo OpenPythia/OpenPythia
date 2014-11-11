@@ -272,6 +272,10 @@ public class SQLHelper {
                 indexPlaceholder++;
 
                 if (indexPlaceholder > NUMBER_BIND_VARIABLES_SELECT_WAIT_EVENTS_SQL) {
+                    // set the time window for the samples
+                    sqlWaitEventsStatement.setDate(NUMBER_BIND_VARIABLES_SELECT_WAIT_EVENTS_SQL + 1, new java.sql.Date(startTime.getTimeInMillis()));
+                    sqlWaitEventsStatement.setDate(NUMBER_BIND_VARIABLES_SELECT_WAIT_EVENTS_SQL + 2, new java.sql.Date(stopTime.getTimeInMillis()));
+
                     // all place holders are filled - so fetch the wait events from the DB
                     getWaitEventsFromDB(sqlStatementsToLoad, sqlWaitEventsStatement, result);
 
