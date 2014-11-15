@@ -43,18 +43,8 @@ public class JDBCHandler {
      *         JDBC driver could not be loaded.
      */
     public static boolean makeJDBCDriverAvailable() {
-        if (loadJDBCDriverFromClassPath()) {
+        if (isJDBCDriverAvailable()) {
             return true;
-        }
-
-        if (PreferencesManager.getPathToJDBCDriver() != null) {
-            if (loadJDBCDriverFromFile(PreferencesManager.getPathToJDBCDriver())) {
-                // A path for the jar file is in the preferences AND the driver
-                // was successfully loaded.
-                return true;
-            } else {
-                PreferencesManager.setPathToJDBCDriver(null);
-            }
         }
 
         while (PreferencesManager.getPathToJDBCDriver() == null) {
@@ -79,6 +69,24 @@ public class JDBCHandler {
         }
         
         // we should never get here...
+        return false;
+    }
+
+    public static boolean isJDBCDriverAvailable() {
+        if (loadJDBCDriverFromClassPath()) {
+            return true;
+        }
+
+        if (PreferencesManager.getPathToJDBCDriver() != null) {
+            if (loadJDBCDriverFromFile(PreferencesManager.getPathToJDBCDriver())) {
+                // A path for the jar file is in the preferences AND the driver
+                // was successfully loaded.
+                return true;
+            } else {
+                PreferencesManager.setPathToJDBCDriver(null);
+            }
+        }
+
         return false;
     }
 
@@ -114,7 +122,7 @@ public class JDBCHandler {
     private static boolean loadJDBCDriverFromFile(String driverJARFileName) {
         File driverJARFile = new File(driverJARFileName);
 
-        URL oracleJDBCDriverURL = null;
+        URL oracleJDBCDriverURL;
         try {
             oracleJDBCDriverURL = driverJARFile.toURI().toURL();
         } catch (MalformedURLException ex) {

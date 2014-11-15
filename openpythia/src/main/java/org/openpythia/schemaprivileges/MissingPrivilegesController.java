@@ -49,14 +49,14 @@ public class MissingPrivilegesController {
     private static class CloseWindowListener extends WindowAdapter {
         @Override
         public void windowClosing(WindowEvent e) {
-            PythiaMain.gracefullExit();
+            PythiaMain.gracefulExit();
         }
     }
 
     private void buttonOKPressed() {
         view.dispose();
 
-        PythiaMain.gracefullExit();
+        PythiaMain.gracefulExit();
     }
 
 }

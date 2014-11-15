@@ -56,12 +56,15 @@ public class FileSelectorUtility {
     }
 
     public static File chooseSnapshotFileToWrite(Component owner, String snapshotIdToSave) {
-        String fileNameSuggestion = snapshotIdToSave
-                .replaceAll(" ", "_")
-                .replaceAll("\\.", "")
-                .replaceAll(":", "") + ".snap";
+        String fileNameSuggestion = suggestedFileNameForSnapshotID(snapshotIdToSave);
 
         return chooseFileToWrite(owner, new FileFilterSnapshot(), ".snap", fileNameSuggestion);
+    }
+
+    public static String suggestedFileNameForSnapshotID(String snapshotId) {
+        return  snapshotId.replaceAll(" ", "_")
+                .replaceAll("\\.", "")
+                .replaceAll(":", "") + ".snap";
     }
 
     private static File chooseFileToWrite(Component owner, FileFilter filter,

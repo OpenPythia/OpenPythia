@@ -93,12 +93,12 @@ public class MainDialogController implements MainDialog {
     private static class CloseWindowListener extends WindowAdapter {
         @Override
         public void windowClosing(WindowEvent e) {
-            PythiaMain.gracefullExit();
+            PythiaMain.gracefulExit();
         }
     }
 
     private void ExitApplication() {
-        PythiaMain.gracefullExit();
+        PythiaMain.gracefulExit();
     }
 
     private void openOnlineHelp() {

@@ -15,14 +15,19 @@
  **/
 package org.openpythia.main;
 
-import java.util.List;
-
-import javax.swing.UIManager;
-
-import org.openpythia.dbconnection.*;
+import org.openpythia.batch.BatchTakeSnapshot;
+import org.openpythia.batch.DBConnectionInformation;
+import org.openpythia.dbconnection.ConnectionPoolUtils;
+import org.openpythia.dbconnection.JDBCHandler;
+import org.openpythia.dbconnection.LoginController;
 import org.openpythia.maindialog.MainDialogController;
 import org.openpythia.schemaprivileges.MissingPrivilegesController;
 import org.openpythia.schemaprivileges.PrivilegesHelper;
+
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.openpythia.dbconnection.LoginController.LoginResult.CANCEL;
 
@@ -37,11 +42,31 @@ public class PythiaMain {
      */
     public static void main(String[] args) {
 
+        if (args.length == 0) {
+            startOpenPythiaInGuiMode();
+            return;
+        }
+
+        List<String> arguments = new ArrayList<>(Arrays.asList(args));
+        if (arguments.contains("-t") || arguments.contains("-T")) {
+            printHelpToOutput();
+            return;
+        }
+
+        if (arguments.contains("-s") || arguments.contains("-S")) {
+            startBatchModeTakeSnapshot(arguments);
+            return;
+        }
+
+        System.out.println("Unknown options.");
+    }
+
+    private static void startOpenPythiaInGuiMode() {
         switchLookAndFeel();
 
         if (!JDBCHandler.makeJDBCDriverAvailable()) {
             // Pythia can not run without an appropriate JDBC driver
-            gracefullExit();
+            gracefulExit();
         }
 
         LoginController loginController = new LoginController();
@@ -49,7 +74,7 @@ public class PythiaMain {
         if (loginController.showDialog() == CANCEL) {
             // When being asked for the connection details the user pressed the
             // cancel button
-            gracefullExit();
+            gracefulExit();
         }
 
         checkPrivileges();
@@ -85,7 +110,73 @@ public class PythiaMain {
         new MainDialogController();
     }
 
-    public static void gracefullExit() {
+    private static void printHelpToOutput() {
+        System.out.println("Help for OpenPythia");
+        System.out.println("--------------------------------------------------------------------------------");
+        System.out.println("without arguments   open in GUI mode");
+        System.out.println("-t/-T               print this information");
+        System.out.println("-s/-S               take snapshot and exit");
+        System.out.println("                    To take a snapshot the JDBC driver must be available in the");
+        System.out.println("                    class path or via the configuration.");
+        System.out.println("                    -host     host to connect");
+        System.out.println("                    -port     port to connect");
+        System.out.println("                    -sid      SID to connect");
+        System.out.println("                    -service  service name to connect");
+        System.out.println("                    -tns      TNS name to connect");
+        System.out.println("                     The parameters SID, service and TNS are processed in the\n" +
+                           "                     order SID, service, TNS: If a SID and a service name are\n" +
+                           "                     give the service name is ignored.");
+        System.out.println("                    -user     user to connect");
+        System.out.println("                    -pw       password of the user ");
+        System.out.println("                    -f        optional - define a prefix for the snapshot file");
+        System.out.println("                    -p        optional - define the path for the snapshot file");
+        System.out.println("--------------------------------------------------------------------------------");
+        System.out.println("Examples");
+        System.out.println("Start in GUI mode:");
+        System.out.println("  OpenPythia");
+        System.out.println();
+        System.out.println("Take a snapshot from <hoat>, <port>, <user>, <password> and write it to\n" +
+                "C:\\temp\\Test<Snapshot ID>:");
+        System.out.println("OpenPythia -s -host <host> -port <port> -user <user> -pw <password> -p C:/temp/\n" +
+                "    -f Test");
+        System.out.println("--------------------------------------------------------------------------------");
+    }
+
+    private static void startBatchModeTakeSnapshot(List<String> arguments) {
+        String host = extractParameter(arguments, "-host");
+        String port = extractParameter(arguments, "-port");
+        String sid = extractParameter(arguments, "-sid");
+        String serviceName = extractParameter(arguments, "-service");
+        String tnsName = extractParameter(arguments, "-tns");
+        String user = extractParameter(arguments, "-user");
+        String password = extractParameter(arguments, "-pw");
+        String filePrefix = extractParameter(arguments, "-f");
+        String filePath = extractParameter(arguments, "-p");
+
+        DBConnectionInformation dbConnectionInformation = new DBConnectionInformation(
+                host,
+                port,
+                sid,
+                serviceName,
+                tnsName,
+                user,
+                password,
+                filePrefix,
+                filePath);
+
+        BatchTakeSnapshot batch = new BatchTakeSnapshot(dbConnectionInformation);
+        batch.takeSnapshot();
+        batch.shutDown();
+    }
+
+    private static String extractParameter(List<String> arguments, String parameter){
+        if (arguments.indexOf(parameter) >= 0) {
+            return arguments.get(arguments.indexOf(parameter) + 1);
+        } else {
+            return null;
+        }
+    }
+    public static void gracefulExit() {
         ConnectionPoolUtils.shutdownPool();
         System.exit(0);
     }
