@@ -79,7 +79,7 @@ public class PythiaMain {
 
         checkPrivileges();
 
-        openMainDialog();
+        openMainDialog(loginController.getConnectionName());
     }
 
     private static void switchLookAndFeel() {
@@ -106,8 +106,8 @@ public class PythiaMain {
         }
     }
 
-    private static void openMainDialog() {
-        new MainDialogController();
+    private static void openMainDialog(String connectionName) {
+        new MainDialogController(connectionName);
     }
 
     private static void printHelpToOutput() {

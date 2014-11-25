@@ -40,6 +40,8 @@ import java.util.List;
 
 public class LoginController {
 
+    private String connectionName;
+
     public static enum LoginResult {
         OK, CANCEL
     }
@@ -214,6 +216,7 @@ public class LoginController {
         try {
             ConnectionPoolUtils.configurePool(connectionConfiguration.toConnectionString(), credentials);
 
+            connectionName = view.getTextFieldConnectionName().getText();
             result = LoginResult.OK;
 
             PreferencesManager.setLastConfiguration(connectionConfiguration);
@@ -301,6 +304,10 @@ public class LoginController {
                 view.getTextFieldPassword().getText());
 
         return connectionConfiguration;
+    }
+
+    public String getConnectionName() {
+        return connectionName;
     }
 
     private void generateSchemaCreationScript() {

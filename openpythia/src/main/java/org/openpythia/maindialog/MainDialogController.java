@@ -38,12 +38,16 @@ public class MainDialogController implements MainDialog {
     private MainDialogView view;
     private List<PythiaPluginController> pluginControllers;
 
-    public MainDialogController() {
+    public MainDialogController(String connectionName) {
         view = new MainDialogView();
 
         bindMenus();
         fillSmallViews();
         view.addWindowListener(new CloseWindowListener());
+
+        if (connectionName != null && !connectionName.equals("")) {
+            view.setTitle(view.getTitle() + " - " + connectionName);
+        }
 
         view.getPanelDetails().setVisible(false);
         view.pack();
