@@ -4,9 +4,14 @@ import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.dbconnection.JDBCHandler;
 import org.openpythia.progress.ProgressListener;
 import org.openpythia.utilities.FileSelectorUtility;
+import org.openpythia.utilities.sql.SQLHelper;
+import org.openpythia.utilities.sql.SQLStatement;
+import org.openpythia.utilities.sql.SQLStatementSnapshot;
 import org.openpythia.utilities.sql.SnapshotHelper;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BatchTakeSnapshot {
 
@@ -16,7 +21,7 @@ public class BatchTakeSnapshot {
         this.dbConnectionInformation = dbConnectionInformation;
     }
 
-    public void takeSnapshot() {
+    public void takeSnapshot(boolean loadSQLText) {
         if (dbConnectionInformation.getHost() == null ||
                 dbConnectionInformation.getPort() == null ||
                 (dbConnectionInformation.getSid() == null && dbConnectionInformation.getServiceName() == null && dbConnectionInformation.getTnsName() == null) ||
@@ -45,6 +50,14 @@ public class BatchTakeSnapshot {
         }
 
         if (theOnlySnapshotId != null) {
+            List<SQLStatement> statementsInSnapshot = new ArrayList<>();
+            for (SQLStatementSnapshot sqlStatementSnapshot : SnapshotHelper.getSnapshot(theOnlySnapshotId).getSqlStatementSnapshots()) {
+                statementsInSnapshot.add(sqlStatementSnapshot.getSqlStatement());
+            }
+            if (loadSQLText) {
+                SQLHelper.loadSQLTextForStatements(statementsInSnapshot, null);
+            }
+
             String outputFileName = FileSelectorUtility.suggestedFileNameForSnapshotID(theOnlySnapshotId);
             if (dbConnectionInformation.getFilePrefix() != null) {
                 outputFileName = dbConnectionInformation.getFilePrefix() + outputFileName;

@@ -126,18 +126,19 @@ public class PythiaMain {
         System.out.println("-s/-S               take snapshot and exit");
         System.out.println("                    To take a snapshot the JDBC driver must be available in the");
         System.out.println("                    class path or via the configuration.");
-        System.out.println("                    -host     host to connect");
-        System.out.println("                    -port     port to connect");
-        System.out.println("                    -sid      SID to connect");
-        System.out.println("                    -service  service name to connect");
-        System.out.println("                    -tns      TNS name to connect");
+        System.out.println("                    -host        host to connect");
+        System.out.println("                    -port        port to connect");
+        System.out.println("                    -sid         SID to connect");
+        System.out.println("                    -service     service name to connect");
+        System.out.println("                    -tns         TNS name to connect");
         System.out.println("                     The parameters SID, service and TNS are processed in the\n" +
                            "                     order SID, service, TNS: If a SID and a service name are\n" +
                            "                     give the service name is ignored.");
-        System.out.println("                    -user     user to connect");
-        System.out.println("                    -pw       password of the user ");
-        System.out.println("                    -f        optional - define a prefix for the snapshot file");
-        System.out.println("                    -p        optional - define the path for the snapshot file");
+        System.out.println("                    -user        user to connect");
+        System.out.println("                    -pw          password of the user ");
+        System.out.println("                    -f           optional - define a prefix for the snapshot file");
+        System.out.println("                    -p           optional - define the path for the snapshot file");
+        System.out.println("                    -loadsqltext optional - load the sql text into the snapshot");
         System.out.println("--------------------------------------------------------------------------------");
         System.out.println("Examples");
         System.out.println("Start in GUI mode:");
@@ -160,6 +161,7 @@ public class PythiaMain {
         String password = extractParameter(arguments, "-pw");
         String filePrefix = extractParameter(arguments, "-f");
         String filePath = extractParameter(arguments, "-p");
+        boolean loadSQLText = arguments.contains("-loadsqltext");
 
         DBConnectionInformation dbConnectionInformation = new DBConnectionInformation(
                 host,
@@ -173,7 +175,7 @@ public class PythiaMain {
                 filePath);
 
         BatchTakeSnapshot batch = new BatchTakeSnapshot(dbConnectionInformation);
-        batch.takeSnapshot();
+        batch.takeSnapshot(loadSQLText);
         batch.shutDown();
     }
 

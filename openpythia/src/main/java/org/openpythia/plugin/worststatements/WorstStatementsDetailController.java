@@ -186,8 +186,7 @@ public class WorstStatementsDetailController implements FinishedListener {
 
         // make sure all the SQL text is loaded
         List<SQLStatement> sqlStatements = new ArrayList<>();
-        for (DeltaSQLStatementSnapshot statement : deltaSnapshot
-                .getDeltaSqlStatementSnapshots()) {
+        for (DeltaSQLStatementSnapshot statement : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
             if (statement.getSqlStatement().getSqlText() == null) {
                 sqlStatements.add(statement.getSqlStatement());
             }

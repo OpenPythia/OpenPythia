@@ -141,4 +141,8 @@ public class SQLStatementSnapshot implements Serializable {
             return this.getSqlStatement().getNormalizedSQLText().hashCode();
         }
     }
+
+    public void updateSQLStatement(SQLStatement registeredSQLStatement) {
+        sqlStatement = registeredSQLStatement;
+    }
 }

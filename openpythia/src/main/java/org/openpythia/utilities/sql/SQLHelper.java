@@ -35,11 +35,6 @@ public class SQLHelper {
     private final static String DATE_TIME_DATABASE = "SELECT sysdate "
             + "FROM dual";
 
-    private final static String SELECT_SQL_TEXT_FOR_ONE_STATEMENT = "SELECT DISTINCT sql_text, piece "
-            + "FROM gv$sqltext_with_newlines "
-            + "WHERE sql_id = ?"
-            + "ORDER BY piece";
-
     private final static int NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT = 200;
     private final static String SELECT_SQL_TEXT_FOR_200_STATEMENTS = "SELECT DISTINCT sql_id, sql_text, piece "
             + "FROM gv$sqltext_with_newlines "
@@ -118,12 +113,25 @@ public class SQLHelper {
 
         if (allSQLStatements.contains(newStatement)) {
             // reuse of an existing statement
-            result = allSQLStatements.get(allSQLStatements
-                    .indexOf(newStatement));
+            result = allSQLStatements.get(allSQLStatements.indexOf(newStatement));
         } else {
             allSQLStatements.add(newStatement);
             unloadedSQLStatements.add(newStatement);
             result = newStatement;
+        }
+
+        return result;
+    }
+
+    public static SQLStatement getRegisterSQLStatement(SQLStatement sqlStatement) {
+        SQLStatement result = getSQLStatement(
+                sqlStatement.getSqlId(),
+                sqlStatement.getAddress(),
+                sqlStatement.getParsingSchema(),
+                sqlStatement.getInstanceId());
+
+        if (sqlStatement.getSqlText() != null) {
+            result.setSqlText(sqlStatement.getSqlText());
         }
 
         return result;
@@ -136,54 +144,35 @@ public class SQLHelper {
             progressListener.setCurrentValue(0);
         }
 
+        List<SQLStatement> sqlStatementsToLoad = new ArrayList<>();
+        int numberStatements = 0;
         int progressCounter = 0;
         for (SQLStatement statement : sqlStatements) {
-            loadSQLTextForStatement(statement);
+
+            sqlStatementsToLoad.add(statement);
+            numberStatements++;
+            if (numberStatements == NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT) {
+
+                loadSQLStatements(sqlStatementsToLoad);
+
+                sqlStatementsToLoad.clear();
+                numberStatements = 0;
+
+                if (progressListener != null) {
+                    progressListener.setCurrentValue(progressCounter);
+                }
+            }
 
             progressCounter++;
-            if (progressListener != null) {
-                progressListener.setCurrentValue(progressCounter);
-            }
         }
+
+        if (sqlStatementsToLoad.size() > 0) {
+            // there are some statements left to load
+            loadSQLStatements(sqlStatementsToLoad);
+        }
+
         if (progressListener != null) {
             progressListener.informFinished();
-        }
-    }
-
-    private static void loadSQLTextForStatement(SQLStatement sqlStatement) {
-
-        if (sqlStatement.getSqlText() == null) {
-            // statement has no sql text assigned - so load it...
-
-            Connection connection = null;
-            PreparedStatement sqlTextStatement = null;
-            try {
-                connection = ConnectionPoolUtils.getConnectionFromPool();
-                sqlTextStatement = connection
-                        .prepareStatement(SELECT_SQL_TEXT_FOR_ONE_STATEMENT);
-                sqlTextStatement.setString(1, sqlStatement.getSqlId());
-
-                ResultSet sqlTextResultSet = sqlTextStatement.executeQuery();
-
-                StringBuilder sqlText = new StringBuilder();
-                while (sqlTextResultSet.next()) {
-                    sqlText.append(sqlTextResultSet.getString(1));
-                }
-                sqlStatement.setSqlText(sqlText.toString());
-
-                unloadedSQLStatements.remove(sqlStatement);
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, e);
-            } finally {
-                if (sqlTextStatement != null) {
-                    try {
-                        sqlTextStatement.close();
-                    } catch (SQLException e) {
-                        // ignore
-                    }
-                }
-                ConnectionPoolUtils.returnConnectionToPool(connection);
-            }
         }
     }
 
@@ -354,8 +343,7 @@ public class SQLHelper {
                     sqlStatementsToLoad.clear();
                     numberStatements = 0;
 
-                    Iterator<SQLStatement> iterator = unloadedSQLStatements
-                            .iterator();
+                    Iterator<SQLStatement> iterator = unloadedSQLStatements.iterator();
 
                     while (iterator.hasNext() && numberStatements <= NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT) {
                         sqlStatementsToLoad.add(iterator.next());
@@ -363,10 +351,14 @@ public class SQLHelper {
                     }
 
                     loadSQLStatements(sqlStatementsToLoad);
+
+                    // remove the loaded statements from the list
+                    for(SQLStatement statement : sqlStatementsToLoad) {
+                        unloadedSQLStatements.remove(statement);
+                    }
                 }
 
-                // sleep for 0.2 seconds so all the other tasks can do their
-                // work
+                // sleep for 0.2 seconds so all the other tasks can do their work
                 try {
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
@@ -374,89 +366,87 @@ public class SQLHelper {
                 }
             }
         }
+    }
 
-        private void loadSQLStatements(List<SQLStatement> sqlStatementsToLoad) {
+    private static void loadSQLStatements(List<SQLStatement> sqlStatementsToLoad) {
 
-            Connection connection = null;
-            try {
-                connection = ConnectionPoolUtils.getConnectionFromPool();
-                PreparedStatement sqlTextStatement = connection.prepareStatement(SELECT_SQL_TEXT_FOR_200_STATEMENTS);
-                sqlTextStatement.setFetchSize(1000);
+        Connection connection = null;
+        try {
+            connection = ConnectionPoolUtils.getConnectionFromPool();
+            PreparedStatement sqlTextStatement = connection.prepareStatement(SELECT_SQL_TEXT_FOR_200_STATEMENTS);
+            sqlTextStatement.setFetchSize(1000);
 
-                int indexPlaceholder = 1;
-                for (SQLStatement currentStatement : sqlStatementsToLoad) {
-                    sqlTextStatement.setString(indexPlaceholder, currentStatement.getSqlId());
-                    indexPlaceholder++;
+            int indexPlaceholder = 1;
+            for (SQLStatement currentStatement : sqlStatementsToLoad) {
+                sqlTextStatement.setString(indexPlaceholder, currentStatement.getSqlId());
+                indexPlaceholder++;
 
-                    if (indexPlaceholder > NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT) {
-                        // all place holders are filled - so fetch the sql text
-                        // from the db
-                        getTextFromDB(sqlTextStatement);
-
-                        indexPlaceholder = 1;
-                    }
-                }
-
-                if (indexPlaceholder > 1) {
-                    // there are some statements left...
-                    // fill the empty bind variables with invalid IDs
-                    for (int index = indexPlaceholder; index <= NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT; index++) {
-                        sqlTextStatement.setString(index, "");
-                    }
+                if (indexPlaceholder > NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT) {
+                    // all place holders are filled - so fetch the sql text
+                    // from the db
                     getTextFromDB(sqlTextStatement);
-                }
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, e);
-            } finally {
-                ConnectionPoolUtils.returnConnectionToPool(connection);
-            }
-        }
 
-        private void getTextFromDB(PreparedStatement sqlTextStatement)
-                throws SQLException {
-            SQLStatement sqlStatement;
-
-            ResultSet sqlTextResultSet = sqlTextStatement.executeQuery();
-
-            // use a definitely not used (invalid) sqlId to get started
-            String sqlId = "";
-            StringBuffer sqlText = new StringBuffer();
-            while (sqlTextResultSet.next()) {
-                if (sqlId.equals(sqlTextResultSet.getString(1))) {
-                    // found next piece of the SQL text
-                    sqlText.append(sqlTextResultSet.getString(2));
-                } else {
-                    // new sqlId
-                    // save the SQL text of the prior statement
-                    sqlStatement = handleSQLStatementWithSqlId(sqlId);
-                    if (sqlStatement != null) {
-                        sqlStatement.setSqlText(sqlText.toString());
-                    }
-
-                    // start gathering the next SQL string
-                    sqlId = sqlTextResultSet.getString(1);
-                    sqlText = new StringBuffer(sqlTextResultSet.getString(2));
+                    indexPlaceholder = 1;
                 }
             }
-            // save the SQL text of the prior statement
-            sqlStatement = handleSQLStatementWithSqlId(sqlId);
-            if (sqlStatement != null) {
-                sqlStatement.setSqlText(sqlText.toString());
-            }
-        }
 
-        private SQLStatement handleSQLStatementWithSqlId(String sqlId) {
-            for (SQLStatement statement : unloadedSQLStatements) {
-                if (sqlId.equals(statement.getSqlId())) {
-                    // we found the statement
-                    unloadedSQLStatements.remove(statement);
-                    return statement;
+            if (indexPlaceholder > 1) {
+                // there are some statements left...
+                // fill the empty bind variables with invalid IDs
+                for (int index = indexPlaceholder; index <= NUMBER_BIND_VARIABLES_SELECT_SQL_TEXT; index++) {
+                    sqlTextStatement.setString(index, "");
                 }
+                getTextFromDB(sqlTextStatement);
             }
-            // we didn't find the statement
-            return null;
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e);
+        } finally {
+            ConnectionPoolUtils.returnConnectionToPool(connection);
         }
+    }
 
+    private static void getTextFromDB(PreparedStatement sqlTextStatement)
+            throws SQLException {
+        SQLStatement sqlStatement;
+
+        ResultSet sqlTextResultSet = sqlTextStatement.executeQuery();
+
+        // use a definitely not used (invalid) sqlId to get started
+        String sqlId = "";
+        StringBuffer sqlText = new StringBuffer();
+        while (sqlTextResultSet.next()) {
+            if (sqlId.equals(sqlTextResultSet.getString(1))) {
+                // found next piece of the SQL text
+                sqlText.append(sqlTextResultSet.getString(2));
+            } else {
+                // new sqlId
+                // save the SQL text of the prior statement
+                sqlStatement = handleSQLStatementWithSqlId(sqlId);
+                if (sqlStatement != null) {
+                    sqlStatement.setSqlText(sqlText.toString());
+                }
+
+                // start gathering the next SQL string
+                sqlId = sqlTextResultSet.getString(1);
+                sqlText = new StringBuffer(sqlTextResultSet.getString(2));
+            }
+        }
+        // save the SQL text of the prior statement
+        sqlStatement = handleSQLStatementWithSqlId(sqlId);
+        if (sqlStatement != null) {
+            sqlStatement.setSqlText(sqlText.toString());
+        }
+    }
+
+    private static SQLStatement handleSQLStatementWithSqlId(String sqlId) {
+        for (SQLStatement statement : allSQLStatements) {
+            if (sqlId.equals(statement.getSqlId())) {
+                // we found the statement
+                return statement;
+            }
+        }
+        // we didn't find the statement
+        return null;
     }
 
     public static void loadExecutionPlansForStatements(List<DeltaSQLStatementSnapshot> sqlStatements,

@@ -75,6 +75,10 @@ public class SnapshotHelper {
                 ObjectInput input = new ObjectInputStream (buffer);
         ){
             Snapshot loaded = (Snapshot)input.readObject();
+
+            for (SQLStatementSnapshot currentStatement :loaded.getSqlStatementSnapshots()) {
+                currentStatement.updateSQLStatement(SQLHelper.getRegisterSQLStatement(currentStatement.getSqlStatement()));
+            }
             addSnapshot(loaded);
             return true;
         }
