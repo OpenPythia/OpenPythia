@@ -375,8 +375,23 @@ public class DeltaSnapshotWriter {
 
             for (WaitEventTuple currentTuple : waitEventsPerStatementMap.get(currentSnapshot)) {
                 currentRow = SSUtilities.copyRow(waitEventsForStatementSheet, templateWaitEventRow, currentRowIndex);
-                currentRow.getCell(0).setCellValue(currentTuple.getWaitEventName());
-                safeBigDecimalIntoCellWriter(currentRow.getCell(1), currentTuple.getWaitedSeconds());
+
+                int columnIndex = 0;
+                currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitEventName());
+                if (currentTuple.getWaitEventClass().equals("Application") ||
+                        currentTuple.getWaitEventClass().equals("Cluster") ||
+                        currentTuple.getWaitEventClass().equals("Concurrency") ||
+                        currentTuple.getWaitEventClass().equals("User I/O")) {
+
+                    // for these wait classes the following fields contain valid information and we
+                    // put it into the sheet
+                    currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitObjectOwner());
+                    currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitObjectName());
+                } else {
+                    currentRow.getCell(columnIndex++).setCellValue("");
+                    currentRow.getCell(columnIndex++).setCellValue("");
+                }
+                safeBigDecimalIntoCellWriter(currentRow.getCell(columnIndex++), currentTuple.getWaitedSeconds());
                 currentRowIndex++;
             }
         }

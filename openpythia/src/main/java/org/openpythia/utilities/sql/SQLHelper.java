@@ -84,8 +84,10 @@ public class SQLHelper {
             + "ORDER BY sql_id, inst_id, child_number, id, position";
 
     private final static int NUMBER_BIND_VARIABLES_SELECT_WAIT_EVENTS_SQL = 100;
-    private final static String SELECT_WAIT_EVENTS_FOR_100_STATEMENTS = "  SELECT sql_id, event, sum(time_waited) / 1000000 "
-            + "FROM gv$active_session_history "
+    private final static String SELECT_WAIT_EVENTS_FOR_100_STATEMENTS = "SELECT h.sql_id, h.wait_class, h.event, " +
+            "o.owner, o.object_name, sum(h.time_waited) / 1000000 "
+            + "FROM gv$active_session_history h "
+            + "LEFT JOIN dba_objects o ON h.current_obj# = o.object_id "
             + "WHERE session_state = 'WAITING' "
             + "AND sql_id IN ("
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
@@ -99,7 +101,7 @@ public class SQLHelper {
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
             + "?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
             + "AND sample_time BETWEEN ? AND ? "
-            + "GROUP BY sql_id, event "
+            + "GROUP BY h.sql_id, h.wait_class, h.event, o.owner, o.object_name "
             + "ORDER BY sql_id, sum(time_waited) DESC";
 
     private static List<SQLStatement> allSQLStatements = new ArrayList<>();
@@ -317,7 +319,10 @@ public class SQLHelper {
 
             int resultIndex = 1;
             String currentSqlId = waitEventsResultSet.getString(resultIndex++);
+            String currentEventWaitClass = waitEventsResultSet.getString(resultIndex++);
             String currentEvent = waitEventsResultSet.getString(resultIndex++);
+            String currentOwner = waitEventsResultSet.getString(resultIndex++);
+            String currentObject = waitEventsResultSet.getString(resultIndex++);
             BigDecimal currentWaitedSeconds = waitEventsResultSet.getBigDecimal(resultIndex++);
 
             if (!lastSqlId.equals(currentSqlId)) {
@@ -330,7 +335,8 @@ public class SQLHelper {
                 }
                 result.put(currentStatement, new ArrayList<WaitEventTuple>());
             }
-            result.get(currentStatement).add(new WaitEventTuple(currentEvent, currentWaitedSeconds));
+            result.get(currentStatement).add(new WaitEventTuple(currentEventWaitClass, currentEvent,
+                    currentOwner, currentObject, currentWaitedSeconds));
 
             lastSqlId = currentSqlId;
         }
