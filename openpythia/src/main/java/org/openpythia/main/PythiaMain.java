@@ -21,6 +21,7 @@ import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.dbconnection.JDBCHandler;
 import org.openpythia.dbconnection.LoginController;
 import org.openpythia.maindialog.MainDialogController;
+import org.openpythia.preferences.PreferencesManager;
 import org.openpythia.schemaprivileges.MissingPrivilegesController;
 import org.openpythia.schemaprivileges.PrivilegesHelper;
 
@@ -55,6 +56,12 @@ public class PythiaMain {
 
         if (arguments.contains("-s") || arguments.contains("-S")) {
             startBatchModeTakeSnapshot(arguments);
+            return;
+        }
+
+        if (arguments.contains("-c")) {
+            PreferencesManager.setPathToJDBCDriver("xxx");
+            PreferencesManager.savePythiaConfiguration();
             return;
         }
 
@@ -115,6 +122,7 @@ public class PythiaMain {
         System.out.println("--------------------------------------------------------------------------------");
         System.out.println("without arguments   open in GUI mode");
         System.out.println("-t/-T               print this information");
+        System.out.println("-c                  create a dummy configuration file (to have a template)");
         System.out.println("-s/-S               take snapshot and exit");
         System.out.println("                    To take a snapshot the JDBC driver must be available in the");
         System.out.println("                    class path or via the configuration.");
