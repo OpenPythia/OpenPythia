@@ -15,10 +15,11 @@
  **/
 package org.openpythia.plugin.worststatements;
 
-import java.awt.Frame;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -238,7 +239,18 @@ public class WorstStatementsDetailController implements FinishedListener {
         if (excelFile != null) {
             DeltaSnapshotWriter.saveDeltaSnapshot(excelFile, deltaSnapshot, view.getCbMoreExecutionPlans().isSelected());
 
-            JOptionPane.showMessageDialog(view, "Excel file successfully written.", "Excel Export", JOptionPane.INFORMATION_MESSAGE);
+            if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(view,
+                    "Excel file successfully written. Open File?",
+                    "Excel Export",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE)) {
+
+                try {
+                    Desktop.getDesktop().open(excelFile);
+                } catch (IOException e) {
+                    // nothing to do
+                }
+            }
         }
     }
 
