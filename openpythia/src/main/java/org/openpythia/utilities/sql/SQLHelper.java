@@ -99,7 +99,7 @@ public class SQLHelper {
             + "GROUP BY h.sql_id, h.wait_class, h.event, o.owner, o.object_name "
             + "ORDER BY sql_id, sum(time_waited) DESC";
 
-    private static List<SQLStatement> allSQLStatements = new ArrayList<>();
+    private static List<SQLStatement> allSQLStatements = new CopyOnWriteArrayList<>();
     private static List<SQLStatement> unloadedSQLStatements = new CopyOnWriteArrayList<>();
 
     private static SQLStatementLoader sqlStatementLoader;
