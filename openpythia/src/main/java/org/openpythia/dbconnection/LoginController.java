@@ -334,6 +334,13 @@ public class LoginController {
                         PrivilegesHelper.getMissingObjectPrivileges(null),
                         DEFAULT_SCHEMA_NAME));
 
+                output.println();
+                output.println("-- -----------------------------------------------------------------------------");
+                output.println("-- Optional: To enable further analysis of schema, grant the SELECT_CATALOG_ROLE");
+                output.println("--           to the user.");
+                output.println("-- -----------------------------------------------------------------------------");
+                output.println("-- GRANT select_catalog_role TO " + DEFAULT_SCHEMA_NAME + ";");
+
                 JOptionPane.showMessageDialog(view, "Schema creation script generated.");
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, e);
