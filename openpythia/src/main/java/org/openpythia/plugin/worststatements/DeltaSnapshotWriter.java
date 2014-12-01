@@ -22,7 +22,8 @@ import org.openpythia.utilities.deltasql.DeltaSnapshot;
 import org.openpythia.utilities.sql.ExecutionPlan;
 import org.openpythia.utilities.sql.ExecutionPlanStep;
 import org.openpythia.utilities.sql.SQLHelper;
-import org.openpythia.utilities.waitevent.WaitEventTuple;
+import org.openpythia.utilities.waitevent.WaitEventForStatementTuple;
+import org.openpythia.utilities.waitevent.WaitEventForTimeSpanTuple;
 
 import javax.swing.*;
 import java.io.File;
@@ -67,6 +68,9 @@ public class DeltaSnapshotWriter {
     private static final int WAIT_EVENTS_SQL_INDEX_ROW_TEMPLATE_WAIT_EVENT_ROW = 3;
     private static final int WAIT_EVENTS_SQL_INDEX_START_WAIT_EVENTS = 4;
 
+    private static final int WAIT_EVENTS_INDEX_ROW_TEMPLATE_WAIT_EVENT_ROW = 1;
+    private static final int WAIT_EVENTS_INDEX_START_WAIT_EVENTS = 2;
+
     private static final String TEMPLATE_DELTA_V_SQL_AREA_XLSX = "Template_DELTA_V$SQLAREA.xlsx";
     private static final int EXCEL_MAX_CHAR_PER_CELL = 32767;
 
@@ -77,6 +81,7 @@ public class DeltaSnapshotWriter {
     private Sheet statementsSheet;
     private Sheet executionPlansSheet;
     private Sheet waitEventsForStatementSheet;
+    private Sheet waitEventsForTimeSpanSheet;
     private CellStyle hyperlinkStyle;
 
     private DeltaSnapshotWriter(File destination, DeltaSnapshot deltaSnapshot, boolean moreExecutionPlans) {
@@ -92,6 +97,7 @@ public class DeltaSnapshotWriter {
             statementsSheet = workbook.getSheet("Delta V$SQLAREA");
             executionPlansSheet = workbook.getSheet("Execution Plans");
             waitEventsForStatementSheet = workbook.getSheet("Wait Events per SQL Statement");
+            waitEventsForTimeSpanSheet = workbook.getSheet("All Wait Events");
             hyperlinkStyle = createHyperlinkStyle(workbook);
 
             writeDeltaSnapshotStatements();
@@ -101,6 +107,8 @@ public class DeltaSnapshotWriter {
             writeExecutionPlansForWorstStatements(worstStatements);
 
             writeWaitEventsForWorstStatements(worstStatements);
+
+            writeWaitEventsForTimeSpan();
 
             OutputStream outputStream = new FileOutputStream(destination);
             workbook.write(outputStream);
@@ -112,7 +120,8 @@ public class DeltaSnapshotWriter {
     }
 
     private List<DeltaSQLStatementSnapshot> getWorstSQLStatements() {
-        List<DeltaSQLStatementSnapshot> worstStatements;WorstStatementIdentifier wsi = new WorstStatementIdentifier(deltaSnapshot, moreExecutionPlans);
+        List<DeltaSQLStatementSnapshot> worstStatements;
+        WorstStatementIdentifier wsi = new WorstStatementIdentifier(deltaSnapshot, moreExecutionPlans);
 
         // Identify the worst statements
         worstStatements = new ArrayList<>();
@@ -341,7 +350,7 @@ public class DeltaSnapshotWriter {
         Row templateStatementHeaderRow = waitEventsForStatementSheet.getRow(WAIT_EVENTS_SQL_INDEX_ROW_TEMPLATE_STATEMENT_HEADER_ROW);
         Row templateWaitEventRow = waitEventsForStatementSheet.getRow(WAIT_EVENTS_SQL_INDEX_ROW_TEMPLATE_WAIT_EVENT_ROW);
 
-        Map<DeltaSQLStatementSnapshot, List<WaitEventTuple>> waitEventsPerStatementMap =
+        Map<DeltaSQLStatementSnapshot, List<WaitEventForStatementTuple>> waitEventsPerStatementMap =
                 SQLHelper.loadWaitEventsForStatements(
                         worstStatements,
                         deltaSnapshot.getSnapshotA().getSnapshotTime(),
@@ -373,24 +382,13 @@ public class DeltaSnapshotWriter {
             link.setAddress("'" + waitEventsForStatementSheet.getSheetName() + "'!A" + (currentRowIndex - 2));
             addLinkFromStatement(currentSnapshot.getSqlStatement().getSqlId(), INDEX_COLUMN_HAS_WAIT, link);
 
-            for (WaitEventTuple currentTuple : waitEventsPerStatementMap.get(currentSnapshot)) {
+            for (WaitEventForStatementTuple currentTuple : waitEventsPerStatementMap.get(currentSnapshot)) {
                 currentRow = SSUtilities.copyRow(waitEventsForStatementSheet, templateWaitEventRow, currentRowIndex);
 
                 int columnIndex = 0;
                 currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitEventName());
-                if (currentTuple.getWaitEventClass().equals("Application") ||
-                        currentTuple.getWaitEventClass().equals("Cluster") ||
-                        currentTuple.getWaitEventClass().equals("Concurrency") ||
-                        currentTuple.getWaitEventClass().equals("User I/O")) {
-
-                    // for these wait classes the following fields contain valid information and we
-                    // put it into the sheet
-                    currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitObjectOwner());
-                    currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitObjectName());
-                } else {
-                    currentRow.getCell(columnIndex++).setCellValue("");
-                    currentRow.getCell(columnIndex++).setCellValue("");
-                }
+                currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitObjectOwner());
+                currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitObjectName());
                 safeBigDecimalIntoCellWriter(currentRow.getCell(columnIndex++), currentTuple.getWaitedSeconds());
                 currentRowIndex++;
             }
@@ -399,6 +397,37 @@ public class DeltaSnapshotWriter {
         // delete the template rows
         SSUtilities.deleteRow(waitEventsForStatementSheet, templateStatementHeaderRow);
         SSUtilities.deleteRow(waitEventsForStatementSheet, templateWaitEventRow);
+    }
+
+    private void writeWaitEventsForTimeSpan() {
+
+        Row templateWaitEventRow = waitEventsForTimeSpanSheet.getRow(WAIT_EVENTS_INDEX_ROW_TEMPLATE_WAIT_EVENT_ROW);
+
+        List<WaitEventForTimeSpanTuple> waitEventsList =
+                SQLHelper.loadWaitEventsForTimeSpan(
+                        deltaSnapshot.getSnapshotA().getSnapshotTime(),
+                        deltaSnapshot.getSnapshotB().getSnapshotTime());
+
+        // Now write the wait events into the Excel sheet
+        int currentRowIndex = WAIT_EVENTS_INDEX_START_WAIT_EVENTS;
+        Row currentRow;
+
+        for (WaitEventForTimeSpanTuple currentWaitEvent : waitEventsList) {
+
+            // Header for statement
+            currentRow = SSUtilities.copyRow(waitEventsForTimeSpanSheet, templateWaitEventRow, currentRowIndex);
+
+            int columnIndex = 0;
+            currentRow.getCell(columnIndex++).setCellValue(currentWaitEvent.getWaitEventName());
+            currentRow.getCell(columnIndex++).setCellValue(currentWaitEvent.getWaitObjectOwner());
+            currentRow.getCell(columnIndex++).setCellValue(currentWaitEvent.getWaitObjectName());
+            safeBigDecimalIntoCellWriter(currentRow.getCell(columnIndex++), currentWaitEvent.getWaitedSeconds());
+
+            currentRowIndex++;
+        }
+
+        // delete the template row
+        SSUtilities.deleteRow(waitEventsForTimeSpanSheet, templateWaitEventRow);
     }
 
     private void safeBigDecimalIntoCellWriter(Cell cell, BigDecimal value) {

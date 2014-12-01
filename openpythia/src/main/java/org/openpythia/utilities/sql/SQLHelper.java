@@ -18,10 +18,10 @@ package org.openpythia.utilities.sql;
 import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.progress.ProgressListener;
 import org.openpythia.utilities.deltasql.DeltaSQLStatementSnapshot;
-import org.openpythia.utilities.waitevent.WaitEventTuple;
+import org.openpythia.utilities.waitevent.WaitEventForStatementTuple;
+import org.openpythia.utilities.waitevent.WaitEventForTimeSpanTuple;
 
 import javax.swing.*;
-import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 import java.util.List;
@@ -82,7 +82,7 @@ public class SQLHelper {
         SQLExecutionPlanLoadHelper.loadExecutionPlansForStatements(sqlStatements, progressListener);
     }
 
-    public static Map<DeltaSQLStatementSnapshot, List<WaitEventTuple>> loadWaitEventsForStatements(
+    public static Map<DeltaSQLStatementSnapshot, List<WaitEventForStatementTuple>> loadWaitEventsForStatements(
             List<DeltaSQLStatementSnapshot> worstStatements,
             Calendar startTime,
             Calendar stopTime,
@@ -94,6 +94,13 @@ public class SQLHelper {
                 stopTime,
                 progressListener);
     }
+
+    public static List<WaitEventForTimeSpanTuple> loadWaitEventsForTimeSpan(Calendar startTime,
+                                                                               Calendar stopTime) {
+
+        return SQLWaitLoadHelper.loadWaitEventsForTimeSpan(startTime, stopTime);
+    }
+
 
     public static int getNumberSQLStatements() {
         int result = 0;
