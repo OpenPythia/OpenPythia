@@ -17,7 +17,6 @@ public class SQLStatementTest {
                              "SELECT * FROM dual WHERE row1 = ?");
         assertNormalizedText("SELECT * FROM dual WHERE row1 = :1",
                              "SELECT * FROM dual WHERE row1 = :1");
-
     }
 
     @Test
@@ -27,7 +26,12 @@ public class SQLStatementTest {
                              "SELECT ? FROM dual");
         assertNormalizedText("SELECT 'test' FROM dual",
                              "SELECT ? FROM dual");
-
+        assertNormalizedText("SELECT * FROM dual WHERE dummy IN (1, 2,3,4)",
+                "SELECT * FROM dual WHERE dummy IN (?, ?,?,?)");
+        assertNormalizedText("SELECT * FROM dual WHERE dummy IN ('1', '2','3','4')",
+                "SELECT * FROM dual WHERE dummy IN (?, ?,?,?)");
+        assertNormalizedText("SELECT * FROM dual WHERE dummy=123",
+                "SELECT * FROM dual WHERE dummy=?");
     }
 
     private void assertNormalizedText(String sqlText, String expectedNormalizedText) {

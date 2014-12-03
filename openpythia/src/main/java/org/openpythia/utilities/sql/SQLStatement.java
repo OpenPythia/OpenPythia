@@ -95,14 +95,18 @@ public class SQLStatement implements Serializable {
                 statementStep0 = sqlText;
             }
             // replace string literals with a question mark
-            String statementStep1 = statementStep0.replaceAll("'.+'", "?");
+            String statementStep1 = statementStep0.replaceAll("'.+?'", "?");
 
             // replace number literals with a question mark
             String statementStep2 = statementStep1.replaceAll("\\s\\d+", " ?");
             // also those directly after a comma
             String statementStep3 = statementStep2.replaceAll(",\\d+", ",?");
+            // also those directly after a equals
+            String statementStep4 = statementStep3.replaceAll("=\\d+", "=?");
+            // also those directly after a opening bracket
+            String statementStep5 = statementStep4.replaceAll("\\(\\d+", "(?");
 
-            normalizedSQLText = statementStep3;
+            normalizedSQLText = statementStep5;
         }
 
         return normalizedSQLText;

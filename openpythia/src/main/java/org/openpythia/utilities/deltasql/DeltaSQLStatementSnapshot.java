@@ -82,14 +82,15 @@ public class DeltaSQLStatementSnapshot {
         if (this.deltaRowsProcessed.compareTo(BigDecimal.ZERO) < 0) {
             this.deltaRowsProcessed = BigDecimal.ZERO;
         }
+
+        // The following code is a bit dirty: we know how many variants of the statement exist per snapshot.
+        // But we don't know how many variants have been executed between the snapshot. As a workaround we use the
+        // maximum of both.
         if (this.deltaNumberStatements != null || sqlStatementSnapshotA.getNumberStatements() != null) {
             BigDecimal thisNumberStatements = this.deltaNumberStatements != null ? this.deltaNumberStatements : BigDecimal.ONE;
             BigDecimal thatNumberStatements = sqlStatementSnapshotA.getNumberStatements() != null ? sqlStatementSnapshotA.getNumberStatements() : BigDecimal.ONE;
 
-            this.deltaNumberStatements = thisNumberStatements.subtract(thatNumberStatements);
-            if (this.deltaNumberStatements.compareTo(BigDecimal.ZERO) < 0) {
-                this.deltaNumberStatements = BigDecimal.ZERO;
-            }
+            this.deltaNumberStatements = thisNumberStatements.max(thatNumberStatements);
         }
     }
 

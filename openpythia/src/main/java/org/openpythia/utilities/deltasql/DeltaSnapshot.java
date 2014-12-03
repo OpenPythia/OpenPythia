@@ -239,8 +239,7 @@ public class DeltaSnapshot {
                 // was executed for the first time after the first snapshot was
                 // taken (or was dropped from the library cache). We take only
                 // the new snapshot into account.
-                sortDeltaSQLStatementSnapshotIn(new DeltaSQLStatementSnapshot(
-                        sqlStatementSnapshotB));
+                sortDeltaSQLStatementSnapshotIn(new DeltaSQLStatementSnapshot(sqlStatementSnapshotB));
             } else if (sqlStatementSnapshotA.getExecutions().compareTo(sqlStatementSnapshotB.getExecutions()) >= 0) {
                 // the statement was not executed between the two snapshots. So
                 // it will be ignored for the delta snapshot.
@@ -252,8 +251,7 @@ public class DeltaSnapshot {
                 // times!?!
                 // We decided to ignore such statements.
             } else {
-                sortDeltaSQLStatementSnapshotIn(new DeltaSQLStatementSnapshot(
-                        sqlStatementSnapshotA, sqlStatementSnapshotB));
+                sortDeltaSQLStatementSnapshotIn(new DeltaSQLStatementSnapshot(sqlStatementSnapshotA, sqlStatementSnapshotB));
             }
         }
     }
