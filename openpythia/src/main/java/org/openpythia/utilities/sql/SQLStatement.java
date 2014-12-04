@@ -103,10 +103,14 @@ public class SQLStatement implements Serializable {
             String statementStep3 = statementStep2.replaceAll(",\\d+", ",?");
             // also those directly after a equals
             String statementStep4 = statementStep3.replaceAll("=\\d+", "=?");
+            // also those directly after a smaller
+            String statementStep5 = statementStep4.replaceAll("<\\d+", "<?");
+            // also those directly after a bigger
+            String statementStep6 = statementStep5.replaceAll(">\\d+", ">?");
             // also those directly after a opening bracket
-            String statementStep5 = statementStep4.replaceAll("\\(\\d+", "(?");
+            String statementStep7 = statementStep6.replaceAll("\\(\\d+", "(?");
 
-            normalizedSQLText = statementStep5;
+            normalizedSQLText = statementStep7;
         }
 
         return normalizedSQLText;
