@@ -37,7 +37,9 @@ public class PrivilegesHelper {
             // DB parameters
             "v$parameter",
             // missing/stale statistics
-            "dba_indexes", "dba_tables"};
+            "dba_indexes", "dba_tables",
+            // wait events for objects
+            "dba_objects"};
 
     private static final String TRY_SELECT_FROM_TABLE = "SELECT 1 "
             + "FROM %s "
