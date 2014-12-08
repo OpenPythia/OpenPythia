@@ -501,6 +501,11 @@ public class DeltaSnapshotWriter {
             if (snapshot.getDeltaDiskReads().multiply(new BigDecimal(multiplyFactor)).compareTo(sumDiskReads) > 0) {
                 return true;
             }
+            if (snapshot.getDeltaExecutions().compareTo(BigDecimal.ZERO) > 0 &&
+                    snapshot.getDeltaElapsedSeconds().divide(snapshot.getDeltaExecutions(), 1, BigDecimal.ROUND_HALF_UP).compareTo(BigDecimal.ONE) >= 0) {
+                // average elapsed time at least 1 second
+                return true;
+            }
 
             return false;
         }
