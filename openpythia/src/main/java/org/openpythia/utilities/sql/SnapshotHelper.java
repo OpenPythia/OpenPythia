@@ -24,6 +24,9 @@ import java.sql.SQLException;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipException;
 
 import javax.swing.JOptionPane;
 
@@ -58,36 +61,67 @@ public class SnapshotHelper {
         try (
                 OutputStream file = new FileOutputStream(snapshotFile);
                 OutputStream buffer = new BufferedOutputStream(file);
-                ObjectOutput output = new ObjectOutputStream(buffer);
+                // we use GZIP because ZIP is not transparent but needs special calls to run
+                OutputStream zipped = new GZIPOutputStream(buffer);
+                ObjectOutput output = new ObjectOutputStream(zipped);
         ){
             output.writeObject(toSave);
             return true;
         }
         catch(IOException ex){
+            ex.printStackTrace();
             return false;
         }
     }
 
     public static boolean loadSnapshot(File snapshotFile) {
-        try(
-                InputStream file = new FileInputStream(snapshotFile);
-                InputStream buffer = new BufferedInputStream(file);
-                ObjectInput input = new ObjectInputStream (buffer);
-        ){
-            Snapshot loaded = (Snapshot)input.readObject();
+        // default are compressed snapshots
+        return loadSnapshot(snapshotFile, true);
+    }
 
-            for (SQLStatementSnapshot currentStatement :loaded.getSqlStatementSnapshots()) {
-                currentStatement.updateSQLStatement(SQLHelper.getRegisterSQLStatement(currentStatement.getSqlStatement()));
+    private static boolean loadSnapshot(File snapshotFile, boolean compressed) {
+        if (compressed) {
+            try (
+                    InputStream file = new FileInputStream(snapshotFile);
+                    InputStream buffer = new BufferedInputStream(file);
+                    InputStream unzipped = new GZIPInputStream(buffer);
+                    ObjectInput input = new ObjectInputStream(unzipped);
+            ) {
+                integrateSnapshotIntoDataStructures(input);
+
+                return true;
+            } catch (ZipException ex) {
+                // this is an old snapshot not using the compression
+                return loadSnapshot(snapshotFile, false);
+            } catch (ClassNotFoundException ex) {
+                return false;
+            } catch (IOException ex) {
+                return false;
             }
-            addSnapshot(loaded);
-            return true;
+        } else {
+            try (
+                    InputStream file = new FileInputStream(snapshotFile);
+                    InputStream buffer = new BufferedInputStream(file);
+                    ObjectInput input = new ObjectInputStream(buffer);
+            ) {
+                integrateSnapshotIntoDataStructures(input);
+
+                return true;
+            } catch (ClassNotFoundException ex) {
+                return false;
+            } catch (IOException ex) {
+                return false;
+            }
         }
-        catch(ClassNotFoundException ex){
-            return false;
+    }
+
+    private static void integrateSnapshotIntoDataStructures(ObjectInput input) throws IOException, ClassNotFoundException {
+        Snapshot loaded = (Snapshot) input.readObject();
+
+        for (SQLStatementSnapshot currentStatement : loaded.getSqlStatementSnapshots()) {
+            currentStatement.updateSQLStatement(SQLHelper.getRegisterSQLStatement(currentStatement.getSqlStatement()));
         }
-        catch(IOException ex){
-            return false;
-        }
+        addSnapshot(loaded);
     }
 
     public static void takeSnapshot(ProgressListener progressListener) {
