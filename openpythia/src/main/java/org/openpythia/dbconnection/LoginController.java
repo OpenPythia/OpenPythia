@@ -77,6 +77,8 @@ public class LoginController {
                 updatedIndex = index;
             }
 
+            Collections.sort(connections, new ConnectionConfigurationComparator());
+
             fireIntervalAdded(this, updatedIndex, updatedIndex);
         }
 
@@ -107,6 +109,8 @@ public class LoginController {
         ConnectionConfiguration lastConnectionConfiguration = PreferencesManager.getLastConfiguration();
 
         List<ConnectionConfiguration> savedConnectionConfiguration = PreferencesManager.getSavedConnectionConfiguration();
+        Collections.sort(savedConnectionConfiguration, new ConnectionConfigurationComparator());
+
 
         if (lastConnectionConfiguration == null) {
             updateView(DEFAULT_CONNECTION_PREFERENCES);
