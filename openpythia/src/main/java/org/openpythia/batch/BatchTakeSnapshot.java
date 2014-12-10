@@ -31,9 +31,17 @@ public class BatchTakeSnapshot {
             return;
         }
 
-        if (!JDBCHandler.isJDBCDriverAvailable()) {
-            System.out.println("There is no JDBC driver available - neither in the classpath nor configured.");
-            return;
+        if (dbConnectionInformation.getJdbcPath() != null) {
+            if (!JDBCHandler.makeJDBCDriverAvailableFrom(dbConnectionInformation.getJdbcPath())) {
+                System.out.println(String.format("There is no JDBC driver available at the given location '%s'.",
+                        dbConnectionInformation.getJdbcPath()));
+                return;
+            }
+        } else {
+            if (!JDBCHandler.isJDBCDriverAvailable()) {
+                System.out.println("There is no JDBC driver available - neither in the classpath nor configured.");
+                return;
+            }
         }
 
         if (!BatchHelper.initializeConnectionPool(dbConnectionInformation)) {

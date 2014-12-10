@@ -72,6 +72,10 @@ public class JDBCHandler {
         return false;
     }
 
+    public static boolean makeJDBCDriverAvailableFrom(String jdbcPath) {
+        return loadJDBCDriverFromFile(jdbcPath);
+    }
+
     public static boolean isJDBCDriverAvailable() {
         if (loadJDBCDriverFromClassPath()) {
             return true;

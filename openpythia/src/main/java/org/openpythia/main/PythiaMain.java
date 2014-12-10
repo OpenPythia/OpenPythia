@@ -139,6 +139,8 @@ public class PythiaMain {
         System.out.println("                    -f           optional - define a prefix for the snapshot file");
         System.out.println("                    -p           optional - define the path for the snapshot file");
         System.out.println("                    -loadsqltext optional - load the sql text into the snapshot");
+        System.out.println("                    -jdbcdriver  optional - load the JDBC driver from the given\n" +
+                           "                                 location");
         System.out.println("--------------------------------------------------------------------------------");
         System.out.println("Examples");
         System.out.println("Start in GUI mode:");
@@ -162,6 +164,7 @@ public class PythiaMain {
         String filePrefix = extractParameter(arguments, "-f");
         String filePath = extractParameter(arguments, "-p");
         boolean loadSQLText = arguments.contains("-loadsqltext");
+        String jdbcPath = extractParameter(arguments, "-jdbcdriver");
 
         DBConnectionInformation dbConnectionInformation = new DBConnectionInformation(
                 host,
@@ -172,7 +175,8 @@ public class PythiaMain {
                 user,
                 password,
                 filePrefix,
-                filePath);
+                filePath,
+                jdbcPath);
 
         BatchTakeSnapshot batch = new BatchTakeSnapshot(dbConnectionInformation);
         batch.takeSnapshot(loadSQLText);

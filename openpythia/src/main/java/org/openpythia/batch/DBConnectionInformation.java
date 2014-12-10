@@ -11,6 +11,7 @@ public class DBConnectionInformation {
     private String password;
     private String filePrefix;
     private String filePath;
+    private String jdbcPath;
 
     public DBConnectionInformation(String host,
                                    String port,
@@ -20,7 +21,8 @@ public class DBConnectionInformation {
                                    String user,
                                    String password,
                                    String filePrefix,
-                                   String filePath) {
+                                   String filePath,
+                                   String jdbcPath) {
         this.host = host;
         this.port = port;
         this.sid = sid;
@@ -30,6 +32,7 @@ public class DBConnectionInformation {
         this.password = password;
         this.filePrefix = filePrefix;
         this.filePath = filePath;
+        this.jdbcPath = jdbcPath;
     }
 
     public String getHost() {
@@ -67,4 +70,6 @@ public class DBConnectionInformation {
     public String getFilePath() {
         return filePath;
     }
+
+    public String getJdbcPath() { return jdbcPath; }
 }
