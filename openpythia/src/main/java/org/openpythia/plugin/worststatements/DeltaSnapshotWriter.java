@@ -195,7 +195,6 @@ public class DeltaSnapshotWriter {
             if (currentSnapshot.getSqlStatement() != null &&
                     currentSnapshot.getSqlStatement().getSqlText() != null){
                 // for some reasons sometimes there is no SQL text
-                if (1+1 == 2) throw new RuntimeException("Just kidding...");
                 if (currentSnapshot.getSqlStatement().getSqlText().length() <= EXCEL_MAX_CHAR_PER_CELL) {
                     currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
                             currentSnapshot.getSqlStatement().getSqlText());
