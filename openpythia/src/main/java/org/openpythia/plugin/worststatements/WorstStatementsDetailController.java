@@ -237,7 +237,13 @@ public class WorstStatementsDetailController implements FinishedListener {
     private void exportDeltaToExcel() {
         File excelFile = FileSelectorUtility.chooseExcelFileToWrite(view);
         if (excelFile != null) {
-            DeltaSnapshotWriter.saveDeltaSnapshot(excelFile, deltaSnapshot, view.getCbMoreExecutionPlans().isSelected());
+            if (!DeltaSnapshotWriter.saveDeltaSnapshot(
+                    excelFile,
+                    deltaSnapshot,
+                    view.getCbMoreExecutionPlans().isSelected())){
+                // if the file could not be written there is no point in opening it
+                return;
+            }
 
             if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(view,
                     "Excel file successfully written. Open File?",

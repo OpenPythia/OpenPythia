@@ -91,7 +91,7 @@ public class DeltaSnapshotWriter {
         this.moreExecutionPlans = moreExecutionPlans;
     }
 
-    private void saveDeltaSnapshot() {
+    private boolean saveDeltaSnapshot() {
         try {
             Workbook workbook = WorkbookFactory.create(this.getClass().getResourceAsStream(TEMPLATE_DELTA_V_SQL_AREA_XLSX));
             statementsSheet = workbook.getSheet("Delta V$SQLAREA");
@@ -104,18 +104,37 @@ public class DeltaSnapshotWriter {
 
             List<DeltaSQLStatementSnapshot> worstStatements = getWorstSQLStatements();
 
-            writeExecutionPlansForWorstStatements(worstStatements);
+            try {
+                writeExecutionPlansForWorstStatements(worstStatements);
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, e);
+            }
 
-            writeWaitEventsForWorstStatements(worstStatements);
+            try {
+                writeWaitEventsForWorstStatements(worstStatements);
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, e);
+            }
 
-            writeWaitEventsForTimeSpan();
+            try {
+                writeWaitEventsForTimeSpan();
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, e);
+            }
 
             OutputStream outputStream = new FileOutputStream(destination);
             workbook.write(outputStream);
             outputStream.close();
 
+            return true;
+
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(null, e);
+            return false;
         }
     }
 
@@ -136,9 +155,9 @@ public class DeltaSnapshotWriter {
         return worstStatements;
     }
 
-    public static void saveDeltaSnapshot(File destination, DeltaSnapshot deltaSnapshot, boolean moreExecutionPlans) {
+    public static boolean saveDeltaSnapshot(File destination, DeltaSnapshot deltaSnapshot, boolean moreExecutionPlans) {
         DeltaSnapshotWriter writer = new DeltaSnapshotWriter(destination, deltaSnapshot, moreExecutionPlans);
-        writer.saveDeltaSnapshot();
+        return writer.saveDeltaSnapshot();
     }
 
     private CellStyle createHyperlinkStyle(Workbook workbook) {
@@ -173,16 +192,21 @@ public class DeltaSnapshotWriter {
             currentRow.getCell(INDEX_COLUMN_INSTANCE).setCellValue(
                     currentSnapshot.getInstanceId());
             // Excel is limited to 32.767 chars per cell
-            if (currentSnapshot.getSqlStatement().getSqlText().length() <= EXCEL_MAX_CHAR_PER_CELL) {
-                currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
-                        currentSnapshot.getSqlStatement().getSqlText());
-            } else {
-                // truncate the text and add some information of how much was truncated
-                String truncatedText = currentSnapshot.getSqlStatement().getSqlText().substring(0, EXCEL_MAX_CHAR_PER_CELL - 50) +
-                        String.format("SQL statement truncated; %d more characters",
-                                currentSnapshot.getSqlStatement().getSqlText().length() - EXCEL_MAX_CHAR_PER_CELL - 50 /* this text */);
+            if (currentSnapshot.getSqlStatement() != null &&
+                    currentSnapshot.getSqlStatement().getSqlText() != null){
+                // for some reasons sometimes there is no SQL text
+                if (1+1 == 2) throw new RuntimeException("Just kidding...");
+                if (currentSnapshot.getSqlStatement().getSqlText().length() <= EXCEL_MAX_CHAR_PER_CELL) {
+                    currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
+                            currentSnapshot.getSqlStatement().getSqlText());
+                } else {
+                    // truncate the text and add some information of how much was truncated
+                    String truncatedText = currentSnapshot.getSqlStatement().getSqlText().substring(0, EXCEL_MAX_CHAR_PER_CELL - 50) +
+                            String.format("SQL statement truncated; %d more characters",
+                                    currentSnapshot.getSqlStatement().getSqlText().length() - EXCEL_MAX_CHAR_PER_CELL - 50 /* this text */);
 
-                currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(truncatedText);
+                    currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(truncatedText);
+                }
             }
 
             if (currentSnapshot.getDeltaNumberStatements() == null) {
