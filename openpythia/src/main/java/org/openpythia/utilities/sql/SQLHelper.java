@@ -40,12 +40,10 @@ public class SQLHelper {
     private static List<SQLStatement> allSQLStatements = new CopyOnWriteArrayList<>();
     private static List<SQLStatement> unloadedSQLStatements = new CopyOnWriteArrayList<>();
 
-    public static SQLStatement getSQLStatement(String sqlId, String address,
-                                               String parsingSchema, int instance) {
+    public static SQLStatement getSQLStatement(String sqlId, String parsingSchema, int instance) {
         SQLStatement result;
 
-        SQLStatement newStatement = new SQLStatement(sqlId, address,
-                parsingSchema, instance);
+        SQLStatement newStatement = new SQLStatement(sqlId, parsingSchema, instance);
 
         if (allSQLStatements.contains(newStatement)) {
             // reuse of an existing statement
@@ -62,7 +60,6 @@ public class SQLHelper {
     public static SQLStatement getRegisterSQLStatement(SQLStatement sqlStatement) {
         SQLStatement result = getSQLStatement(
                 sqlStatement.getSqlId(),
-                sqlStatement.getAddress(),
                 sqlStatement.getParsingSchema(),
                 sqlStatement.getInstanceId());
 

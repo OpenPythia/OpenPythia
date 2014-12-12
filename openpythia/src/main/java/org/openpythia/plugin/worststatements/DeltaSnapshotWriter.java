@@ -230,8 +230,6 @@ public class DeltaSnapshotWriter {
 
             currentRow.getCell(INDEX_COLUMN_SQL_ID).setCellValue(
                     currentSnapshot.getSqlStatement().getSqlId());
-            currentRow.getCell(INDEX_COLUMN_ADDRESS).setCellValue(
-                    currentSnapshot.getSqlStatement().getAddress());
 
             currentRowIndex++;
         }
@@ -271,8 +269,7 @@ public class DeltaSnapshotWriter {
             currentRow = SSUtilities.copyRow(executionPlansSheet, templateStatementHeaderRow, currentRowIndex);
 
             currentRow.getCell(0).setCellValue(currentSnapshot.getSqlStatement().getSqlId());
-            currentRow.getCell(1).setCellValue(currentSnapshot.getSqlStatement().getAddress());
-            currentRow.getCell(2).setCellValue(currentSnapshot.getSqlStatement().getSqlTextTrimmedForExcel());
+            currentRow.getCell(1).setCellValue(currentSnapshot.getSqlStatement().getSqlTextTrimmedForExcel());
             currentRowIndex++;
 
             // Link from sheet with statements to this execution plan

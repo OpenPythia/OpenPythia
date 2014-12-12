@@ -130,7 +130,7 @@ public class SnapshotHelper {
 
     private static class SnapshotTaker implements Runnable {
 
-        private static String SNAPSHOT_SQL_AREA = "SELECT sql_id, address, inst_id, parsing_schema_name, "
+        private static String SNAPSHOT_SQL_AREA = "SELECT sql_id, inst_id, parsing_schema_name, "
                 + "executions, elapsed_time / 1000000, cpu_time / 1000000, buffer_gets, disk_reads, "
                 + "concurrency_wait_time / 1000000, cluster_wait_time / 1000000, rows_processed "
                 + "FROM gv$sqlarea";
@@ -159,8 +159,7 @@ public class SnapshotHelper {
         private void fillSnapshot(Snapshot snapshot) {
             Connection connection = ConnectionPoolUtils.getConnectionFromPool();
             try {
-                PreparedStatement snapshotStatement = connection
-                        .prepareStatement(SNAPSHOT_SQL_AREA);
+                PreparedStatement snapshotStatement = connection.prepareStatement(SNAPSHOT_SQL_AREA);
 
                 ResultSet snapshotResultSet = snapshotStatement.executeQuery();
 
@@ -169,7 +168,6 @@ public class SnapshotHelper {
                     while (snapshotResultSet.next()) {
                         int columnIndex = 1;
                         String sqlId = snapshotResultSet.getString(columnIndex++);
-                        String address = snapshotResultSet.getString(columnIndex++);
                         Integer instanceId = snapshotResultSet.getInt(columnIndex++);
 
                         String parsingSchema = snapshotResultSet.getString(columnIndex++);
@@ -183,7 +181,7 @@ public class SnapshotHelper {
                         BigDecimal rowsProcessed = snapshotResultSet.getBigDecimal(columnIndex++);
 
                         SQLStatementSnapshot sqlStatementSnapshot = new SQLStatementSnapshot(
-                                SQLHelper.getSQLStatement(sqlId, address, parsingSchema, instanceId),
+                                SQLHelper.getSQLStatement(sqlId, parsingSchema, instanceId),
                                 instanceId,
                                 executions,
                                 elapsedSeconds,

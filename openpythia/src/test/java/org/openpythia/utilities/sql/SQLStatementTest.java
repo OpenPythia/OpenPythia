@@ -42,7 +42,7 @@ public class SQLStatementTest {
     }
 
     private void assertNormalizedText(String sqlText, String expectedNormalizedText) {
-        SQLStatement statement = new SQLStatement("SQL ID", "Address", "Parsing Schema", 0);
+        SQLStatement statement = new SQLStatement("SQL ID", "Parsing Schema", 0);
 
         statement.setSqlText(sqlText);
         assertEquals(expectedNormalizedText, statement.getNormalizedSQLText());
@@ -50,7 +50,7 @@ public class SQLStatementTest {
 
     @Test
     public void truncatedForExcelTest() {
-        SQLStatement statement = new SQLStatement("SQL ID", "Address", "Parsing Schema", 0);
+        SQLStatement statement = new SQLStatement("SQL ID", "Parsing Schema", 0);
 
         statement.setSqlText("SELECT * FROM dual");
         assertEquals("SELECT * FROM dual", statement.getSqlTextTrimmedForExcel());

@@ -26,7 +26,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class SQLStatement implements Serializable {
 
     private String sqlId;
-    private String address;
     private String parsingSchema;
     private int instanceId;
     private String sqlText;
@@ -34,9 +33,8 @@ public class SQLStatement implements Serializable {
 
     private List<ExecutionPlan> executionPlans;
 
-    protected SQLStatement(String sqlId, String address, String parsingSchema, int instanceId) {
+    protected SQLStatement(String sqlId, String parsingSchema, int instanceId) {
         this.sqlId = sqlId;
-        this.address = address;
         this.parsingSchema = parsingSchema;
         this.instanceId = instanceId;
 
@@ -47,10 +45,6 @@ public class SQLStatement implements Serializable {
 
     public String getSqlId() {
         return sqlId;
-    }
-
-    public String getAddress() {
-        return address;
     }
 
     public String getParsingSchema() {
