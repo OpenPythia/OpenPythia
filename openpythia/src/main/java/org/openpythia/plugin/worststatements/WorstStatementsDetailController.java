@@ -228,8 +228,7 @@ public class WorstStatementsDetailController implements FinishedListener {
     private void showDeltaSnapshot(DeltaSnapshot deltaSnapshot) {
         view.getTfSnapshotA().setText(deltaSnapshot.getSnapshotA().getSnapshotId());
         view.getTfSnapshotB().setText(deltaSnapshot.getSnapshotB().getSnapshotId());
-        view.getTfNumberStatements().setText(
-                String.valueOf(deltaSnapshot.getDeltaSqlStatementSnapshots().size()));
+        view.getTfNumberStatements().setText(String.format("%,d", deltaSnapshot.getDeltaSqlStatementSnapshots().size()));
 
         view.getTableDeltaSQLStatements().setModel(new DeltaSnapshotTableModel(deltaSnapshot));
     }
