@@ -165,16 +165,13 @@ public class WorstStatementsDetailController implements FinishedListener {
     }
 
     private void compareSnapshot() {
-        int numberSelectedSnapshots = view.getListSnapshots()
-                .getSelectedIndices().length;
+        int numberSelectedSnapshots = view.getListSnapshots().getSelectedIndices().length;
         if (numberSelectedSnapshots < 2) {
             // at least two snapshots have to be selected
             return;
         }
-        String oldSnapshotId = (String) view.getListSnapshots()
-                .getSelectedValues()[0];
-        String newSnapshotId = (String) view.getListSnapshots()
-                .getSelectedValues()[numberSelectedSnapshots - 1];
+        String oldSnapshotId = (String) view.getListSnapshots().getSelectedValues()[0];
+        String newSnapshotId = (String) view.getListSnapshots().getSelectedValues()[numberSelectedSnapshots - 1];
 
         boolean condenseInstances = view.getCbCondenseInstances().isSelected();
         boolean condenseMissingBindVariables = view.getCbCondenseMissingBindvariables().isSelected();

@@ -73,6 +73,10 @@ public class SQLHelper {
         return result;
     }
 
+    public static void waitForAllSQLTextToBeLoaded() {
+        SQLTextLoadHelper.loadSQLTextForStatements(unloadedSQLStatements, null);
+    }
+
     public static void loadSQLTextForStatements(List<SQLStatement> sqlStatements, ProgressListener progressListener) {
         SQLTextLoadHelper.loadSQLTextForStatements(sqlStatements, progressListener);
     }
@@ -102,7 +106,7 @@ public class SQLHelper {
     }
 
 
-    public static int getNumberSQLStatements() {
+    public static int getNumberSQLStatementsInLibraryCache() {
         int result = 0;
 
         Connection connection = ConnectionPoolUtils.getConnectionFromPool();

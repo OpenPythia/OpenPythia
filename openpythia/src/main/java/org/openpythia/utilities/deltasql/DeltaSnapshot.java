@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.openpythia.utilities.sql.SQLHelper;
 import org.openpythia.utilities.sql.SQLStatementSnapshot;
 import org.openpythia.utilities.sql.Snapshot;
 
@@ -73,6 +74,9 @@ public class DeltaSnapshot {
         }
 
         if (condenseMissingBindVariables) {
+            // to condense by missing bind variable the SQL text needs to be available
+            SQLHelper.waitForAllSQLTextToBeLoaded();
+
             tempSnapshotA = condenseSnapshotByMissingBindVariables(tempSnapshotA);
             tempSnapshotB = condenseSnapshotByMissingBindVariables(tempSnapshotB);
         }

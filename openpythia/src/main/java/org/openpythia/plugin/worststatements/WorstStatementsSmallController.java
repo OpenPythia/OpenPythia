@@ -91,7 +91,7 @@ public class WorstStatementsSmallController implements PythiaPluginController {
 
         @Override
         public void run() {
-            int numberSQLStatements = SQLHelper.getNumberSQLStatements();
+            int numberSQLStatements = SQLHelper.getNumberSQLStatementsInLibraryCache();
             float ratioTop20 = getRatioTop20();
 
             updateView(numberSQLStatements, ratioTop20);

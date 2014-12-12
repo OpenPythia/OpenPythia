@@ -144,7 +144,7 @@ public class SnapshotHelper {
         @Override
         public void run() {
             progressListener.setStartValue(0);
-            progressListener.setEndValue(SQLHelper.getNumberSQLStatements());
+            progressListener.setEndValue(SQLHelper.getNumberSQLStatementsInLibraryCache());
             progressListener.setCurrentValue(0);
 
             Snapshot snapshot = new Snapshot(SQLHelper.getCurrentDBDateTime());
