@@ -192,9 +192,11 @@ public class DeltaSnapshotWriter {
             currentRow.getCell(INDEX_COLUMN_INSTANCE).setCellValue(
                     currentSnapshot.getInstanceId());
             // Excel is limited to 32.767 chars per cell
-            if (currentSnapshot.getSqlStatement() != null &&
-                    currentSnapshot.getSqlStatement().getSqlText() != null){
-                // for some reasons sometimes there is no SQL text
+            if (currentSnapshot.getSqlStatement() == null ||
+                    currentSnapshot.getSqlStatement().getSqlText() == null) {
+                // The snapshot is no longer available in the library cache so there is no way to get it's SQL text
+                currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue("<Statement was swapped out of the library cache.>");
+            } else {
                 if (currentSnapshot.getSqlStatement().getSqlText().length() <= EXCEL_MAX_CHAR_PER_CELL) {
                     currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
                             currentSnapshot.getSqlStatement().getSqlText());
