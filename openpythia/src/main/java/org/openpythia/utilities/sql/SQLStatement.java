@@ -65,6 +65,24 @@ public class SQLStatement implements Serializable {
         return sqlText;
     }
 
+    private static final int EXCEL_MAX_CHAR_PER_CELL = 32767;
+    private static final String INFO_TRUNCATED = "%s ... SQL statement truncated; %d more characters";
+
+    public String getSqlTextTrimmedForExcel() {
+        if (sqlText == null ||
+            sqlText.length() <= EXCEL_MAX_CHAR_PER_CELL) {
+            return sqlText;
+        } else {
+            // truncate the text and add some information of how much was truncated
+            String truncatedText = String.format(
+                    INFO_TRUNCATED,
+                    // length of info text + some space for inserting the number of missing characters
+                    sqlText.substring(0, EXCEL_MAX_CHAR_PER_CELL - INFO_TRUNCATED.length() - 4),
+                    sqlText.length() - EXCEL_MAX_CHAR_PER_CELL + INFO_TRUNCATED.length() + 4);
+            return truncatedText;
+        }
+    }
+
     public void setSqlText(String sqlText) {
         this.sqlText = sqlText;
         this.normalizedSQLText = null;

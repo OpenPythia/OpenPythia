@@ -72,7 +72,6 @@ public class DeltaSnapshotWriter {
     private static final int WAIT_EVENTS_INDEX_START_WAIT_EVENTS = 2;
 
     private static final String TEMPLATE_DELTA_V_SQL_AREA_XLSX = "Template_DELTA_V$SQLAREA.xlsx";
-    private static final int EXCEL_MAX_CHAR_PER_CELL = 32767;
 
     private File destination;
     private DeltaSnapshot deltaSnapshot;
@@ -197,17 +196,7 @@ public class DeltaSnapshotWriter {
                 // The snapshot is no longer available in the library cache so there is no way to get it's SQL text
                 currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue("<Statement was swapped out of the library cache.>");
             } else {
-                if (currentSnapshot.getSqlStatement().getSqlText().length() <= EXCEL_MAX_CHAR_PER_CELL) {
-                    currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(
-                            currentSnapshot.getSqlStatement().getSqlText());
-                } else {
-                    // truncate the text and add some information of how much was truncated
-                    String truncatedText = currentSnapshot.getSqlStatement().getSqlText().substring(0, EXCEL_MAX_CHAR_PER_CELL - 50) +
-                            String.format("SQL statement truncated; %d more characters",
-                                    currentSnapshot.getSqlStatement().getSqlText().length() - EXCEL_MAX_CHAR_PER_CELL - 50 /* this text */);
-
-                    currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(truncatedText);
-                }
+                currentRow.getCell(INDEX_COLUMN_SQL_TEXT).setCellValue(currentSnapshot.getSqlStatement().getSqlTextTrimmedForExcel());
             }
 
             if (currentSnapshot.getDeltaNumberStatements() == null) {
@@ -283,7 +272,7 @@ public class DeltaSnapshotWriter {
 
             currentRow.getCell(0).setCellValue(currentSnapshot.getSqlStatement().getSqlId());
             currentRow.getCell(1).setCellValue(currentSnapshot.getSqlStatement().getAddress());
-            currentRow.getCell(2).setCellValue(currentSnapshot.getSqlStatement().getSqlText());
+            currentRow.getCell(2).setCellValue(currentSnapshot.getSqlStatement().getSqlTextTrimmedForExcel());
             currentRowIndex++;
 
             // Link from sheet with statements to this execution plan
@@ -397,7 +386,7 @@ public class DeltaSnapshotWriter {
             currentRow = SSUtilities.copyRow(waitEventsForStatementSheet, templateStatementHeaderRow, currentRowIndex);
 
             currentRow.getCell(0).setCellValue(currentSnapshot.getSqlStatement().getSqlId());
-            currentRow.getCell(1).setCellValue(currentSnapshot.getSqlStatement().getSqlText());
+            currentRow.getCell(1).setCellValue(currentSnapshot.getSqlStatement().getSqlTextTrimmedForExcel());
             currentRowIndex++;
 
             // Link from sheet with statements to this list of wait events
