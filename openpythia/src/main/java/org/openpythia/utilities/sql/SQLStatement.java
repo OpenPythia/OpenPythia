@@ -25,6 +25,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class SQLStatement implements Serializable {
 
+    private static final long serialVersionUID = -6425706792286270913L;
+
     private String sqlId;
     private String parsingSchema;
     private int instanceId;

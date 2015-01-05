@@ -21,7 +21,9 @@ import java.util.Calendar;
 import java.util.List;
 
 public class Snapshot implements Serializable {
-    
+
+    private static final long serialVersionUID = 9187082512305187559L;
+
     private Calendar snapshotTime;
     private List<SQLStatementSnapshot> sqlStatementSnapshots;
     

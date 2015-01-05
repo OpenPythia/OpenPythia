@@ -22,15 +22,17 @@ import java.io.Serializable;
  */
 public class ExecutionPlan implements Serializable {
 
+    private static final long serialVersionUID = -7970493905585878876L;
+
     private int instanceId;
     private int childNumber;
-    private String address;
+    private String sqlID;
     private ExecutionPlanStep parentStep;
 
-    public ExecutionPlan(int instanceId, int childNumber, String address) {
+    public ExecutionPlan(int instanceId, int childNumber, String sqlID) {
         this.instanceId = instanceId;
         this.childNumber = childNumber;
-        this.address = address;
+        this.sqlID = sqlID;
     }
 
     public ExecutionPlanStep getParentStep() {
@@ -47,8 +49,7 @@ public class ExecutionPlan implements Serializable {
         return childNumber;
     }
 
-    public String getAddress() {
-        return address;
+    public String getSqlID() {
+        return sqlID;
     }
-
 }

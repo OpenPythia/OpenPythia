@@ -27,6 +27,8 @@ import java.util.List;
  */
 public class ExecutionPlanStep implements Serializable {
 
+    private static final long serialVersionUID = -7970493905585878877L;
+
     private int executionPlanStepId;
     private int parentExecutionPlanStepId;
     private ExecutionPlanStep parentStep;

@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 
 public class SQLStatementSnapshot implements Serializable {
 
+    private static final long serialVersionUID = 707385401128251088L;
+
     private SQLStatement sqlStatement;
     private int instanceId;
     private BigDecimal executions;
