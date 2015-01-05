@@ -130,6 +130,11 @@ public class SnapshotHelper {
 
     private static class SnapshotTaker implements Runnable {
 
+        // From Oracle 11gR2 on there is a column FULL_TEXT which could be used to directly load
+        // the SQL text. This would make the logic of OpenPythia much simpler. This approach was
+        // taken but failed because of the very bad performance: For some reasons Oracle takes
+        // much time to access the full text via thia way. In addition it took very long to load
+        // the text to the client. So for the moment this way will not be taken.
         private static String SNAPSHOT_SQL_AREA = "SELECT sql_id, inst_id, parsing_schema_name, "
                 + "executions, elapsed_time / 1000000, cpu_time / 1000000, buffer_gets, disk_reads, "
                 + "concurrency_wait_time / 1000000, cluster_wait_time / 1000000, rows_processed "
