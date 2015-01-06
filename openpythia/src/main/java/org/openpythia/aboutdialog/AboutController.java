@@ -60,6 +60,8 @@ public class AboutController {
             }
         });
 
+        view.getEditorPaneAbout().setCaretPosition(0);
+
         view.getBtnOK().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
