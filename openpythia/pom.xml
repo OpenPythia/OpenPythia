@@ -4,7 +4,7 @@
 
     <groupId>org.openpythia</groupId>
     <artifactId>openpythia</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1.0alpha0</version>
     <packaging>jar</packaging>
 
     <name>org.openpythia</name>
@@ -68,7 +68,24 @@
             <version>4.10</version>
         </dependency>
     </dependencies>
+
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.txt</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/*.txt</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

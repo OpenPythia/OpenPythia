@@ -24,6 +24,7 @@ import org.openpythia.maindialog.MainDialogController;
 import org.openpythia.preferences.PreferencesManager;
 import org.openpythia.schemaprivileges.MissingPrivilegesController;
 import org.openpythia.schemaprivileges.PrivilegesHelper;
+import org.openpythia.utilities.FileResourceUtility;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -49,6 +50,11 @@ public class PythiaMain {
         }
 
         List<String> arguments = new ArrayList<>(Arrays.asList(args));
+        if (arguments.contains("-v") || arguments.contains("-V")) {
+            printVersionToOutput();
+            return;
+        }
+
         if (arguments.contains("-t") || arguments.contains("-T")) {
             printHelpToOutput();
             return;
@@ -117,11 +123,16 @@ public class PythiaMain {
         new MainDialogController(connectionName);
     }
 
+    private static void printVersionToOutput() {
+        System.out.println("OpenPythia version is '" + FileResourceUtility.getVersion() + "'.");
+    }
+
     private static void printHelpToOutput() {
         System.out.println("Help for OpenPythia");
         System.out.println("--------------------------------------------------------------------------------");
         System.out.println("without arguments   open in GUI mode");
         System.out.println("-t/-T               print this information");
+        System.out.println("-v/-V               print the version");
         System.out.println("-c                  create a dummy configuration file (to have a template)");
         System.out.println("-s/-S               take snapshot and exit");
         System.out.println("                    To take a snapshot the JDBC driver must be available in the");
