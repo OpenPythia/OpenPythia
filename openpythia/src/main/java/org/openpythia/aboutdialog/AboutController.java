@@ -25,6 +25,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 import org.apache.commons.io.IOUtils;
+import org.openpythia.utilities.FileResourceUtility;
 
 public class AboutController {
 
@@ -39,7 +40,7 @@ public class AboutController {
 
         try {
             InputStream inputStream = this.getClass().getResourceAsStream(ABOUT_HTML);
-            aboutText = IOUtils.toString(inputStream);
+            aboutText = String.format(IOUtils.toString(inputStream), FileResourceUtility.getVersion());
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e);
         }
