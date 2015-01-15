@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<java version="1.7.0_60" class="java.beans.XMLDecoder">
+<java version="1.8.0_25" class="java.beans.XMLDecoder">
  <object class="com.jformdesigner.model.FormModel">
   <void property="contentType">
    <string>form/swing</string>
@@ -56,7 +56,7 @@
          <string>scrollPane1</string>
         </void>
         <void method="add">
-         <object class="com.jformdesigner.model.FormComponent">
+         <object class="com.jformdesigner.model.FormComponent" id="FormComponent0">
           <string>javax.swing.JList</string>
           <void method="setProperty">
            <string>selectionMode</string>
@@ -91,7 +91,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent1">
         <string>javax.swing.JButton</string>
         <void method="setProperty">
          <string>text</string>
@@ -120,7 +120,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent2">
         <string>javax.swing.JButton</string>
         <void method="setProperty">
          <string>text</string>
@@ -149,7 +149,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent3">
         <string>javax.swing.JButton</string>
         <void method="setProperty">
          <string>text</string>
@@ -205,7 +205,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent4">
         <string>javax.swing.JCheckBox</string>
         <void method="setProperty">
          <string>text</string>
@@ -234,7 +234,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent5">
         <string>javax.swing.JCheckBox</string>
         <void method="setProperty">
          <string>text</string>
@@ -263,7 +263,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent6">
         <string>javax.swing.JButton</string>
         <void method="setProperty">
          <string>text</string>
@@ -342,7 +342,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent7">
         <string>javax.swing.JTextField</string>
         <void method="setProperty">
          <string>editable</string>
@@ -371,7 +371,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent8">
         <string>javax.swing.JCheckBox</string>
         <void method="setProperty">
          <string>text</string>
@@ -423,7 +423,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent9">
         <string>javax.swing.JTextField</string>
         <void method="setProperty">
          <string>editable</string>
@@ -452,7 +452,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent10">
         <string>javax.swing.JButton</string>
         <void method="setProperty">
          <string>text</string>
@@ -504,7 +504,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent11">
         <string>javax.swing.JTextField</string>
         <void method="setProperty">
          <string>editable</string>
@@ -542,7 +542,7 @@
          <string>scrollPane2</string>
         </void>
         <void method="add">
-         <object class="com.jformdesigner.model.FormComponent">
+         <object class="com.jformdesigner.model.FormComponent" id="FormComponent12">
           <string>javax.swing.JTable</string>
           <void property="name">
            <string>tableDeltaSQLStatements</string>
@@ -568,7 +568,7 @@
         </void>
         <void method="setProperty">
          <string>gridWidth</string>
-         <int>8</int>
+         <int>7</int>
         </void>
        </object>
       </void>

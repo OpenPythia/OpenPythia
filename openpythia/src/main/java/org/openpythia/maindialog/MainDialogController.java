@@ -49,6 +49,9 @@ public class MainDialogController implements MainDialog {
             view.setTitle(view.getTitle() + " - " + connectionName);
         }
 
+        // start the MemoryMonitor in a new thread so the memory usage will be periodically updated
+        new Thread(new MemoryMonitor(view.getProgressBarMemory(), view.getLblTotalMemory())).start();
+
         view.getPanelDetails().setVisible(false);
         view.pack();
 

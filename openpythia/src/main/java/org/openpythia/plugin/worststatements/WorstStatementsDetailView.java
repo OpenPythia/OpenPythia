@@ -180,7 +180,7 @@ public class WorstStatementsDetailView extends JPanel {
         {
             scrollPane2.setViewportView(tableDeltaSQLStatements);
         }
-        add(scrollPane2, CC.xywh(2, 24, 8, 1));
+        add(scrollPane2, CC.xywh(2, 24, 7, 1));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
