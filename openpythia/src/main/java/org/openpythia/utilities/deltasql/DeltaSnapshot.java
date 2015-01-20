@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.openpythia.utilities.sql.SQLHelper;
+import org.openpythia.utilities.sql.SQLStatement;
 import org.openpythia.utilities.sql.SQLStatementSnapshot;
 import org.openpythia.utilities.sql.Snapshot;
 
@@ -134,8 +135,12 @@ public class DeltaSnapshot {
                         sumClusterSeconds = sumClusterSeconds.add(currentStatement.getClusterSeconds());
                         sumRowsProcessed = sumRowsProcessed.add(currentStatement.getRowsProcessed());
                     }
+                    SQLStatement multiInstanceStatement = SQLHelper.getSQLStatement(
+                            sqlStatementSnapshot.getSqlStatement().getSqlId(),
+                            sqlStatementSnapshot.getSqlStatement().getParsingSchema(),
+                            MULTIPLE_INSTANCES);
                     result.addSQLStatementSnapshot(new SQLStatementSnapshot(
-                            sqlStatementSnapshot.getSqlStatement(),
+                            multiInstanceStatement,
                             // identifier for the condensed entry - no longer just one instance
                             MULTIPLE_INSTANCES,
                             sumExecutions,
@@ -205,8 +210,13 @@ public class DeltaSnapshot {
 
                         numberStatements = numberStatements.add(BigDecimal.ONE);
                     }
+                    SQLStatement representationStatement = SQLHelper.getSQLStatement(
+                            sqlStatementSnapshot.getSqlStatement().getSqlId(),
+                            sqlStatementSnapshot.getSqlStatement().getParsingSchema(),
+                            instanceId);
+                    representationStatement.setSqlText(sqlStatementSnapshot.getSqlStatement().getSqlText());
                     result.addSQLStatementSnapshot(new SQLStatementSnapshot(
-                            sqlStatementSnapshot.getSqlStatement(),
+                            representationStatement,
                             instanceId,
                             sumExecutions,
                             sumElapsedSeconds,

@@ -219,15 +219,13 @@ public class SQLHelper {
         return null;
     }
 
-    protected static SQLStatement findSQLStatementWithSqlId(String sqlId) {
+    protected static void setTextForSQLStatementWithSqlId(String sqlId, String sqlText) {
 
         for (SQLStatement statement : allSQLStatements) {
             if (sqlId.equals(statement.getSqlId())) {
-                // we found the statement
-                return statement;
+                // we found an instance of the statement
+                statement.setSqlText(sqlText);
             }
         }
-        // we didn't find the statement
-        return null;
     }
 }

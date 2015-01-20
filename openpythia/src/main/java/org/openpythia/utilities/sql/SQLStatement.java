@@ -144,7 +144,8 @@ public class SQLStatement implements Serializable {
             SQLStatement statement = (SQLStatement) obj;
 
             return sqlId.equals(statement.sqlId)
-                    && isEqual(parsingSchema, statement.parsingSchema);
+                    && isEqual(parsingSchema, statement.parsingSchema)
+                    && instanceId == statement.instanceId;
         } else {
             return false;
         }

@@ -115,8 +115,7 @@ public class SQLTextLoadHelper {
         }
     }
 
-    private static void getTextFromDB(PreparedStatement sqlTextStatement)
-            throws SQLException {
+    private static void getTextFromDB(PreparedStatement sqlTextStatement) throws SQLException {
         SQLStatement sqlStatement;
 
         ResultSet sqlTextResultSet = sqlTextStatement.executeQuery();
@@ -131,10 +130,7 @@ public class SQLTextLoadHelper {
             } else {
                 // new sqlId
                 // save the SQL text of the prior statement
-                sqlStatement = SQLHelper.findSQLStatementWithSqlId(sqlId);
-                if (sqlStatement != null) {
-                    sqlStatement.setSqlText(sqlText.toString());
-                }
+                SQLHelper.setTextForSQLStatementWithSqlId(sqlId, sqlText.toString());
 
                 // start gathering the next SQL string
                 sqlId = sqlTextResultSet.getString(1);
@@ -142,9 +138,6 @@ public class SQLTextLoadHelper {
             }
         }
         // save the SQL text of the prior statement
-        sqlStatement = SQLHelper.findSQLStatementWithSqlId(sqlId);
-        if (sqlStatement != null) {
-            sqlStatement.setSqlText(sqlText.toString());
-        }
+        SQLHelper.setTextForSQLStatementWithSqlId(sqlId, sqlText.toString());
     }
 }
