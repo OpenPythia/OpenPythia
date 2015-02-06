@@ -42,6 +42,9 @@ public class WorstStatementsDetailController implements FinishedListener {
     private Frame owner;
     private WorstStatementsDetailView view;
 
+    private static File lastSnapshotPath;
+    private static File lastExcelExportPath;
+
     private DeltaSnapshot deltaSnapshot = null;
 
     public WorstStatementsDetailController(Frame owner) {
@@ -134,17 +137,18 @@ public class WorstStatementsDetailController implements FinishedListener {
     }
 
     private void saveSnapshot() {
-        int numberSelectedSnapshots = view.getListSnapshots()
-                .getSelectedIndices().length;
+        int numberSelectedSnapshots = view.getListSnapshots().getSelectedIndices().length;
         if (numberSelectedSnapshots != 1) {
             JOptionPane.showMessageDialog(view, "Select the snapshot to save.", "Save Snapshot", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String snapshotIdToSave = (String) view.getListSnapshots()
-                .getSelectedValues()[0];
-        File snapshotFile = FileSelectorUtility.chooseSnapshotFileToWrite(view, snapshotIdToSave);
+        String snapshotIdToSave = (String) view.getListSnapshots().getSelectedValues()[0];
+
+        File snapshotFile = FileSelectorUtility.chooseSnapshotFileToWrite(view, lastSnapshotPath, snapshotIdToSave);
         if (snapshotFile != null) {
+            // store the directory for next call
+            lastSnapshotPath = snapshotFile.getParentFile();
             if (SnapshotHelper.saveSnapshot(snapshotIdToSave, snapshotFile)) {
                 JOptionPane.showMessageDialog(view, "Snapshot successfully written.", "Snapshot Export", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -154,8 +158,10 @@ public class WorstStatementsDetailController implements FinishedListener {
     }
 
     private void loadSnapshot() {
-        File snapshotFile = FileSelectorUtility.chooseSnapshotFileToRead(view);
+        File snapshotFile = FileSelectorUtility.chooseSnapshotFileToRead(view, lastSnapshotPath);
         if (snapshotFile != null) {
+            // store the directory for next call
+            lastSnapshotPath = snapshotFile.getParentFile();
             if (SnapshotHelper.loadSnapshot(snapshotFile)) {
                 fillScenarios();
             } else {
@@ -231,8 +237,10 @@ public class WorstStatementsDetailController implements FinishedListener {
     }
 
     private void exportDeltaToExcel() {
-        File excelFile = FileSelectorUtility.chooseExcelFileToWrite(view);
+        File excelFile = FileSelectorUtility.chooseExcelFileToWrite(view, lastExcelExportPath);
         if (excelFile != null) {
+            // store the directory for next call
+            lastExcelExportPath = excelFile.getParentFile();
             if (!DeltaSnapshotWriter.saveDeltaSnapshot(
                     excelFile,
                     deltaSnapshot,

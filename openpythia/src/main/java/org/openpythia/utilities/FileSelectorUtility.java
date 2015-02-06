@@ -24,8 +24,6 @@ import javax.swing.filechooser.FileFilter;
 
 public class FileSelectorUtility {
 
-    private static File lastPath;
-
     private FileSelectorUtility() {
     }
 
@@ -47,18 +45,18 @@ public class FileSelectorUtility {
         return ext;
     }
 
-    public static File chooseExcelFileToWrite(Component owner) {
-        return chooseFileToWrite(owner, new FileFilterExcel(), ".xlsx", null);
+    public static File chooseExcelFileToWrite(Component owner, File pathToNavigateTo) {
+        return chooseFileToWrite(owner, new FileFilterExcel(), ".xlsx", pathToNavigateTo, null);
     }
 
-    public static File chooseSQLFileToWrite(Component owner, String fileName) {
-        return chooseFileToWrite(owner, new FileFilterSQL(), ".sql", fileName);
+    public static File chooseSQLFileToWrite(Component owner, File pathToNavigateTo, String fileName) {
+        return chooseFileToWrite(owner, new FileFilterSQL(), ".sql", pathToNavigateTo, fileName);
     }
 
-    public static File chooseSnapshotFileToWrite(Component owner, String snapshotIdToSave) {
+    public static File chooseSnapshotFileToWrite(Component owner, File pathToNavigateTo, String snapshotIdToSave) {
         String fileNameSuggestion = suggestedFileNameForSnapshotID(snapshotIdToSave);
 
-        return chooseFileToWrite(owner, new FileFilterSnapshot(), ".snap", fileNameSuggestion);
+        return chooseFileToWrite(owner, new FileFilterSnapshot(), ".snap", pathToNavigateTo, fileNameSuggestion);
     }
 
     public static String suggestedFileNameForSnapshotID(String snapshotId) {
@@ -67,15 +65,14 @@ public class FileSelectorUtility {
                 .replaceAll(":", "") + ".snap";
     }
 
-    private static File chooseFileToWrite(Component owner, FileFilter filter,
-            String extension, String fileName) {
+    private static File chooseFileToWrite(Component owner, FileFilter filter, String extension, File pathToNavigateTo, String fileName) {
 
         File result = null;
 
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(filter);
-        if (lastPath != null) {
-            fileChooser.setCurrentDirectory(lastPath);
+        if (pathToNavigateTo != null) {
+            fileChooser.setCurrentDirectory(pathToNavigateTo);
         }
         if (fileName != null) {
             fileChooser.setSelectedFile(new File(fileName));
@@ -84,7 +81,6 @@ public class FileSelectorUtility {
         int returnVal = fileChooser.showSaveDialog(owner);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             result = fileChooser.getSelectedFile();
-            lastPath = result.getParentFile();
 
             if (FileSelectorUtility.getExtension(result) == null) {
                 result = new File(result.getAbsolutePath() + extension);
@@ -103,27 +99,26 @@ public class FileSelectorUtility {
     }
 
     public static File chooseJarFileToRead() {
-        return chooseFileToRead(null, new FileFilterJar());
+        return chooseFileToRead(null, new FileFilterJar(), null);
     }
 
-    public static File chooseSnapshotFileToRead(Component owner) {
-        return chooseFileToRead(owner, new FileFilterSnapshot());
+    public static File chooseSnapshotFileToRead(Component owner, File pathToNavigateTo) {
+        return chooseFileToRead(owner, new FileFilterSnapshot(), pathToNavigateTo);
     }
 
-    private static File chooseFileToRead(Component owner, FileFilter filter) {
+    private static File chooseFileToRead(Component owner, FileFilter filter, File pathToNavigateTo) {
 
         File result = null;
 
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileFilter(filter);
-        if (lastPath != null) {
-            fileChooser.setCurrentDirectory(lastPath);
+        if (pathToNavigateTo != null) {
+            fileChooser.setCurrentDirectory(pathToNavigateTo);
         }
 
         int returnVal = fileChooser.showOpenDialog(owner);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             result = fileChooser.getSelectedFile();
-            lastPath = result.getParentFile();
         }
         return result;
     }

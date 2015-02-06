@@ -48,6 +48,7 @@ public class LoginController {
 
     private static class ConnectionListModel extends AbstractListModel {
 
+        private static final long serialVersionUID = -3562953203956378314L;
         private List<ConnectionConfiguration> connections;
 
         public ConnectionListModel(List<ConnectionConfiguration> connections) {
@@ -86,11 +87,6 @@ public class LoginController {
             connections.remove(index);
             fireIntervalRemoved(this, index, index);
         }
-
-        public List<ConnectionConfiguration> getConnectionConfigurations() {
-            return connections;
-        }
-
     }
 
     private static final ConnectionConfiguration DEFAULT_CONNECTION_PREFERENCES
@@ -197,6 +193,9 @@ public class LoginController {
 
         //set cell renderer for saved connection configurations only the name will be shown
         view.getSavedConnectionsList().setCellRenderer(new DefaultListCellRenderer() {
+
+            private static final long serialVersionUID = -8268524243585527841L;
+
             @Override
             public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 ConnectionConfiguration connection = (ConnectionConfiguration) value;
@@ -317,8 +316,7 @@ public class LoginController {
     private void generateSchemaCreationScript() {
         final String DEFAULT_SCHEMA_NAME = "pythia";
 
-        File destination = FileSelectorUtility.chooseSQLFileToWrite(view,
-                "CreatePythiaSchema.sql");
+        File destination = FileSelectorUtility.chooseSQLFileToWrite(view, null, "CreatePythiaSchema.sql");
 
         if (destination != null) {
             PrintWriter output = null;
