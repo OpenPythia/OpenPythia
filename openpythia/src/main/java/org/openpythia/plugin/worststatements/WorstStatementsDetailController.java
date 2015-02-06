@@ -181,6 +181,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         boolean condenseInstances = view.getCbCondenseInstances().isSelected();
         boolean condenseMissingBindVariables = view.getCbCondenseMissingBindvariables().isSelected();
 
+        // TODO add a progress indicator
         new Thread(new SnapshotComparator(oldSnapshotId, newSnapshotId,
                 condenseInstances, condenseMissingBindVariables)).start();
     }
@@ -288,13 +289,45 @@ public class WorstStatementsDetailController implements FinishedListener {
         if (excelFile != null) {
             // store the directory for next call
             lastExcelExportPath = excelFile.getParentFile();
+
+            dialogBlocked = true;
+            setGUIElementsToCorrectState();
+
+            // TODO add a progress indicator
+            new Thread(new DeltaToExcelExporter(excelFile,
+                    deltaSnapshot,
+                    view.getCbMoreExecutionPlans().isSelected())).start();
+        }
+    }
+
+    private class DeltaToExcelExporter implements Runnable {
+
+        private File excelFile;
+        private DeltaSnapshot deltaSnapshot;
+        private boolean loadMoreExecutionPlans;
+
+        public DeltaToExcelExporter(File excelFile, DeltaSnapshot deltaSnapshot, boolean loadMoreExecutionPlans) {
+            this.excelFile = excelFile;
+            this.deltaSnapshot = deltaSnapshot;
+            this.loadMoreExecutionPlans = loadMoreExecutionPlans;
+        }
+
+        @Override
+        public void run() {
             if (!DeltaSnapshotWriter.saveDeltaSnapshot(
                     excelFile,
                     deltaSnapshot,
-                    view.getCbMoreExecutionPlans().isSelected())){
+                    loadMoreExecutionPlans)){
                 // if the file could not be written there is no point in opening it
                 return;
             }
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    dialogBlocked = false;
+                    setGUIElementsToCorrectState();
+                }
+            });
 
             if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(view,
                     "Excel file successfully written. Open File?",
