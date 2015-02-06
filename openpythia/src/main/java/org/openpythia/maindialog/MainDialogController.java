@@ -43,6 +43,7 @@ public class MainDialogController implements MainDialog {
 
         bindMenus();
         fillSmallViews();
+        view.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         view.addWindowListener(new CloseWindowListener());
 
         if (connectionName != null && !connectionName.equals("")) {
@@ -97,10 +98,16 @@ public class MainDialogController implements MainDialog {
         });
     }
 
-    private static class CloseWindowListener extends WindowAdapter {
+    private class CloseWindowListener extends WindowAdapter {
         @Override
         public void windowClosing(WindowEvent e) {
-            PythiaMain.gracefulExit();
+            if (JOptionPane.showConfirmDialog(view,
+                    "Are you sure to close OpenPythia?", "Close OpenPythia?",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                PythiaMain.gracefulExit();
+            }
         }
     }
 
