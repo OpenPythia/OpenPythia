@@ -26,7 +26,13 @@ public class Snapshot implements Serializable {
 
     private Calendar snapshotTime;
     private List<SQLStatementSnapshot> sqlStatementSnapshots;
-    
+
+    public Snapshot() {
+        this.snapshotTime = null;
+
+        sqlStatementSnapshots = new ArrayList<>();
+    }
+
     public Snapshot(Calendar snapshotTime) {
         this.snapshotTime = snapshotTime;
 
@@ -36,6 +42,10 @@ public class Snapshot implements Serializable {
     public Calendar getSnapshotTime() { return snapshotTime; }
 
     public String getSnapshotId() {
+        if (snapshotTime == null) {
+            return "";
+        }
+
         return snapshotTime.get(Calendar.YEAR) + "."
                 + fillLeadingZero(snapshotTime.get(Calendar.MONTH) + 1) + "."
                 + fillLeadingZero(snapshotTime.get(Calendar.DAY_OF_MONTH)) + " "

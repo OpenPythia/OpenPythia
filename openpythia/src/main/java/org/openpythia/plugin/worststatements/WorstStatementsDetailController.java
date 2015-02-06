@@ -29,7 +29,6 @@ import javax.swing.event.ListSelectionListener;
 
 import org.openpythia.progress.FinishedListener;
 import org.openpythia.progress.ProgressController;
-import org.openpythia.progress.ProgressListener;
 import org.openpythia.utilities.FileSelectorUtility;
 import org.openpythia.utilities.deltasql.DeltaSQLStatementSnapshot;
 import org.openpythia.utilities.deltasql.DeltaSnapshot;
@@ -47,6 +46,8 @@ public class WorstStatementsDetailController implements FinishedListener {
 
     private DeltaSnapshot deltaSnapshot = null;
 
+    private boolean dialogBlocked = false;
+
     public WorstStatementsDetailController(Frame owner) {
         this.owner = owner;
 
@@ -55,6 +56,9 @@ public class WorstStatementsDetailController implements FinishedListener {
         fillScenarios();
 
         bindActions();
+
+        deltaSnapshot = new DeltaSnapshot();
+        showDeltaSnapshot(deltaSnapshot);
     }
 
     private void fillScenarios() {
@@ -101,22 +105,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         view.getListSnapshots().addListSelectionListener(
                 new ListSelectionListener() {
                     @Override
-                    public void valueChanged(ListSelectionEvent e) {
-                        if (view.getListSnapshots().getSelectedIndices().length > 1) {
-                            view.getBtnCompareSnapshots().setEnabled(true);
-                            view.getCbCondenseInstances().setEnabled(true);
-                            view.getCbCondenseMissingBindvariables().setEnabled(true);
-
-                            view.getBtnSaveSnapshot().setEnabled(false);
-                        } else {
-                            view.getBtnCompareSnapshots().setEnabled(false);
-                            view.getCbCondenseInstances().setEnabled(false);
-                            view.getCbCondenseMissingBindvariables().setEnabled(false);
-
-                            if (view.getListSnapshots().getSelectedIndices().length == 1) {
-                                view.getBtnSaveSnapshot().setEnabled(true);
-                            }
-                        }
+                    public void valueChanged(ListSelectionEvent e) { setGUIElementsToCorrectState();
                     }
                 });
         view.getBtnCompareSnapshots().setEnabled(false);
@@ -171,67 +160,125 @@ public class WorstStatementsDetailController implements FinishedListener {
     }
 
     private void compareSnapshot() {
+        dialogBlocked = true;
+        setGUIElementsToCorrectState();
         int numberSelectedSnapshots = view.getListSnapshots().getSelectedIndices().length;
         if (numberSelectedSnapshots < 2) {
             // at least two snapshots have to be selected
+            dialogBlocked = false;
+            setGUIElementsToCorrectState();
             return;
         }
+
+        // clean display during calculation
+        deltaSnapshot = new DeltaSnapshot();
+        showDeltaSnapshot(deltaSnapshot);
+        view.getBtnExportExcel().setEnabled(false);
+
         String oldSnapshotId = (String) view.getListSnapshots().getSelectedValues()[0];
         String newSnapshotId = (String) view.getListSnapshots().getSelectedValues()[numberSelectedSnapshots - 1];
 
         boolean condenseInstances = view.getCbCondenseInstances().isSelected();
         boolean condenseMissingBindVariables = view.getCbCondenseMissingBindvariables().isSelected();
 
-        deltaSnapshot = new DeltaSnapshot(
-                SnapshotHelper.getSnapshot(oldSnapshotId),
-                SnapshotHelper.getSnapshot(newSnapshotId),
-                condenseInstances,
-                condenseMissingBindVariables);
-
-        // make sure all the SQL text is loaded
-        List<SQLStatement> sqlStatements = new ArrayList<>();
-        for (DeltaSQLStatementSnapshot statement : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
-            if (statement.getSqlStatement().getSqlText() == null) {
-                sqlStatements.add(statement.getSqlStatement());
-            }
-        }
-
-        if (sqlStatements.size() <= 100) {
-            // no progress bar for just one bunch of statements
-            SQLHelper.loadSQLTextForStatements(sqlStatements, null);
-        } else {
-            ProgressListener listener = new ProgressController(owner, this,
-                    "Load SQL Text",
-                    "Loading SQL text for the statements in the snapshot.");
-            new Thread(new SQLTextLoader(sqlStatements, listener)).start();
-        }
-
-        showDeltaSnapshot(deltaSnapshot);
-        view.getBtnExportExcel().setEnabled(true);
+        new Thread(new SnapshotComparator(oldSnapshotId, newSnapshotId,
+                condenseInstances, condenseMissingBindVariables)).start();
     }
 
-    private class SQLTextLoader implements Runnable {
+    private void setGUIElementsToCorrectState() {
+        if (dialogBlocked) {
+            view.getBtnTakeSnapshot().setEnabled(false);
+            view.getBtnSaveSnapshot().setEnabled(false);
+            view.getBtnLoadSnapshot().setEnabled(false);
+            view.getBtnCompareSnapshots().setEnabled(false);
 
-        private List<SQLStatement> statementsToLoad;
-        private ProgressListener progressListener;
+            view.getCbCondenseInstances().setEnabled(false);
+            view.getCbCondenseMissingBindvariables().setEnabled(false);
 
-        public SQLTextLoader(List<SQLStatement> statementsToLoad,
-                             ProgressListener progressListener) {
-            this.statementsToLoad = statementsToLoad;
-            this.progressListener = progressListener;
+            view.getCbMoreExecutionPlans().setEnabled(false);
+            view.getBtnExportExcel().setEnabled(false);
+        } else {
+            // when the dialog is not blocked the user can always take and load snapshots
+            view.getBtnTakeSnapshot().setEnabled(true);
+            view.getBtnLoadSnapshot().setEnabled(true);
+
+            // some of the other buttons rely on the number of selected elements
+            if (view.getListSnapshots().getSelectedIndices().length > 1) {
+                view.getBtnCompareSnapshots().setEnabled(true);
+                view.getCbCondenseInstances().setEnabled(true);
+                view.getCbCondenseMissingBindvariables().setEnabled(true);
+
+                view.getBtnSaveSnapshot().setEnabled(false);
+            } else {
+                view.getBtnCompareSnapshots().setEnabled(false);
+                view.getCbCondenseInstances().setEnabled(false);
+                view.getCbCondenseMissingBindvariables().setEnabled(false);
+
+                if (view.getListSnapshots().getSelectedIndices().length == 1) {
+                    view.getBtnSaveSnapshot().setEnabled(true);
+                }
+            }
+
+            if (deltaSnapshot != null &&
+                    deltaSnapshot.getDeltaSqlStatementSnapshots().size() > 0) {
+                // if there is a delta snapshot it can be exported
+                view.getCbMoreExecutionPlans().setEnabled(true);
+                view.getBtnExportExcel().setEnabled(true);
+            }
+        }
+    }
+
+    private class SnapshotComparator implements Runnable {
+
+        private String oldSnapshotId;
+        private String newSnapshotId;
+        private boolean condenseInstances;
+        private boolean condenseMissingBindVariables;
+
+        public SnapshotComparator(String oldSnapshotId, String newSnapshotId,
+                                  boolean condenseInstances, boolean condenseMissingBindVariables) {
+            this.oldSnapshotId = oldSnapshotId;
+            this.newSnapshotId = newSnapshotId;
+            this.condenseInstances = condenseInstances;
+            this.condenseMissingBindVariables = condenseMissingBindVariables;
         }
 
         @Override
         public void run() {
-            SQLHelper.loadSQLTextForStatements(statementsToLoad, progressListener);
-        }
+            deltaSnapshot = new DeltaSnapshot(
+                    SnapshotHelper.getSnapshot(oldSnapshotId),
+                    SnapshotHelper.getSnapshot(newSnapshotId),
+                    condenseInstances,
+                    condenseMissingBindVariables);
 
+            // make sure all the SQL text is loaded
+            List<SQLStatement> sqlStatements = new ArrayList<>();
+            for (DeltaSQLStatementSnapshot statement : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
+                if (statement.getSqlStatement().getSqlText() == null) {
+                    sqlStatements.add(statement.getSqlStatement());
+                }
+            }
+
+            SQLHelper.loadSQLTextForStatements(sqlStatements, null);
+
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    showDeltaSnapshot(deltaSnapshot);
+                    dialogBlocked = false;
+                    setGUIElementsToCorrectState();
+                }
+            });
+        }
     }
 
     private void showDeltaSnapshot(DeltaSnapshot deltaSnapshot) {
         view.getTfSnapshotA().setText(deltaSnapshot.getSnapshotA().getSnapshotId());
         view.getTfSnapshotB().setText(deltaSnapshot.getSnapshotB().getSnapshotId());
-        view.getTfNumberStatements().setText(String.format("%,d", deltaSnapshot.getDeltaSqlStatementSnapshots().size()));
+        if (deltaSnapshot.getDeltaSqlStatementSnapshots().size() > 0) {
+            view.getTfNumberStatements().setText(String.format("%,d", deltaSnapshot.getDeltaSqlStatementSnapshots().size()));
+        } else {
+            view.getTfNumberStatements().setText("");
+        }
 
         view.getTableDeltaSQLStatements().setModel(new DeltaSnapshotTableModel(deltaSnapshot));
     }

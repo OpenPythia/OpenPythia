@@ -37,6 +37,16 @@ public class DeltaSnapshot {
     private List<DeltaSQLStatementSnapshot> deltaSQLStatementSnapshots;
 
     /**
+     * Create a new empty delta snapshot.
+     */
+    public DeltaSnapshot() {
+        this.snapshotA = new Snapshot();
+        this.snapshotB = new Snapshot();
+
+        deltaSQLStatementSnapshots = new ArrayList<>();;
+    }
+
+    /**
      * Create a new delta snapshot - the delta of two snapshots.
      * <p/>
      * When snapshotB is not younger than snapshotA, a runtime exception is

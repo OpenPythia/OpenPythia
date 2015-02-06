@@ -22,14 +22,14 @@ import org.openpythia.utilities.deltasql.DeltaSnapshot;
 
 class DeltaSnapshotTableModel extends AbstractTableModel implements TableModel {
 
-    private DeltaSnapshot deltaSnaphot;
+    private DeltaSnapshot deltaSnapshot;
 
     private final String[] columnNames = { "SQL", "Executions",
             "Elapsed Seconds", "CPU Seconds", "Buffer Gets", "Disk Reads",
             "Rows Processed" };
 
     public DeltaSnapshotTableModel(DeltaSnapshot deltaSnapshot) {
-        this.deltaSnaphot = deltaSnapshot;
+        this.deltaSnapshot = deltaSnapshot;
     }
 
     @Override
@@ -44,7 +44,7 @@ class DeltaSnapshotTableModel extends AbstractTableModel implements TableModel {
 
     @Override
     public int getRowCount() {
-        return deltaSnaphot.getDeltaSqlStatementSnapshots().size();
+        return deltaSnapshot.getDeltaSqlStatementSnapshots().size();
     }
 
     @Override
@@ -78,25 +78,25 @@ class DeltaSnapshotTableModel extends AbstractTableModel implements TableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return deltaSnaphot.getDeltaSqlStatementSnapshots()
+                return deltaSnapshot.getDeltaSqlStatementSnapshots()
                         .get(rowIndex).getSqlStatement().getSqlText();
             case 1:
-                return deltaSnaphot.getDeltaSqlStatementSnapshots()
+                return deltaSnapshot.getDeltaSqlStatementSnapshots()
                         .get(rowIndex).getDeltaExecutions();
             case 2:
-                return deltaSnaphot.getDeltaSqlStatementSnapshots()
+                return deltaSnapshot.getDeltaSqlStatementSnapshots()
                         .get(rowIndex).getDeltaElapsedSeconds();
             case 3:
-                return deltaSnaphot.getDeltaSqlStatementSnapshots()
+                return deltaSnapshot.getDeltaSqlStatementSnapshots()
                         .get(rowIndex).getDeltaCpuSeconds();
             case 4:
-                return deltaSnaphot.getDeltaSqlStatementSnapshots()
+                return deltaSnapshot.getDeltaSqlStatementSnapshots()
                         .get(rowIndex).getDeltaBufferGets();
             case 5:
-                return deltaSnaphot.getDeltaSqlStatementSnapshots()
+                return deltaSnapshot.getDeltaSqlStatementSnapshots()
                         .get(rowIndex).getDeltaDiskReads();
             case 6:
-                return deltaSnaphot.getDeltaSqlStatementSnapshots()
+                return deltaSnapshot.getDeltaSqlStatementSnapshots()
                         .get(rowIndex).getDeltaRowsProcessed();
             default:
                 return null;
