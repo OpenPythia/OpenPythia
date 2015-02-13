@@ -21,12 +21,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.plugin.PythiaPluginController;
+import org.openpythia.utilities.sql.SQLHelper;
 
 public class HitRatioController implements PythiaPluginController {
 
@@ -73,10 +72,19 @@ public class HitRatioController implements PythiaPluginController {
 
         @Override
         public void run() {
-            float bufferCacheHitRatio = getBufferCacheHitRatio();
-            float libraryCacheHitRatio = getLibraryCacheHitRatio();
+            while (true) {
+                float bufferCacheHitRatio = getBufferCacheHitRatio();
+                float libraryCacheHitRatio = getLibraryCacheHitRatio();
 
-            updateView(bufferCacheHitRatio, libraryCacheHitRatio);
+                updateView(bufferCacheHitRatio, libraryCacheHitRatio);
+
+                try {
+                    // Update the metric every minute
+                    Thread.sleep(60 * 1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         private float getBufferCacheHitRatio() {
@@ -133,38 +141,38 @@ public class HitRatioController implements PythiaPluginController {
             return result;
         }
 
-        private void updateView(float bufferCacheHitRatio,
-                float libraryCacheHitRatio) {
-            smallView.getTfBufferCacheHitRatio().setText(
-                    String.format("%6.2f", bufferCacheHitRatio * 100));
-            if (bufferCacheHitRatio >= 0.97) {
-                smallView.getLblIconBufferCacheHitRatio().setIcon(
-                        new ImageIcon(getClass().getResource(
-                                "/circle-green-24-ns.png")));
-            } else if (bufferCacheHitRatio >= 0.92) {
-                smallView.getLblIconBufferCacheHitRatio().setIcon(
-                        new ImageIcon(getClass().getResource(
-                                "/circle-yellow-24-ns.png")));
-            } else {
-                smallView.getLblIconBufferCacheHitRatio().setIcon(
-                        new ImageIcon(getClass().getResource(
-                                "/circle-red-24-ns.png")));
+        private void updateView(float bufferCacheHitRatio, float libraryCacheHitRatio) {
+            SwingUtilities.invokeLater(new ViewUpdater(bufferCacheHitRatio, libraryCacheHitRatio));
+        }
+
+        private class ViewUpdater implements Runnable {
+
+            private float bufferCacheHitRatio;
+            private float libraryCacheHitRatio;
+
+            public ViewUpdater(float bufferCacheHitRatio, float libraryCacheHitRatio) {
+                this.bufferCacheHitRatio = bufferCacheHitRatio;
+                this.libraryCacheHitRatio = libraryCacheHitRatio;
             }
 
-            smallView.getTfLibraryCacheHitRatio().setText(
-                    String.format("%6.2f", libraryCacheHitRatio * 100));
-            if (libraryCacheHitRatio >= 0.99) {
-                smallView.getLblIconLibraryCacheHitRatio().setIcon(
-                        new ImageIcon(getClass().getResource(
-                                "/circle-green-24-ns.png")));
-            } else if (libraryCacheHitRatio >= 0.97) {
-                smallView.getLblIconLibraryCacheHitRatio().setIcon(
-                        new ImageIcon(getClass().getResource(
-                                "/circle-yellow-24-ns.png")));
-            } else {
-                smallView.getLblIconLibraryCacheHitRatio().setIcon(
-                        new ImageIcon(getClass().getResource(
-                                "/circle-red-24-ns.png")));
+            public void run() {
+                smallView.getTfBufferCacheHitRatio().setText(String.format("%6.2f", bufferCacheHitRatio * 100));
+                if (bufferCacheHitRatio >= 0.97) {
+                    smallView.getLblIconBufferCacheHitRatio().setIcon(new ImageIcon(getClass().getResource("/circle-green-24-ns.png")));
+                } else if (bufferCacheHitRatio >= 0.92) {
+                    smallView.getLblIconBufferCacheHitRatio().setIcon(new ImageIcon(getClass().getResource("/circle-yellow-24-ns.png")));
+                } else {
+                    smallView.getLblIconBufferCacheHitRatio().setIcon(new ImageIcon(getClass().getResource("/circle-red-24-ns.png")));
+                }
+
+                smallView.getTfLibraryCacheHitRatio().setText(String.format("%6.2f", libraryCacheHitRatio * 100));
+                if (libraryCacheHitRatio >= 0.99) {
+                    smallView.getLblIconLibraryCacheHitRatio().setIcon(new ImageIcon(getClass().getResource("/circle-green-24-ns.png")));
+                } else if (libraryCacheHitRatio >= 0.97) {
+                    smallView.getLblIconLibraryCacheHitRatio().setIcon(new ImageIcon(getClass().getResource("/circle-yellow-24-ns.png")));
+                } else {
+                    smallView.getLblIconLibraryCacheHitRatio().setIcon(new ImageIcon(getClass().getResource("/circle-red-24-ns.png")));
+                }
             }
         }
     }

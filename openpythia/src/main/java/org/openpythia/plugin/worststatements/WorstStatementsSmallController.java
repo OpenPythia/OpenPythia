@@ -24,8 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.plugin.MainDialog;
@@ -91,10 +90,19 @@ public class WorstStatementsSmallController implements PythiaPluginController {
 
         @Override
         public void run() {
-            int numberSQLStatements = SQLHelper.getNumberSQLStatementsInLibraryCache();
-            float ratioTop20 = getRatioTop20();
+            while (true) {
+                int numberSQLStatements = SQLHelper.getNumberSQLStatementsInLibraryCache();
+                float ratioTop20 = getRatioTop20();
 
-            updateView(numberSQLStatements, ratioTop20);
+                updateView(numberSQLStatements, ratioTop20);
+
+                try {
+                    // As the metric is a bit more complex for the database it is executed only all five minutes
+                    Thread.sleep(5*60*1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         private float getRatioTop20() {
@@ -103,11 +111,9 @@ public class WorstStatementsSmallController implements PythiaPluginController {
 
             Connection connection = ConnectionPoolUtils.getConnectionFromPool();
             try {
-                PreparedStatement elapsedTop20Statement = connection
-                        .prepareStatement(ELAPSED_TIME_TOP20);
+                PreparedStatement elapsedTop20Statement = connection.prepareStatement(ELAPSED_TIME_TOP20);
 
-                ResultSet elapsedTop20ResultSet = elapsedTop20Statement
-                        .executeQuery();
+                ResultSet elapsedTop20ResultSet = elapsedTop20Statement.executeQuery();
 
                 if (elapsedTop20ResultSet != null) {
                     while (elapsedTop20ResultSet.next()) {
@@ -137,11 +143,23 @@ public class WorstStatementsSmallController implements PythiaPluginController {
         }
 
         private void updateView(int numberSQLStatements, float ratioTop20) {
-            smallView.getTfTotalNumber().setText(
-                    String.format("%,d", numberSQLStatements));
+            SwingUtilities.invokeLater(new ViewUpdater(numberSQLStatements, ratioTop20));
+        }
 
-            smallView.getTfElapsedTop20().setText(
-                    String.format("%6.2f", ratioTop20 * 100));
+        private class ViewUpdater implements Runnable {
+
+            private int numberSQLStatements;
+            private float ratioTop20;
+
+            public ViewUpdater(int numberSQLStatements, float ratioTop20) {
+                this.numberSQLStatements = numberSQLStatements;
+                this.ratioTop20 = ratioTop20;
+            }
+
+            public void run() {
+                smallView.getTfTotalNumber().setText(String.format("%,d", numberSQLStatements));
+                smallView.getTfElapsedTop20().setText(String.format("%6.2f", ratioTop20 * 100));
+            }
         }
     }
 }
