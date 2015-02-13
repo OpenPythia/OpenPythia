@@ -49,4 +49,10 @@ public interface ProgressListener extends FinishedListener {
      *            The value of items which were already finished.
      */
     void setCurrentValue(int currentValue);
-}
+
+    /**
+     * Set the message shown to the user.
+     * @param message The message to display.
+     */
+    public void setMessage(String message);
+    }

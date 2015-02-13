@@ -16,6 +16,7 @@
 package org.openpythia.plugin.worststatements;
 
 import org.apache.poi.ss.usermodel.*;
+import org.openpythia.progress.ProgressListener;
 import org.openpythia.utilities.SSUtilities;
 import org.openpythia.utilities.deltasql.DeltaSQLStatementSnapshot;
 import org.openpythia.utilities.deltasql.DeltaSnapshot;
@@ -41,7 +42,6 @@ public class DeltaSnapshotWriter {
     private static final int INDEX_ROW_START_SQL_STATEMENTS = 4;
     private static final int INDEX_ROW_SUM_FORMULAS = 2;
 
-    private static final int INDEX_COLUMN_ADDRESS = 26;
     private static final int INDEX_COLUMN_SQL_ID = 25;
     private static final int INDEX_COLUMN_DELTA_ROWS_PROCESSED = 23;
     private static final int INDEX_COLUMN_DELTA_CLUSTER_SECONDS = 21;
@@ -76,6 +76,7 @@ public class DeltaSnapshotWriter {
     private File destination;
     private DeltaSnapshot deltaSnapshot;
     private boolean moreExecutionPlans;
+    private ProgressListener listener;
 
     private Sheet statementsSheet;
     private Sheet executionPlansSheet;
@@ -83,11 +84,12 @@ public class DeltaSnapshotWriter {
     private Sheet waitEventsForTimeSpanSheet;
     private CellStyle hyperlinkStyle;
 
-    private DeltaSnapshotWriter(File destination, DeltaSnapshot deltaSnapshot, boolean moreExecutionPlans) {
+    private DeltaSnapshotWriter(File destination, DeltaSnapshot deltaSnapshot,
+                                boolean moreExecutionPlans, ProgressListener listener) {
         this.destination = destination;
         this.deltaSnapshot = deltaSnapshot;
         this.moreExecutionPlans = moreExecutionPlans;
-        this.moreExecutionPlans = moreExecutionPlans;
+        this.listener = listener;
     }
 
     private boolean saveDeltaSnapshot() {
@@ -124,6 +126,10 @@ public class DeltaSnapshotWriter {
                 JOptionPane.showMessageDialog(null, e);
             }
 
+            if (listener != null) {
+                listener.informFinished();
+            }
+
             OutputStream outputStream = new FileOutputStream(destination);
             workbook.write(outputStream);
             outputStream.close();
@@ -154,8 +160,9 @@ public class DeltaSnapshotWriter {
         return worstStatements;
     }
 
-    public static boolean saveDeltaSnapshot(File destination, DeltaSnapshot deltaSnapshot, boolean moreExecutionPlans) {
-        DeltaSnapshotWriter writer = new DeltaSnapshotWriter(destination, deltaSnapshot, moreExecutionPlans);
+    public static boolean saveDeltaSnapshot(File destination, DeltaSnapshot deltaSnapshot,
+                                            boolean moreExecutionPlans, ProgressListener listener) {
+        DeltaSnapshotWriter writer = new DeltaSnapshotWriter(destination, deltaSnapshot, moreExecutionPlans, listener);
         return writer.saveDeltaSnapshot();
     }
 
@@ -181,7 +188,17 @@ public class DeltaSnapshotWriter {
         int currentNumber = 1;
         boolean snapshotContainsMissingBindVariables = false;
 
+        if (listener != null) {
+            listener.setMessage("Writing the statements...");
+            listener.setStartValue(0);
+            listener.setEndValue(deltaSnapshot.getDeltaSqlStatementSnapshots().size());
+        }
+
         for (DeltaSQLStatementSnapshot currentSnapshot : deltaSnapshot.getDeltaSqlStatementSnapshots()) {
+            if (listener != null) {
+                listener.setCurrentValue(currentNumber);
+            }
+
             Row currentRow = SSUtilities.copyRow(statementsSheet, templateRow, currentRowIndex);
 
             currentRow.getCell(INDEX_COLUMN_NO).setCellValue(currentNumber++);
@@ -264,7 +281,20 @@ public class DeltaSnapshotWriter {
         int currentRowIndex = EXECUTION_PLANS_INDEX_START_EXECUTION_PLANS;
         Row currentRow;
 
+        int currentDataSet = 0;
+
+        if (listener != null) {
+            listener.setMessage("Writing the execution plans...");
+            listener.setStartValue(0);
+            listener.setEndValue(worstStatements.size());
+        }
+
         for (DeltaSQLStatementSnapshot currentSnapshot : worstStatements) {
+
+            currentDataSet++;
+            if (listener != null) {
+                listener.setCurrentValue(currentDataSet);
+            }
             // Header for statement
             currentRow = SSUtilities.copyRow(executionPlansSheet, templateStatementHeaderRow, currentRowIndex);
 
@@ -372,7 +402,20 @@ public class DeltaSnapshotWriter {
         int currentRowIndex = WAIT_EVENTS_SQL_INDEX_START_WAIT_EVENTS;
         Row currentRow;
 
+        int currentDataSet = 0;
+
+        if (listener != null) {
+            listener.setMessage("Writing the wait events...");
+            listener.setStartValue(0);
+            listener.setEndValue(worstStatements.size());
+        }
+
         for (DeltaSQLStatementSnapshot currentSnapshot : worstStatements) {
+
+            currentDataSet++;
+            if (listener != null) {
+                listener.setCurrentValue(currentDataSet);
+            }
 
             if (waitEventsPerStatementMap.get(currentSnapshot) == null) {
                 // if this worst statement has no wait events associated with, go to the next one
@@ -400,6 +443,7 @@ public class DeltaSnapshotWriter {
                 currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitEventName());
                 currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitObjectOwner());
                 currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitObjectName());
+                //noinspection UnusedAssignment
                 safeBigDecimalIntoCellWriter(currentRow.getCell(columnIndex++), currentTuple.getWaitedSeconds());
                 currentRowIndex++;
             }
@@ -432,6 +476,7 @@ public class DeltaSnapshotWriter {
             currentRow.getCell(columnIndex++).setCellValue(currentWaitEvent.getWaitEventName());
             currentRow.getCell(columnIndex++).setCellValue(currentWaitEvent.getWaitObjectOwner());
             currentRow.getCell(columnIndex++).setCellValue(currentWaitEvent.getWaitObjectName());
+            //noinspection UnusedAssignment
             safeBigDecimalIntoCellWriter(currentRow.getCell(columnIndex++), currentWaitEvent.getWaitedSeconds());
 
             currentRowIndex++;

@@ -70,4 +70,9 @@ public class ProgressController implements ProgressListener {
     public void setCurrentValue(int currentValue) {
         view.getProgressBar().setValue(currentValue);
     }
+
+    @Override
+    public void setMessage(String message) {
+        view.getLblMessage().setText(message);
+    }
 }

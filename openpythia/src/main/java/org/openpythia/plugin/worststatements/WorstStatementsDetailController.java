@@ -29,6 +29,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.openpythia.progress.FinishedListener;
 import org.openpythia.progress.ProgressController;
+import org.openpythia.progress.ProgressListener;
 import org.openpythia.utilities.FileSelectorUtility;
 import org.openpythia.utilities.deltasql.DeltaSQLStatementSnapshot;
 import org.openpythia.utilities.deltasql.DeltaSnapshot;
@@ -182,8 +183,12 @@ public class WorstStatementsDetailController implements FinishedListener {
         boolean condenseMissingBindVariables = view.getCbCondenseMissingBindvariables().isSelected();
 
         // TODO add a progress indicator
+        ProgressListener listener = new ProgressController(owner, this,
+                "Compare Snapshots",
+                "Comparing Snaphots...");
         new Thread(new SnapshotComparator(oldSnapshotId, newSnapshotId,
-                condenseInstances, condenseMissingBindVariables)).start();
+                condenseInstances, condenseMissingBindVariables,
+                listener)).start();
     }
 
     private void setGUIElementsToCorrectState() {
@@ -235,13 +240,16 @@ public class WorstStatementsDetailController implements FinishedListener {
         private String newSnapshotId;
         private boolean condenseInstances;
         private boolean condenseMissingBindVariables;
+        private ProgressListener listener;
 
         public SnapshotComparator(String oldSnapshotId, String newSnapshotId,
-                                  boolean condenseInstances, boolean condenseMissingBindVariables) {
+                                  boolean condenseInstances, boolean condenseMissingBindVariables,
+                                  ProgressListener listener) {
             this.oldSnapshotId = oldSnapshotId;
             this.newSnapshotId = newSnapshotId;
             this.condenseInstances = condenseInstances;
             this.condenseMissingBindVariables = condenseMissingBindVariables;
+            this.listener = listener;
         }
 
         @Override
@@ -250,7 +258,8 @@ public class WorstStatementsDetailController implements FinishedListener {
                     SnapshotHelper.getSnapshot(oldSnapshotId),
                     SnapshotHelper.getSnapshot(newSnapshotId),
                     condenseInstances,
-                    condenseMissingBindVariables);
+                    condenseMissingBindVariables,
+                    listener);
 
             // make sure all the SQL text is loaded
             List<SQLStatement> sqlStatements = new ArrayList<>();
@@ -260,7 +269,7 @@ public class WorstStatementsDetailController implements FinishedListener {
                 }
             }
 
-            SQLHelper.loadSQLTextForStatements(sqlStatements, null);
+            SQLHelper.loadSQLTextForStatements(sqlStatements, listener);
 
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -294,9 +303,13 @@ public class WorstStatementsDetailController implements FinishedListener {
             setGUIElementsToCorrectState();
 
             // TODO add a progress indicator
+            ProgressListener listener = new ProgressController(owner, this,
+                    "Export to Excel",
+                    "Export the delta snapshot to Excel..");
             new Thread(new DeltaToExcelExporter(excelFile,
                     deltaSnapshot,
-                    view.getCbMoreExecutionPlans().isSelected())).start();
+                    view.getCbMoreExecutionPlans().isSelected(),
+                    listener)).start();
         }
     }
 
@@ -305,22 +318,23 @@ public class WorstStatementsDetailController implements FinishedListener {
         private File excelFile;
         private DeltaSnapshot deltaSnapshot;
         private boolean loadMoreExecutionPlans;
+        private ProgressListener listener;
 
-        public DeltaToExcelExporter(File excelFile, DeltaSnapshot deltaSnapshot, boolean loadMoreExecutionPlans) {
+        public DeltaToExcelExporter(File excelFile, DeltaSnapshot deltaSnapshot,
+                                    boolean loadMoreExecutionPlans, ProgressListener listener) {
             this.excelFile = excelFile;
             this.deltaSnapshot = deltaSnapshot;
             this.loadMoreExecutionPlans = loadMoreExecutionPlans;
+            this.listener = listener;
         }
 
         @Override
         public void run() {
-            if (!DeltaSnapshotWriter.saveDeltaSnapshot(
+            boolean success = DeltaSnapshotWriter.saveDeltaSnapshot(
                     excelFile,
                     deltaSnapshot,
-                    loadMoreExecutionPlans)){
-                // if the file could not be written there is no point in opening it
-                return;
-            }
+                    loadMoreExecutionPlans,
+                    listener);
 
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -328,6 +342,11 @@ public class WorstStatementsDetailController implements FinishedListener {
                     setGUIElementsToCorrectState();
                 }
             });
+
+            if (!success){
+                // if the file could not be written there is no point in opening it
+                return;
+            }
 
             if (JOptionPane.YES_OPTION == JOptionPane.showConfirmDialog(view,
                     "Excel file successfully written. Open File?",

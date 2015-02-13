@@ -70,8 +70,8 @@ public class SQLHelper {
         return result;
     }
 
-    public static void waitForAllSQLTextToBeLoaded() {
-        SQLTextLoadHelper.loadSQLTextForStatements(unloadedSQLStatements, null);
+    public static void waitForAllSQLTextToBeLoaded(ProgressListener listener) {
+        SQLTextLoadHelper.loadSQLTextForStatements(unloadedSQLStatements, listener);
     }
 
     public static void loadSQLTextForStatements(List<SQLStatement> sqlStatements, ProgressListener progressListener) {
@@ -173,6 +173,7 @@ public class SQLHelper {
             List<SQLStatement> sqlStatementsToLoad = new ArrayList<>();
             int numberStatements;
 
+            //noinspection InfiniteLoopStatement
             while (true) {
                 if (unloadedSQLStatements.size() > 0) {
 

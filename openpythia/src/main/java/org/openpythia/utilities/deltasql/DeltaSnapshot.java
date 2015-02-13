@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.openpythia.progress.ProgressListener;
 import org.openpythia.utilities.sql.SQLHelper;
 import org.openpythia.utilities.sql.SQLStatement;
 import org.openpythia.utilities.sql.SQLStatementSnapshot;
@@ -43,7 +44,7 @@ public class DeltaSnapshot {
         this.snapshotA = new Snapshot();
         this.snapshotB = new Snapshot();
 
-        deltaSQLStatementSnapshots = new ArrayList<>();;
+        deltaSQLStatementSnapshots = new ArrayList<>();
     }
 
     /**
@@ -66,11 +67,13 @@ public class DeltaSnapshot {
      * @param snapshotB The newer snapshot.
      * @param condenseInstances Should the result be condensed by instances?
      * @param condenseMissingBindVariables Should the result be condensed by missing bind variables?
+     * @param listener A progress listener to visualize the progress of the comparison.
      */
     public DeltaSnapshot(Snapshot snapshotA,
                          Snapshot snapshotB,
                          boolean condenseInstances,
-                         boolean condenseMissingBindVariables) {
+                         boolean condenseMissingBindVariables,
+                         ProgressListener listener) {
         if (snapshotA.getSnapshotId().compareTo(snapshotB.getSnapshotId()) > 0) {
             throw new IllegalArgumentException(
                     "Snapshot B not younger than Snapshot A.");
@@ -86,7 +89,7 @@ public class DeltaSnapshot {
 
         if (condenseMissingBindVariables) {
             // to condense by missing bind variable the SQL text needs to be available
-            SQLHelper.waitForAllSQLTextToBeLoaded();
+            SQLHelper.waitForAllSQLTextToBeLoaded(listener);
 
             tempSnapshotA = condenseSnapshotByMissingBindVariables(tempSnapshotA);
             tempSnapshotB = condenseSnapshotByMissingBindVariables(tempSnapshotB);
@@ -264,7 +267,8 @@ public class DeltaSnapshot {
                 // taken (or was dropped from the library cache). We take only
                 // the new snapshot into account.
                 sortDeltaSQLStatementSnapshotIn(new DeltaSQLStatementSnapshot(sqlStatementSnapshotB));
-            } else if (sqlStatementSnapshotA.getExecutions().compareTo(sqlStatementSnapshotB.getExecutions()) >= 0) {
+            } else //noinspection StatementWithEmptyBody
+                if (sqlStatementSnapshotA.getExecutions().compareTo(sqlStatementSnapshotB.getExecutions()) >= 0) {
                 // the statement was not executed between the two snapshots. So
                 // it will be ignored for the delta snapshot.
                 //
@@ -300,11 +304,6 @@ public class DeltaSnapshot {
 
     public List<DeltaSQLStatementSnapshot> getDeltaSqlStatementSnapshots() {
         return deltaSQLStatementSnapshots;
-    }
-
-    public void addDeltaSQLStatementSnapshot(
-            DeltaSQLStatementSnapshot deltaSqlStatementSnapshot) {
-        deltaSQLStatementSnapshots.add(deltaSqlStatementSnapshot);
     }
 
     public Snapshot getSnapshotA() {

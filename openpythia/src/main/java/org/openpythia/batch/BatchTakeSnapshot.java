@@ -125,6 +125,11 @@ public class BatchTakeSnapshot {
                 }
             }
         }
+
+        @Override
+        public void setMessage(String message) {
+            // nothing to implement for the batch
+        }
     }
 
     public void shutDown() {
