@@ -275,7 +275,10 @@ public class DeltaSnapshotWriter {
         Row templateChildHeaderRow = executionPlansSheet.getRow(EXECUTION_PLANS_INDEX_ROW_TEMPLATE_CHILD_HEADER_ROW);
         Row templateExecutionStepRow = executionPlansSheet.getRow(EXECUTION_PLANS_INDEX_ROW_TEMPLATE_EXECUTION_STEP_ROW);
 
-        SQLHelper.loadExecutionPlansForStatements(worstStatements, null);
+        if (listener != null) {
+            listener.setMessage("Loading the execution plans...");
+        }
+        SQLHelper.loadExecutionPlansForStatements(worstStatements, listener);
 
         // Now write the execution plans into the Excel sheet
         int currentRowIndex = EXECUTION_PLANS_INDEX_START_EXECUTION_PLANS;
