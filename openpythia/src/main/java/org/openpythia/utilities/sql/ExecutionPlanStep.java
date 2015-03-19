@@ -169,8 +169,13 @@ public class ExecutionPlanStep implements Serializable {
     private void addChildStep(ExecutionPlanStep childStep) {
         int insertAt = -1;
         for (ExecutionPlanStep currentStep : childSteps) {
-            if (currentStep.position.compareTo(childStep.position) > 0) {
-                insertAt = childSteps.indexOf(currentStep);
+            try {
+                if (currentStep.position.compareTo(childStep.position) > 0) {
+                    insertAt = childSteps.indexOf(currentStep);
+                }
+            } catch (NullPointerException e) {
+                // this is a curious case that came up during analysing a database - and happened just one time:
+                // there seem to be cases where the position is not filled.
             }
         }
         if (insertAt == -1) {
