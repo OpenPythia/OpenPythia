@@ -371,11 +371,11 @@ public class DeltaSnapshotWriter {
             currentRow.getCell(1).setCellValue(
                     step.getObjectOwner() + "." + step.getObjectName());
         }
-        safeBigDecimalIntoCellWriter(currentRow.getCell(2), step.getCost());
-        safeBigDecimalIntoCellWriter(currentRow.getCell(3), step.getCardinality());
-        safeBigDecimalIntoCellWriter(currentRow.getCell(4), step.getBytes());
-        safeBigDecimalIntoCellWriter(currentRow.getCell(5), step.getCpuCost());
-        safeBigDecimalIntoCellWriter(currentRow.getCell(6), step.getIoCost());
+        nullSafeBigDecimalIntoCellWriter(currentRow.getCell(2), step.getCost());
+        nullSafeBigDecimalIntoCellWriter(currentRow.getCell(3), step.getCardinality());
+        nullSafeBigDecimalIntoCellWriter(currentRow.getCell(4), step.getBytes());
+        nullSafeBigDecimalIntoCellWriter(currentRow.getCell(5), step.getCpuCost());
+        nullSafeBigDecimalIntoCellWriter(currentRow.getCell(6), step.getIoCost());
         currentRow.getCell(7).setCellValue(step.getAccessPredicates());
         currentRow.getCell(8).setCellValue(step.getFilterPredicates());
         internalCurrentRowIndex++;
@@ -447,7 +447,7 @@ public class DeltaSnapshotWriter {
                 currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitObjectOwner());
                 currentRow.getCell(columnIndex++).setCellValue(currentTuple.getWaitObjectName());
                 //noinspection UnusedAssignment
-                safeBigDecimalIntoCellWriter(currentRow.getCell(columnIndex++), currentTuple.getWaitedSeconds());
+                nullSafeBigDecimalIntoCellWriter(currentRow.getCell(columnIndex++), currentTuple.getWaitedSeconds());
                 currentRowIndex++;
             }
         }
@@ -480,7 +480,7 @@ public class DeltaSnapshotWriter {
             currentRow.getCell(columnIndex++).setCellValue(currentWaitEvent.getWaitObjectOwner());
             currentRow.getCell(columnIndex++).setCellValue(currentWaitEvent.getWaitObjectName());
             //noinspection UnusedAssignment
-            safeBigDecimalIntoCellWriter(currentRow.getCell(columnIndex++), currentWaitEvent.getWaitedSeconds());
+            nullSafeBigDecimalIntoCellWriter(currentRow.getCell(columnIndex++), currentWaitEvent.getWaitedSeconds());
 
             currentRowIndex++;
         }
@@ -489,7 +489,7 @@ public class DeltaSnapshotWriter {
         SSUtilities.deleteRow(waitEventsForTimeSpanSheet, templateWaitEventRow);
     }
 
-    private void safeBigDecimalIntoCellWriter(Cell cell, BigDecimal value) {
+    private void nullSafeBigDecimalIntoCellWriter(Cell cell, BigDecimal value) {
         if (value == null) {
             cell.setCellValue("");
         } else {
