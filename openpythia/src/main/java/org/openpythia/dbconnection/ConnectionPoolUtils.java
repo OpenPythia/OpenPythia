@@ -109,7 +109,9 @@ public class ConnectionPoolUtils {
      */
     public static void returnConnectionToPool(Connection connection) {
         try {
-            connection.close();
+            if (connection != null) {
+                connection.close();
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

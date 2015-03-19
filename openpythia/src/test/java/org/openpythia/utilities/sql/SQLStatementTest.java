@@ -1,6 +1,5 @@
 package org.openpythia.utilities.sql;
 
-import com.sun.org.apache.xpath.internal.operations.Equals;
 import org.junit.Test;
 
 import java.io.IOException;

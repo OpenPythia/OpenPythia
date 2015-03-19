@@ -40,7 +40,7 @@ public class SQLHelper {
     private static List<SQLStatement> allSQLStatements = new CopyOnWriteArrayList<>();
     private static List<SQLStatement> unloadedSQLStatements = new CopyOnWriteArrayList<>();
 
-    public static SQLStatement getSQLStatement(String sqlId, String parsingSchema, int instance) {
+    public static SQLStatement getSQLStatement(String sqlId, String parsingSchema, int instance, String sqlText) {
         SQLStatement result;
 
         SQLStatement newStatement = new SQLStatement(sqlId, parsingSchema, instance);
@@ -50,11 +50,19 @@ public class SQLHelper {
             result = allSQLStatements.get(allSQLStatements.indexOf(newStatement));
         } else {
             allSQLStatements.add(newStatement);
-            unloadedSQLStatements.add(newStatement);
+            if (sqlText != null && !sqlText.equals("")) {
+                newStatement.setSqlText(sqlText);
+            } else {
+                unloadedSQLStatements.add(newStatement);
+            }
             result = newStatement;
         }
 
         return result;
+    }
+
+    public static SQLStatement getSQLStatement(String sqlId, String parsingSchema, int instance) {
+        return getSQLStatement(sqlId, parsingSchema, instance, null);
     }
 
     public static SQLStatement getRegisterSQLStatement(SQLStatement sqlStatement) {

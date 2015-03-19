@@ -84,6 +84,12 @@ public class SQLTextLoadHelper {
         Connection connection = null;
         try {
             connection = ConnectionPoolUtils.getConnectionFromPool();
+            if (connection == null) {
+                // just for testability: during normal execution we will never get here. But the unit tests are
+                // running without a database
+                return;
+            }
+
             PreparedStatement sqlTextStatement = connection.prepareStatement(SELECT_SQL_TEXT_FOR_200_STATEMENTS);
             sqlTextStatement.setFetchSize(1000);
 
