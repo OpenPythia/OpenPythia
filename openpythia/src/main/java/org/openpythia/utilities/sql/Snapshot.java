@@ -16,6 +16,7 @@
 package org.openpythia.utilities.sql;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -46,12 +47,10 @@ public class Snapshot implements Serializable {
             return "";
         }
 
-        return snapshotTime.get(Calendar.YEAR) + "."
-                + fillLeadingZero(snapshotTime.get(Calendar.MONTH) + 1) + "."
-                + fillLeadingZero(snapshotTime.get(Calendar.DAY_OF_MONTH)) + " "
-                + fillLeadingZero(snapshotTime.get(Calendar.HOUR_OF_DAY)) + ":"
-                + fillLeadingZero(snapshotTime.get(Calendar.MINUTE)) + ":"
-                + fillLeadingZero(snapshotTime.get(Calendar.SECOND));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+        formatter.setTimeZone(snapshotTime.getTimeZone());
+
+        return formatter.format(snapshotTime.getTime());
     }
 
     private static String fillLeadingZero(int value) {
