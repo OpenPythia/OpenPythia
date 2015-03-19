@@ -130,14 +130,14 @@ public class DeltaSnapshot {
                 } else {
                     // There are multiple entries for this SQL statement. All the entries from the
                     // different instances have to be condensed into one new entry.
-                    BigDecimal sumExecutions = BigDecimal.valueOf(0);
-                    BigDecimal sumElapsedSeconds = BigDecimal.valueOf(0);
-                    BigDecimal sumCpuSeconds = BigDecimal.valueOf(0);
-                    BigDecimal sumBufferGets = BigDecimal.valueOf(0);
-                    BigDecimal sumDiskReads = BigDecimal.valueOf(0);
-                    BigDecimal sumConcurrencySeconds = BigDecimal.valueOf(0);
-                    BigDecimal sumClusterSeconds = BigDecimal.valueOf(0);
-                    BigDecimal sumRowsProcessed = BigDecimal.valueOf(0);
+                    BigDecimal sumExecutions = BigDecimal.ZERO;
+                    BigDecimal sumElapsedSeconds = BigDecimal.ZERO;
+                    BigDecimal sumCpuSeconds = BigDecimal.ZERO;
+                    BigDecimal sumBufferGets = BigDecimal.ZERO;
+                    BigDecimal sumDiskReads = BigDecimal.ZERO;
+                    BigDecimal sumConcurrencySeconds = BigDecimal.ZERO;
+                    BigDecimal sumClusterSeconds = BigDecimal.ZERO;
+                    BigDecimal sumRowsProcessed = BigDecimal.ZERO;
                     for (SQLStatementSnapshot currentStatement : snapshotLookup.get(sqlId)) {
                         sumExecutions = sumExecutions.add(currentStatement.getExecutions());
                         sumElapsedSeconds = sumElapsedSeconds.add(currentStatement.getElapsedSeconds());
@@ -196,14 +196,14 @@ public class DeltaSnapshot {
                     // There are multiple entries for this SQL statement. All the entries with missing
                     // bind variables have to be condensed into one new entry.
                     int instanceId = NO_INSTANCE;
-                    BigDecimal sumExecutions = BigDecimal.valueOf(0);
-                    BigDecimal sumElapsedSeconds = BigDecimal.valueOf(0);
-                    BigDecimal sumCpuSeconds = BigDecimal.valueOf(0);
-                    BigDecimal sumBufferGets = BigDecimal.valueOf(0);
-                    BigDecimal sumDiskReads = BigDecimal.valueOf(0);
-                    BigDecimal sumConcurrencySeconds = BigDecimal.valueOf(0);
-                    BigDecimal sumClusterSeconds = BigDecimal.valueOf(0);
-                    BigDecimal sumRowsProcessed = BigDecimal.valueOf(0);
+                    BigDecimal sumExecutions = BigDecimal.ZERO;
+                    BigDecimal sumElapsedSeconds = BigDecimal.ZERO;
+                    BigDecimal sumCpuSeconds = BigDecimal.ZERO;
+                    BigDecimal sumBufferGets = BigDecimal.ZERO;
+                    BigDecimal sumDiskReads = BigDecimal.ZERO;
+                    BigDecimal sumConcurrencySeconds = BigDecimal.ZERO;
+                    BigDecimal sumClusterSeconds = BigDecimal.ZERO;
+                    BigDecimal sumRowsProcessed = BigDecimal.ZERO;
 
                     BigDecimal numberStatements = BigDecimal.ONE;
                     for (SQLStatementSnapshot currentStatement : snapshotLookup.get(normalizedSQLText)) {
