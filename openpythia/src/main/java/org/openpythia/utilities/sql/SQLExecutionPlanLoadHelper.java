@@ -32,7 +32,7 @@ public class SQLExecutionPlanLoadHelper {
             + "ORDER BY sql_id, inst_id, child_number, id, position";
 
     protected static void loadExecutionPlansForStatements(List<DeltaSQLStatementSnapshot> sqlStatements,
-                                                       ProgressListener progressListener) {
+                                                          ProgressListener progressListener) {
         if (progressListener != null) {
             progressListener.setStartValue(0);
             progressListener.setEndValue(sqlStatements.size());
@@ -77,10 +77,6 @@ public class SQLExecutionPlanLoadHelper {
             } catch (InterruptedException e) {
                 // we don't care for being interrupted
             }
-        }
-
-        if (progressListener != null) {
-            progressListener.informFinished();
         }
     }
 
