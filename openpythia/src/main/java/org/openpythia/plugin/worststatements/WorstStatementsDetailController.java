@@ -302,7 +302,6 @@ public class WorstStatementsDetailController implements FinishedListener {
             dialogBlocked = true;
             setGUIElementsToCorrectState();
 
-            // TODO add a progress indicator
             ProgressListener listener = new ProgressController(owner, this,
                     "Export to Excel",
                     "Export the delta snapshot to Excel..");
