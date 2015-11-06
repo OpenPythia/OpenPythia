@@ -4,7 +4,7 @@ notifications:
   email: false
 deploy:
   provider: bintray
-  user: openPythia
+  user: dennisrippinger
   key: '$BINTRAY_API_KEY'
   file: ./bintray.json
   skip_cleanup: true
