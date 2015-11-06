@@ -5,6 +5,6 @@ notifications:
 deploy:
   provider: bintray
   user: dennisrippinger
-  key: '$BINTRAY_API_KEY'
+  key: $BINTRAY_API_KEY
   file: ./bintray.json
   skip_cleanup: true

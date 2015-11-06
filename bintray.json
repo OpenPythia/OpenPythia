@@ -1,6 +1,6 @@
 {
     "package": {
-        "name": "${TRAVIS_OS_NAME}",
+        "name": "openPythia",
         "repo": "master",
         "subject": "openPythia",
         "desc": "Automated build of master branch from travis ci.",
