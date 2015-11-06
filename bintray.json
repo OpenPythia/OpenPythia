@@ -2,7 +2,7 @@
     "package": {
         "name": "openPythia",
         "repo": "OpenPythia",
-        "subject": "openpythia",
+        "subject": "openPythia",
         "desc": "Automated build of master branch from travis ci.",
         "website_url": "https://github.com/OpenPythia/OpenPythia",
         "issue_tracker_url": "https://github.com/OpenPythia/OpenPythia/issues",
@@ -13,7 +13,6 @@
     "version": {
         "name": "master",
         "desc": "Automated build of the master branch.",
-        "released": "${DATE}",
         "vcs_tag": "master"
     },
 
