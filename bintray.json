@@ -1,0 +1,26 @@
+{
+    "package": {
+        "name": "${TRAVIS_OS_NAME}",
+        "repo": "master",
+        "subject": "openPythia",
+        "desc": "Automated build of master branch from travis ci.",
+        "website_url": "https://github.com/OpenPythia/OpenPythia",
+        "issue_tracker_url": "https://github.com/OpenPythia/OpenPythia/issues",
+        "vcs_url": "https://github.com/OpenPythia/OpenPythia.git",
+        "licenses": ["Apache-2.0"]
+    },
+
+    "version": {
+        "name": "master",
+        "desc": "Automated build of the master branch.",
+        "released": "${DATE}",
+        "vcs_tag": "master"
+    },
+
+    "files": [
+        {
+            "includePattern": "/home/travis/build/OpenPythia/OpenPythia/openpythia/target/openPythia.jar"
+        }
+    ],
+    "publish": true
+}

@@ -2,3 +2,9 @@ language: java
 script: mvn -f openpythia/pom.xml clean verify
 notifications:
   email: false
+deploy:
+  provider: bintray
+  user: openPythia
+  key: '$BINTRAY_API_KEY'
+  file: ./bintray.json
+  skip_cleanup: true
