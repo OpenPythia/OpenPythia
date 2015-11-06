@@ -1,3 +1,4 @@
 language: java
+script: mvn -f openpythia/pom.xml clean verify
 notifications:
   email: false
