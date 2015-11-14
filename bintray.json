@@ -11,7 +11,7 @@
     },
 
     "version": {
-        "name": "master",
+        "name": "openPythia",
         "desc": "Automated build of the master branch.",
         "vcs_tag": "master"
     },
