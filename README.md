@@ -1,4 +1,6 @@
-# OpenPythia for Oracle databases #
+# OpenPythia for Oracle databases ![Build Status](https://travis-ci.org/OpenPythia/OpenPythia.svg)](https://travis-ci.org/OpenPythia/OpenPythia) #
+
+
 
 - Your application seems to be slow?
 - Your database has a high load?
