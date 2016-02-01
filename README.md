@@ -1,4 +1,4 @@
-# OpenPythia for Oracle databases ![Build Status](https://travis-ci.org/OpenPythia/OpenPythia.svg)](https://travis-ci.org/OpenPythia/OpenPythia) #
+# OpenPythia for Oracle databases [![Build Status](https://travis-ci.org/OpenPythia/OpenPythia.svg)](https://travis-ci.org/OpenPythia/OpenPythia)
 
 
 
