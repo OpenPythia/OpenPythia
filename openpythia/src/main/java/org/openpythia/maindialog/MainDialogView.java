@@ -133,7 +133,7 @@ public class MainDialogView extends JFrame {
 
                 //======== panelDetails ========
                 {
-                   // panelDetails.setBorder(Borders.createEmptyBorder("0dlu, 0dlu, 0dlu, 0dlu"));
+                    // TODO - check if the new line has the same behaviour as the old one
                     panelDetails.setBorder(Borders.EMPTY);
                     panelDetails.setLayout(new BorderLayout());
                 }
