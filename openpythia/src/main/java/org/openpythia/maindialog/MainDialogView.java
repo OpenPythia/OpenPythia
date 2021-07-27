@@ -133,7 +133,8 @@ public class MainDialogView extends JFrame {
 
                 //======== panelDetails ========
                 {
-                    panelDetails.setBorder(Borders.createEmptyBorder("0dlu, 0dlu, 0dlu, 0dlu"));
+                   // panelDetails.setBorder(Borders.createEmptyBorder("0dlu, 0dlu, 0dlu, 0dlu"));
+                    panelDetails.setBorder(Borders.EMPTY);
                     panelDetails.setLayout(new BorderLayout());
                 }
                 scrollPaneDetail.setViewportView(panelDetails);

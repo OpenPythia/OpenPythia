@@ -38,13 +38,13 @@ public class SSUtilities {
                 newCell.setCellStyle(currentCell.getCellStyle());
                 newCell.setCellComment(currentCell.getCellComment());
                 switch (currentCell.getCellType()) {
-                    case Cell.CELL_TYPE_STRING:
+                    case STRING:
                         newCell.setCellValue(currentCell.getStringCellValue());
                         break;
-                    case Cell.CELL_TYPE_NUMERIC:
+                    case NUMERIC:
                         newCell.setCellValue(currentCell.getNumericCellValue());
                         break;
-                    case Cell.CELL_TYPE_FORMULA:
+                    case FORMULA:
                         String dummy = currentCell.getCellFormula();
                         dummy = dummy.replace("Row",
                                 String.valueOf(destination + 1));
@@ -53,7 +53,7 @@ public class SSUtilities {
                                 .getCellFormula()
                                 .replace("Row", String.valueOf(destination + 1)));
                         break;
-                    case Cell.CELL_TYPE_BOOLEAN:
+                    case BOOLEAN:
                         newCell.setCellValue(currentCell.getBooleanCellValue());
                         break;
                     default:
