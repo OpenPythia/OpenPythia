@@ -133,7 +133,7 @@ public class WorstStatementsDetailController implements FinishedListener {
             return;
         }
 
-        String snapshotIdToSave = (String) view.getListSnapshots().getSelectedValues()[0];
+        String snapshotIdToSave = (String) view.getListSnapshots().getSelectedValuesList().get(0);
 
         File snapshotFile = FileSelectorUtility.chooseSnapshotFileToWrite(view, lastSnapshotPath, snapshotIdToSave);
         if (snapshotFile != null) {
@@ -176,8 +176,8 @@ public class WorstStatementsDetailController implements FinishedListener {
         showDeltaSnapshot(deltaSnapshot);
         view.getBtnExportExcel().setEnabled(false);
 
-        String oldSnapshotId = (String) view.getListSnapshots().getSelectedValues()[0];
-        String newSnapshotId = (String) view.getListSnapshots().getSelectedValues()[numberSelectedSnapshots - 1];
+        String oldSnapshotId = (String) view.getListSnapshots().getSelectedValuesList().get(0);
+        String newSnapshotId = (String) view.getListSnapshots().getSelectedValuesList().get(numberSelectedSnapshots - 1);
 
         boolean condenseInstances = view.getCbCondenseInstances().isSelected();
         boolean condenseMissingBindVariables = view.getCbCondenseMissingBindvariables().isSelected();

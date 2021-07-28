@@ -133,8 +133,7 @@ public class MainDialogView extends JFrame {
 
                 //======== panelDetails ========
                 {
-                    // TODO - check if the new line has the same behaviour as the old one
-                    panelDetails.setBorder(Borders.EMPTY);
+                    panelDetails.setBorder(BorderFactory.createEmptyBorder());
                     panelDetails.setLayout(new BorderLayout());
                 }
                 scrollPaneDetail.setViewportView(panelDetails);

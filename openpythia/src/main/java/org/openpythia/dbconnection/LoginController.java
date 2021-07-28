@@ -304,7 +304,7 @@ public class LoginController {
                 view.getTextFieldServiceName().getText(),
                 view.getTextFieldTnsName().getText(),
                 view.getTextFieldUser().getText(),
-                view.getTextFieldPassword().getText());
+                String.valueOf(view.getTextFieldPassword().getPassword()));
 
         return connectionConfiguration;
     }
