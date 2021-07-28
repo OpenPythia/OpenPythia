@@ -15,6 +15,7 @@
  **/
 package org.openpythia.plugin.worststatements;
 
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
 import org.openpythia.progress.ProgressListener;
 import org.openpythia.utilities.SSUtilities;
@@ -264,7 +265,7 @@ public class DeltaSnapshotWriter {
         Iterator<Cell> cellIterator = statementsSheet.getRow(INDEX_ROW_SUM_FORMULAS).cellIterator();
         while (cellIterator.hasNext()) {
             Cell currentCell = cellIterator.next();
-            if (currentCell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+            if (currentCell.getCellType() == CellType.FORMULA) {
                 evaluator.evaluateFormulaCell(currentCell);
             }
         }
@@ -306,7 +307,7 @@ public class DeltaSnapshotWriter {
             currentRowIndex++;
 
             // Link from sheet with statements to this execution plan
-            Hyperlink link = statementsSheet.getWorkbook().getCreationHelper().createHyperlink(Hyperlink.LINK_DOCUMENT);
+            Hyperlink link = statementsSheet.getWorkbook().getCreationHelper().createHyperlink(HyperlinkType.DOCUMENT);
             // Later on we will delete three rows at the beginning of the sheet. Prepare the
             // hyperlink to point to the correct cell after the deletion.
             link.setAddress("'" + executionPlansSheet.getSheetName() + "'!A" + (currentRowIndex - 3));
@@ -433,7 +434,7 @@ public class DeltaSnapshotWriter {
             currentRowIndex++;
 
             // Link from sheet with statements to this list of wait events
-            Hyperlink link = statementsSheet.getWorkbook().getCreationHelper().createHyperlink(Hyperlink.LINK_DOCUMENT);
+            Hyperlink link = statementsSheet.getWorkbook().getCreationHelper().createHyperlink(HyperlinkType.DOCUMENT);
             // Later on we will delete two rows at the beginning of the sheet. Prepare the
             // hyperlink to point to the correct cell after the deletion.
             link.setAddress("'" + waitEventsForStatementSheet.getSheetName() + "'!A" + (currentRowIndex - 2));

@@ -57,7 +57,7 @@ public class AboutView extends JDialog {
 
         //======== dialogPane ========
         {
-            dialogPane.setBorder(Borders.DIALOG_BORDER);
+            dialogPane.setBorder(BorderFactory.createEmptyBorder());
             dialogPane.setLayout(new BorderLayout());
 
             //======== contentPanel ========
@@ -79,7 +79,7 @@ public class AboutView extends JDialog {
 
             //======== buttonBar ========
             {
-                buttonBar.setBorder(Borders.BUTTON_BAR_GAP_BORDER);
+                buttonBar.setBorder(BorderFactory.createEmptyBorder());
                 buttonBar.setLayout(new FormLayout(
                     "$glue, $button",
                     "pref"));

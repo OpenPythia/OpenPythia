@@ -18,14 +18,14 @@ package org.openpythia.aboutdialog;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.InputStream;
+import java.io.File;
+import java.net.URL;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import org.apache.commons.io.IOUtils;
-import org.openpythia.utilities.FileResourceUtility;
+import org.apache.commons.io.FileUtils;
 
 public class AboutController {
 
@@ -39,8 +39,9 @@ public class AboutController {
         String aboutText = "";
 
         try {
-            InputStream inputStream = this.getClass().getResourceAsStream(ABOUT_HTML);
-            aboutText = String.format(IOUtils.toString(inputStream), FileResourceUtility.getVersion());
+            URL url = getClass().getResource(ABOUT_HTML);
+            File aboutFile = new File(url.getFile());
+             aboutText = FileUtils.readFileToString(aboutFile, "UTF-8");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e);
         }

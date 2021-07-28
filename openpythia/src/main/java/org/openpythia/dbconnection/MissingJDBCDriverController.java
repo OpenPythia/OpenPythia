@@ -19,13 +19,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.InputStream;
+import java.net.URL;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.openpythia.utilities.FileSelectorUtility;
 
 public class MissingJDBCDriverController {
@@ -57,8 +57,9 @@ public class MissingJDBCDriverController {
         String missingJDBCdriverText = "";
 
         try {
-            InputStream inputStream =  this.getClass().getResourceAsStream(MISSING_JDBCDRIVER_HTML);
-            missingJDBCdriverText = IOUtils.toString(inputStream);
+            URL url = getClass().getResource(MISSING_JDBCDRIVER_HTML);
+            File jdbcDriverTextFile = new File(url.getFile());
+            missingJDBCdriverText = FileUtils.readFileToString(jdbcDriverTextFile, "UTF-8");
         }
         catch (Exception e) {
             JOptionPane.showMessageDialog(null, e);
