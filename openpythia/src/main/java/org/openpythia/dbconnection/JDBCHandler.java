@@ -57,14 +57,14 @@ public class JDBCHandler {
                 // Cancel
                 return false;
             } else if (loadJDBCDriverFromFile(controller.getPathJDBCDriver())) {
-                // The file provided by the user contains a valid JDBC driver
-                PreferencesManager.setPathToJDBCDriver(controller.getPathJDBCDriver());
-                return true;
+                    // The file provided by the user contains a valid JDBC driver
+                    PreferencesManager.setPathToJDBCDriver(controller.getPathJDBCDriver());
+                    return true;
             } else {
                 // The file provided by the user contains NOT a valid JDBC
-                // driver
+                // driver or the version of the JDBC driver does not correspond with the JVM machine
                 JOptionPane.showMessageDialog(null,
-                    "The file you provided does not contain a valid JDBC driver from Oracle.");
+                    "The file you provided does not contain a valid JDBC driver from Oracle or it's version is not compatible with the JVM version.");
             }
         }
         
@@ -145,6 +145,8 @@ public class JDBCHandler {
         } catch (InstantiationException e) {
             return false;
         } catch (IllegalAccessException e) {
+            return false;
+        } catch (UnsupportedClassVersionError e) {
             return false;
         }
         return true;
