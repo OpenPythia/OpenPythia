@@ -33,14 +33,9 @@ import org.openpythia.utilities.sql.SQLHelper;
 
 public class WorstStatementsSmallController implements PythiaPluginController {
 
-    private static final String ELAPSED_TIME_TOP20 = "SELECT SUM(elapsed_time)" +
-            "  FROM (  SELECT elapsed_time" +
-            "            FROM gv$sqlarea" +
-            "        ORDER BY elapsed_time DESC)" +
-            " WHERE rownum <= 20";
+    private static final String ELAPSED_TIME_TOP20 = String.format("SELECT SUM(elapsed_time)  FROM (  SELECT elapsed_time            FROM gv$sqlarea        ORDER BY elapsed_time DESC) WHERE rownum <= 20");
 
-    private static final String ELAPSED_TIME_TOTAL = "SELECT SUM(elapsed_time) "
-            + "FROM gv$sqlarea ";
+    private static final String ELAPSED_TIME_TOTAL = String.format("SELECT SUM(elapsed_time) FROM gv$sqlarea ");
 
     private MainDialog mainDialog;
 
@@ -49,12 +44,12 @@ public class WorstStatementsSmallController implements PythiaPluginController {
     private WorstStatementsSmallView smallView;
     private WorstStatementsDetailController detailController;
 
-    public WorstStatementsSmallController(Frame owner, MainDialog mainDialog) {
+    public WorstStatementsSmallController(Frame owner, MainDialog mainDialog, String connectionName) {
         this.mainDialog = mainDialog;
 
         updater = new Updater();
 
-        detailController = new WorstStatementsDetailController(owner);
+        detailController = new WorstStatementsDetailController(owner, connectionName);
 
         smallView = new WorstStatementsSmallView();
 
@@ -65,12 +60,7 @@ public class WorstStatementsSmallController implements PythiaPluginController {
     }
 
     private void bindActions() {
-        smallView.getBtnShowDetails().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showDetailView();
-            }
-        });
+        smallView.getBtnShowDetails().addActionListener(e -> showDetailView());
     }
 
     private void showDetailView() {
@@ -151,7 +141,8 @@ public class WorstStatementsSmallController implements PythiaPluginController {
             private int numberSQLStatements;
             private float ratioTop20;
 
-            public ViewUpdater(int numberSQLStatements, float ratioTop20) {
+            //public
+            ViewUpdater(int numberSQLStatements, float ratioTop20) {
                 this.numberSQLStatements = numberSQLStatements;
                 this.ratioTop20 = ratioTop20;
             }

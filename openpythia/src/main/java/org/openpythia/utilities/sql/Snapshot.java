@@ -26,6 +26,7 @@ public class Snapshot implements Serializable {
     private static final long serialVersionUID = 9187082512305187559L;
 
     private Calendar snapshotTime;
+    private String connectionName;
     private List<SQLStatementSnapshot> sqlStatementSnapshots;
 
     public Snapshot() {
@@ -34,9 +35,9 @@ public class Snapshot implements Serializable {
         sqlStatementSnapshots = new ArrayList<>();
     }
 
-    public Snapshot(Calendar snapshotTime) {
+    public Snapshot(Calendar snapshotTime, String connectionName) {
         this.snapshotTime = snapshotTime;
-
+        this.connectionName = connectionName;
         sqlStatementSnapshots = new ArrayList<>();
     }
 
@@ -53,11 +54,15 @@ public class Snapshot implements Serializable {
         return formatter.format(snapshotTime.getTime());
     }
 
+    public String getSnapshotName() {
+        return connectionName + " " + this.getSnapshotId();
+    }
+
     private static String fillLeadingZero(int value) {
         if (value >= 10) {
             return String.valueOf(value);
         } else {
-            return "0" + String.valueOf(value);
+            return "0" + value;
         }
     }
 

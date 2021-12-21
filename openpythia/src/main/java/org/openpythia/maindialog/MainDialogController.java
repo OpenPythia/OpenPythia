@@ -36,10 +36,12 @@ import org.openpythia.plugin.worststatements.WorstStatementsSmallController;
 public class MainDialogController implements MainDialog {
 
     private MainDialogView view;
+    private String connectionName;
     private List<PythiaPluginController> pluginControllers;
 
     public MainDialogController(String connectionName) {
         view = new MainDialogView();
+        this.connectionName = connectionName;
 
         bindMenus();
         fillSmallViews();
@@ -63,7 +65,7 @@ public class MainDialogController implements MainDialog {
     private void fillSmallViews() {
         pluginControllers = new ArrayList<>();
         pluginControllers.add(new HitRatioController());
-        pluginControllers.add(new WorstStatementsSmallController(view, this));
+        pluginControllers.add(new WorstStatementsSmallController(view, this, connectionName));
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.gridx  = 0;
@@ -78,24 +80,9 @@ public class MainDialogController implements MainDialog {
     }
 
     private void bindMenus() {
-        view.getMiQuit().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ExitApplication();
-            }
-        });
-        view.getMiOnlineHelp().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                openOnlineHelp();
-            }
-        });
-        view.getMiAbout().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showAboutDialog();
-            }
-        });
+        view.getMiQuit().addActionListener(e -> ExitApplication());
+        view.getMiOnlineHelp().addActionListener(e -> openOnlineHelp());
+        view.getMiAbout().addActionListener(e -> showAboutDialog());
     }
 
     private class CloseWindowListener extends WindowAdapter {

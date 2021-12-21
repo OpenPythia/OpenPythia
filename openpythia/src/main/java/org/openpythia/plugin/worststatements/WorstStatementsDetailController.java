@@ -40,6 +40,7 @@ import org.openpythia.utilities.sql.SnapshotHelper;
 public class WorstStatementsDetailController implements FinishedListener {
 
     private Frame owner;
+    private String connectionName;
     private WorstStatementsDetailView view;
 
     private static File lastSnapshotPath;
@@ -49,8 +50,9 @@ public class WorstStatementsDetailController implements FinishedListener {
 
     private boolean dialogBlocked = false;
 
-    public WorstStatementsDetailController(Frame owner) {
+    public WorstStatementsDetailController(Frame owner, String connectionName) {
         this.owner = owner;
+        this.connectionName = connectionName;
 
         view = new WorstStatementsDetailView();
 
@@ -71,44 +73,15 @@ public class WorstStatementsDetailController implements FinishedListener {
     }
 
     private void bindActions() {
-        view.getBtnTakeSnapshot().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                takeSnapshot();
-            }
-        });
-        view.getBtnSaveSnapshot().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveSnapshot();
-            }
-        });
-        view.getBtnLoadSnapshot().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadSnapshot();
-            }
-        });
-        view.getBtnCompareSnapshots().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                compareSnapshot();
-            }
-        });
+        view.getBtnTakeSnapshot().addActionListener(e -> takeSnapshot());
+        view.getBtnSaveSnapshot().addActionListener(e -> saveSnapshot());
+        view.getBtnLoadSnapshot().addActionListener(e -> loadSnapshot());
+        view.getBtnCompareSnapshots().addActionListener(e -> compareSnapshot());
 
-        view.getBtnExportExcel().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                exportDeltaToExcel();
-            }
-        });
+        view.getBtnExportExcel().addActionListener(e -> exportDeltaToExcel());
         view.getBtnExportExcel().setEnabled(false);
         view.getListSnapshots().addListSelectionListener(
-                new ListSelectionListener() {
-                    @Override
-                    public void valueChanged(ListSelectionEvent e) { setGUIElementsToCorrectState();
-                    }
-                });
+                e -> setGUIElementsToCorrectState());
         view.getBtnCompareSnapshots().setEnabled(false);
         view.getCbCondenseInstances().setEnabled(false);
         view.getCbCondenseMissingBindvariables().setEnabled(false);
@@ -121,7 +94,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         ProgressController controller = new ProgressController(owner, this,
                 "Taking Snapshot...",
                 "Pythia is taking a snapshot of the library cache.");
-        SnapshotHelper.takeSnapshot(controller);
+        SnapshotHelper.takeSnapshot(controller, connectionName);
 
         SQLHelper.startSQLTextLoader();
     }
@@ -242,7 +215,8 @@ public class WorstStatementsDetailController implements FinishedListener {
         private boolean condenseMissingBindVariables;
         private ProgressListener listener;
 
-        public SnapshotComparator(String oldSnapshotId, String newSnapshotId,
+        // public
+        SnapshotComparator(String oldSnapshotId, String newSnapshotId,
                                   boolean condenseInstances, boolean condenseMissingBindVariables,
                                   ProgressListener listener) {
             this.oldSnapshotId = oldSnapshotId;
@@ -271,12 +245,10 @@ public class WorstStatementsDetailController implements FinishedListener {
 
             SQLHelper.loadSQLTextForStatements(sqlStatements, listener);
 
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    showDeltaSnapshot(deltaSnapshot);
-                    dialogBlocked = false;
-                    setGUIElementsToCorrectState();
-                }
+            SwingUtilities.invokeLater(() -> {
+                showDeltaSnapshot(deltaSnapshot);
+                dialogBlocked = false;
+                setGUIElementsToCorrectState();
             });
         }
     }
@@ -319,7 +291,8 @@ public class WorstStatementsDetailController implements FinishedListener {
         private boolean loadMoreExecutionPlans;
         private ProgressListener listener;
 
-        public DeltaToExcelExporter(File excelFile, DeltaSnapshot deltaSnapshot,
+        // public
+        DeltaToExcelExporter(File excelFile, DeltaSnapshot deltaSnapshot,
                                     boolean loadMoreExecutionPlans, ProgressListener listener) {
             this.excelFile = excelFile;
             this.deltaSnapshot = deltaSnapshot;
@@ -335,11 +308,9 @@ public class WorstStatementsDetailController implements FinishedListener {
                     loadMoreExecutionPlans,
                     listener);
 
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    dialogBlocked = false;
-                    setGUIElementsToCorrectState();
-                }
+            SwingUtilities.invokeLater(() -> {
+                dialogBlocked = false;
+                setGUIElementsToCorrectState();
             });
 
             if (!success){
@@ -362,7 +333,8 @@ public class WorstStatementsDetailController implements FinishedListener {
         }
     }
 
-    public JPanel getDetailView() {
+    //public
+    JPanel getDetailView() {
         return view;
     }
 

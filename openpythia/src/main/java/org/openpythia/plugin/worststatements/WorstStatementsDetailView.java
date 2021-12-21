@@ -103,7 +103,7 @@ public class WorstStatementsDetailView extends JPanel {
         //======== this ========
         setLayout(new FormLayout(
             "$lcgap, default, $lcgap, 100dlu, $lcgap, default, $lcgap, default:grow, $lcgap",
-            "$lgap, top:default, 10*($lgap, default), $lgap, fill:default:grow, $lgap"));
+            "$lgap, top:default, 11*($lgap, default), $lgap, fill:default:grow, $lgap"));
 
         //---- label1 ----
         label1.setText("Snapshots");
@@ -116,7 +116,7 @@ public class WorstStatementsDetailView extends JPanel {
             listSnapshots.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
             scrollPane1.setViewportView(listSnapshots);
         }
-        add(scrollPane1, CC.xywh(4, 2, 1, 13));
+        add(scrollPane1, CC.xywh(4, 2, 1, 15));
 
         //---- btnTakeSnapshot ----
         btnTakeSnapshot.setText("Take Snapshot");
@@ -124,63 +124,63 @@ public class WorstStatementsDetailView extends JPanel {
 
         //---- btnSaveSnapshot ----
         btnSaveSnapshot.setText("Save Snapshot");
-        add(btnSaveSnapshot, CC.xy(6, 4));
+        add(btnSaveSnapshot, CC.xy(6, 6));
 
         //---- btnLoadSnapshot ----
         btnLoadSnapshot.setText("Load Snapshot");
-        add(btnLoadSnapshot, CC.xy(6, 6));
-        add(separator2, CC.xywh(6, 8, 2, 1));
+        add(btnLoadSnapshot, CC.xy(6, 8));
+        add(separator2, CC.xywh(6, 10, 2, 1));
 
         //---- cbCondenseInstances ----
         cbCondenseInstances.setText("Condense Instances");
-        add(cbCondenseInstances, CC.xy(6, 10));
+        add(cbCondenseInstances, CC.xy(6, 12));
 
         //---- cbCondenseMissingBindvariables ----
         cbCondenseMissingBindvariables.setText("Condense Missing Bindvariables");
-        add(cbCondenseMissingBindvariables, CC.xy(6, 12));
+        add(cbCondenseMissingBindvariables, CC.xy(6, 14));
 
         //---- btnCompareSnapshots ----
         btnCompareSnapshots.setText("Compare Snapshots...");
-        add(btnCompareSnapshots, CC.xy(6, 14));
-        add(separator1, CC.xywh(2, 16, 7, 1));
+        add(btnCompareSnapshots, CC.xy(6, 16));
+        add(separator1, CC.xywh(2, 18, 7, 1));
 
         //---- label2 ----
         label2.setText("Snapshot A");
-        add(label2, CC.xy(2, 18));
+        add(label2, CC.xy(2, 20));
 
         //---- tfSnapshotA ----
         tfSnapshotA.setEditable(false);
-        add(tfSnapshotA, CC.xy(4, 18));
+        add(tfSnapshotA, CC.xy(4, 20));
 
         //---- cbMoreExecutionPlans ----
         cbMoreExecutionPlans.setText("Load More Executation Plans");
-        add(cbMoreExecutionPlans, CC.xy(6, 18));
+        add(cbMoreExecutionPlans, CC.xy(6, 20));
 
         //---- label3 ----
         label3.setText("Snapshot B");
-        add(label3, CC.xy(2, 20));
+        add(label3, CC.xy(2, 22));
 
         //---- tfSnapshotB ----
         tfSnapshotB.setEditable(false);
-        add(tfSnapshotB, CC.xy(4, 20));
+        add(tfSnapshotB, CC.xy(4, 22));
 
         //---- btnExportExcel ----
         btnExportExcel.setText("Export to Excel");
-        add(btnExportExcel, CC.xy(6, 20));
+        add(btnExportExcel, CC.xy(6, 22));
 
         //---- label4 ----
         label4.setText("Number Statements");
-        add(label4, CC.xy(2, 22));
+        add(label4, CC.xy(2, 24));
 
         //---- tfNumberStatements ----
         tfNumberStatements.setEditable(false);
-        add(tfNumberStatements, CC.xy(4, 22));
+        add(tfNumberStatements, CC.xy(4, 24));
 
         //======== scrollPane2 ========
         {
             scrollPane2.setViewportView(tableDeltaSQLStatements);
         }
-        add(scrollPane2, CC.xywh(2, 24, 7, 1));
+        add(scrollPane2, CC.xywh(2, 26, 7, 1));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 

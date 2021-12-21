@@ -51,7 +51,8 @@ public class SnapshotHelper {
 
     private static void addSnapshot(Snapshot snapshot) {
         if (snapshot != null) {
-            snapshots.put(snapshot.getSnapshotId(), snapshot);
+           // snapshots.put(snapshot.getSnapshotId(), snapshot);
+            snapshots.put(snapshot.getSnapshotName(), snapshot);
         }
     }
 
@@ -124,8 +125,8 @@ public class SnapshotHelper {
         addSnapshot(loaded);
     }
 
-    public static void takeSnapshot(ProgressListener progressListener) {
-        new Thread(new SnapshotTaker(progressListener)).start();
+    public static void takeSnapshot(ProgressListener progressListener, String connectionName) {
+        new Thread(new SnapshotTaker(progressListener, connectionName)).start();
     }
 
     private static class SnapshotTaker implements Runnable {
@@ -135,15 +136,14 @@ public class SnapshotHelper {
         // taken but failed because of the very bad performance: For some reasons Oracle takes
         // much time to access the full text via thia way. In addition it took very long to load
         // the text to the client. So for the moment this way will not be taken.
-        private static String SNAPSHOT_SQL_AREA = "SELECT sql_id, inst_id, parsing_schema_name, "
-                + "executions, elapsed_time / 1000000, cpu_time / 1000000, buffer_gets, disk_reads, "
-                + "concurrency_wait_time / 1000000, cluster_wait_time / 1000000, rows_processed "
-                + "FROM gv$sqlarea";
+        private static String SNAPSHOT_SQL_AREA = String.format("SELECT sql_id, inst_id, parsing_schema_name, executions, elapsed_time / 1000000, cpu_time / 1000000, buffer_gets, disk_reads, concurrency_wait_time / 1000000, cluster_wait_time / 1000000, rows_processed FROM gv$sqlarea");
 
         private ProgressListener progressListener;
+        private String connectionName;
 
-        public SnapshotTaker(ProgressListener progressListener) {
+        public SnapshotTaker(ProgressListener progressListener, String connectionName) {
             this.progressListener = progressListener;
+            this.connectionName = connectionName;
         }
 
         @Override
@@ -152,19 +152,21 @@ public class SnapshotHelper {
             progressListener.setEndValue(SQLHelper.getNumberSQLStatementsInLibraryCache());
             progressListener.setCurrentValue(0);
 
-            Snapshot snapshot = new Snapshot(SQLHelper.getCurrentDBDateTime());
+            Snapshot snapshot = new Snapshot(SQLHelper.getCurrentDBDateTime(), connectionName);
 
-            fillSnapshot(snapshot);
+                fillSnapshot(snapshot);
 
-            addSnapshot(snapshot);
+                addSnapshot(snapshot);
 
-            progressListener.informFinished();
+                progressListener.informFinished();
         }
 
         private void fillSnapshot(Snapshot snapshot) {
+
             Connection connection = ConnectionPoolUtils.getConnectionFromPool();
             try {
-                PreparedStatement snapshotStatement = connection.prepareStatement(SNAPSHOT_SQL_AREA);
+                PreparedStatement snapshotStatement;
+                  snapshotStatement = connection.prepareStatement(SNAPSHOT_SQL_AREA);
 
                 ResultSet snapshotResultSet = snapshotStatement.executeQuery();
 
