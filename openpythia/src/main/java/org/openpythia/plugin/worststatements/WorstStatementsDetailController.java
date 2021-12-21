@@ -16,16 +16,12 @@
 package org.openpythia.plugin.worststatements;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.openpythia.progress.FinishedListener;
 import org.openpythia.progress.ProgressController;
@@ -74,6 +70,22 @@ public class WorstStatementsDetailController implements FinishedListener {
 
     private void bindActions() {
         view.getBtnTakeSnapshot().addActionListener(e -> takeSnapshot());
+
+        // initially the option to take snapshots automatically is not selected, there is why, the time interval and the buton to activate the automated snapshots are disabled
+        view.getComboTimeInterval().setEnabled(false);
+        view.getBtnTakeAutomatedSnapshots().setEnabled(false);
+
+        // enable/disable options depending on checkbox isSelected value
+        view.getCheckboxAutomatedSnapshots().addActionListener(e -> {
+                    if (view.getCheckboxAutomatedSnapshots().isSelected()) {
+                        view.getComboTimeInterval().setEnabled(true);
+                        view.getBtnTakeAutomatedSnapshots().setEnabled(true);
+                        view.getBtnTakeAutomatedSnapshots().addActionListener(y -> takeAutomatedSnapshotsAndSave(view.getComboTimeInterval().toString()));
+                    } else {
+                        view.getComboTimeInterval().setEnabled(false);
+                        view.getBtnTakeAutomatedSnapshots().setEnabled(false);
+                    }
+                });
         view.getBtnSaveSnapshot().addActionListener(e -> saveSnapshot());
         view.getBtnLoadSnapshot().addActionListener(e -> loadSnapshot());
         view.getBtnCompareSnapshots().addActionListener(e -> compareSnapshot());
@@ -94,9 +106,20 @@ public class WorstStatementsDetailController implements FinishedListener {
         ProgressController controller = new ProgressController(owner, this,
                 "Taking Snapshot...",
                 "Pythia is taking a snapshot of the library cache.");
-        SnapshotHelper.takeSnapshot(controller, connectionName);
+        SnapshotHelper.takeSnapshot(controller, connectionName, false, null);
 
         SQLHelper.startSQLTextLoader();
+    }
+    private void takeAutomatedSnapshotsAndSave(String timeInterval) {
+
+        // do this after timeInterval minutes
+
+            ProgressController controller = new ProgressController(owner, this,
+                    "Taking Snapshot...",
+                    "Pythia is taking a snapshot of the library cache.");
+            SnapshotHelper.takeSnapshot(controller, connectionName, true, (Integer) view.getComboTimeInterval().getSelectedItem());
+
+            SQLHelper.startSQLTextLoader();
     }
 
     private void saveSnapshot() {
@@ -179,6 +202,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         } else {
             // when the dialog is not blocked the user can always take and load snapshots
             view.getBtnTakeSnapshot().setEnabled(true);
+            view.getCheckboxAutomatedSnapshots().setEnabled(true);
             view.getBtnLoadSnapshot().setEnabled(true);
 
             // some of the other buttons rely on the number of selected elements

@@ -31,6 +31,16 @@ public class WorstStatementsDetailView extends JPanel {
         return btnTakeSnapshot;
     }
 
+    public JCheckBox getCheckboxAutomatedSnapshots() {return checkboxAutomatedSnapshots;}
+
+    public JComboBox getComboTimeInterval() {
+        return comboTimeInterval;
+    }
+
+    public JButton getBtnTakeAutomatedSnapshots() {
+        return btnTakeAutomatedSnapshots;
+    }
+
     public JButton getBtnCompareSnapshots() {
         return btnCompareSnapshots;
     }
@@ -49,10 +59,6 @@ public class WorstStatementsDetailView extends JPanel {
 
     public JTextField getTfNumberStatements() {
         return tfNumberStatements;
-    }
-
-    public JTable getTableDeltaSQLStatements() {
-        return tableDeltaSQLStatements;
     }
 
     public JButton getBtnSaveSnapshot() {
@@ -75,6 +81,10 @@ public class WorstStatementsDetailView extends JPanel {
         return cbCondenseMissingBindvariables;
     }
 
+    public JTable getTableDeltaSQLStatements() {
+        return tableDeltaSQLStatements;
+    }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         DefaultComponentFactory compFactory = DefaultComponentFactory.getInstance();
@@ -82,6 +92,9 @@ public class WorstStatementsDetailView extends JPanel {
         scrollPane1 = new JScrollPane();
         listSnapshots = new JList();
         btnTakeSnapshot = new JButton();
+        checkboxAutomatedSnapshots = new JCheckBox();
+        comboTimeInterval = new JComboBox();
+        btnTakeAutomatedSnapshots = new JButton();
         btnSaveSnapshot = new JButton();
         btnLoadSnapshot = new JButton();
         separator2 = compFactory.createSeparator("Compare Snapshots");
@@ -102,8 +115,8 @@ public class WorstStatementsDetailView extends JPanel {
 
         //======== this ========
         setLayout(new FormLayout(
-            "$lcgap, default, $lcgap, 100dlu, $lcgap, default, $lcgap, default:grow, $lcgap",
-            "$lgap, top:default, 11*($lgap, default), $lgap, fill:default:grow, $lgap"));
+            "$lcgap, default, $lcgap, 100dlu, $lcgap, 131dlu, $lcgap, default:grow, $lcgap",
+            "$lgap, top:default, $lgap, 10dlu, 11*($lgap, default), $lgap, 21dlu, fill:default:grow, 2*($lgap)"));
 
         //---- label1 ----
         label1.setText("Snapshots");
@@ -116,71 +129,87 @@ public class WorstStatementsDetailView extends JPanel {
             listSnapshots.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
             scrollPane1.setViewportView(listSnapshots);
         }
-        add(scrollPane1, CC.xywh(4, 2, 1, 15));
+        add(scrollPane1, CC.xywh(4, 2, 1, 19));
 
         //---- btnTakeSnapshot ----
         btnTakeSnapshot.setText("Take Snapshot");
         add(btnTakeSnapshot, CC.xy(6, 2));
 
+        //---- checkboxAutomatedSnapshots ----
+        checkboxAutomatedSnapshots.setText("Take automated Snapshots");
+        add(checkboxAutomatedSnapshots, CC.xy(6, 4));
+
+        //---- comboTimeInterval ----
+        comboTimeInterval.setToolTipText("snapshots time interval");
+        add(comboTimeInterval, CC.xy(6, 6));
+        comboTimeInterval.addItem(30);
+        comboTimeInterval.addItem(60);
+        comboTimeInterval.addItem(90);
+        comboTimeInterval.addItem(120);
+
+        //---- btnTakeAutomatedSnapshots ----
+        btnTakeAutomatedSnapshots.setText("Set Automated Snapshots");
+        add(btnTakeAutomatedSnapshots, CC.xy(6, 8));
+
         //---- btnSaveSnapshot ----
         btnSaveSnapshot.setText("Save Snapshot");
-        add(btnSaveSnapshot, CC.xy(6, 6));
+        add(btnSaveSnapshot, CC.xy(6, 10));
 
         //---- btnLoadSnapshot ----
         btnLoadSnapshot.setText("Load Snapshot");
-        add(btnLoadSnapshot, CC.xy(6, 8));
-        add(separator2, CC.xywh(6, 10, 2, 1));
+        add(btnLoadSnapshot, CC.xy(6, 12));
+        add(separator2, CC.xywh(6, 14, 2, 1));
 
         //---- cbCondenseInstances ----
         cbCondenseInstances.setText("Condense Instances");
-        add(cbCondenseInstances, CC.xy(6, 12));
+        add(cbCondenseInstances, CC.xy(6, 16));
 
         //---- cbCondenseMissingBindvariables ----
         cbCondenseMissingBindvariables.setText("Condense Missing Bindvariables");
-        add(cbCondenseMissingBindvariables, CC.xy(6, 14));
+        add(cbCondenseMissingBindvariables, CC.xy(6, 18));
 
         //---- btnCompareSnapshots ----
         btnCompareSnapshots.setText("Compare Snapshots...");
-        add(btnCompareSnapshots, CC.xy(6, 16));
-        add(separator1, CC.xywh(2, 18, 7, 1));
+        add(btnCompareSnapshots, CC.xy(6, 20));
+        add(separator1, CC.xywh(2, 22, 7, 1));
 
         //---- label2 ----
         label2.setText("Snapshot A");
-        add(label2, CC.xy(2, 20));
+        add(label2, CC.xy(2, 24));
 
         //---- tfSnapshotA ----
         tfSnapshotA.setEditable(false);
-        add(tfSnapshotA, CC.xy(4, 20));
+        add(tfSnapshotA, CC.xy(4, 24));
 
         //---- cbMoreExecutionPlans ----
         cbMoreExecutionPlans.setText("Load More Executation Plans");
-        add(cbMoreExecutionPlans, CC.xy(6, 20));
+        add(cbMoreExecutionPlans, CC.xy(6, 24));
 
         //---- label3 ----
         label3.setText("Snapshot B");
-        add(label3, CC.xy(2, 22));
+        add(label3, CC.xy(2, 26));
 
         //---- tfSnapshotB ----
         tfSnapshotB.setEditable(false);
-        add(tfSnapshotB, CC.xy(4, 22));
+        add(tfSnapshotB, CC.xy(4, 26));
 
         //---- btnExportExcel ----
         btnExportExcel.setText("Export to Excel");
-        add(btnExportExcel, CC.xy(6, 22));
+        add(btnExportExcel, CC.xy(6, 26));
 
         //---- label4 ----
         label4.setText("Number Statements");
-        add(label4, CC.xy(2, 24));
+        add(label4, CC.xy(2, 28));
 
         //---- tfNumberStatements ----
         tfNumberStatements.setEditable(false);
-        add(tfNumberStatements, CC.xy(4, 24));
+        add(tfNumberStatements, CC.xy(4, 28));
 
         //======== scrollPane2 ========
         {
             scrollPane2.setViewportView(tableDeltaSQLStatements);
         }
-        add(scrollPane2, CC.xywh(2, 26, 7, 1));
+        add(scrollPane2, CC.xywh(2, 29, 7, 1));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -189,6 +218,9 @@ public class WorstStatementsDetailView extends JPanel {
     private JScrollPane scrollPane1;
     private JList listSnapshots;
     private JButton btnTakeSnapshot;
+    private JCheckBox checkboxAutomatedSnapshots;
+    private JComboBox comboTimeInterval;
+    private JButton btnTakeAutomatedSnapshots;
     private JButton btnSaveSnapshot;
     private JButton btnLoadSnapshot;
     private JComponent separator2;

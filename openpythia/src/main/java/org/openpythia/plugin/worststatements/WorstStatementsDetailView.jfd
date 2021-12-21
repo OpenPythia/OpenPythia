@@ -13,11 +13,11 @@
        <class>com.jgoodies.forms.layout.FormLayout</class>
        <void method="setProperty">
         <string>$columnSpecs</string>
-        <string>labelcompgap, default, labelcompgap, 100dlu, labelcompgap, default, labelcompgap, default:grow, labelcompgap</string>
+        <string>labelcompgap, default, labelcompgap, 100dlu, labelcompgap, 131dlu, labelcompgap, default:grow, labelcompgap</string>
        </void>
        <void method="setProperty">
         <string>$rowSpecs</string>
-        <string>linegap, top:default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, fill:default:grow, linegap</string>
+        <string>linegap, top:default, linegap, 10dlu, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, default, linegap, 21dlu, fill:default:grow, linegap, linegap</string>
        </void>
       </object>
       <void property="name">
@@ -82,7 +82,7 @@
         </void>
         <void method="setProperty">
          <string>gridHeight</string>
-         <int>15</int>
+         <int>19</int>
         </void>
         <void method="setProperty">
          <string>gridY</string>
@@ -120,7 +120,82 @@
        </object>
       </void>
       <void method="add">
+       <object class="com.jformdesigner.model.FormComponent">
+        <string>javax.swing.JCheckBox</string>
+        <void method="setProperty">
+         <string>text</string>
+         <string>Take automated Snapshots</string>
+        </void>
+        <void property="name">
+         <string>checkboxAutomatedSnapshots</string>
+        </void>
+       </object>
+       <object class="com.jformdesigner.model.FormLayoutConstraints">
+        <class>com.jgoodies.forms.layout.CellConstraints</class>
+        <void method="setProperty">
+         <string>gridX</string>
+         <int>6</int>
+        </void>
+        <void method="setProperty">
+         <string>gridY</string>
+         <int>4</int>
+        </void>
+       </object>
+      </void>
+      <void method="add">
        <object class="com.jformdesigner.model.FormComponent" id="FormComponent2">
+        <string>javax.swing.JComboBox</string>
+        <void method="setProperty">
+         <string>toolTipText</string>
+         <string>snapshots time interval</string>
+        </void>
+        <void property="name">
+         <string>comboTimeInterval</string>
+        </void>
+        <void method="auxiliary">
+         <void method="setProperty">
+          <string>JavaCodeGenerator.variableGetter</string>
+          <boolean>true</boolean>
+         </void>
+        </void>
+       </object>
+       <object class="com.jformdesigner.model.FormLayoutConstraints">
+        <class>com.jgoodies.forms.layout.CellConstraints</class>
+        <void method="setProperty">
+         <string>gridX</string>
+         <int>6</int>
+        </void>
+        <void method="setProperty">
+         <string>gridY</string>
+         <int>6</int>
+        </void>
+       </object>
+      </void>
+      <void method="add">
+       <object class="com.jformdesigner.model.FormComponent">
+        <string>javax.swing.JButton</string>
+        <void method="setProperty">
+         <string>text</string>
+         <string>Set Automated Snapshots</string>
+        </void>
+        <void property="name">
+         <string>btnTakeAutomatedSnapshots</string>
+        </void>
+       </object>
+       <object class="com.jformdesigner.model.FormLayoutConstraints">
+        <class>com.jgoodies.forms.layout.CellConstraints</class>
+        <void method="setProperty">
+         <string>gridX</string>
+         <int>6</int>
+        </void>
+        <void method="setProperty">
+         <string>gridY</string>
+         <int>8</int>
+        </void>
+       </object>
+      </void>
+      <void method="add">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent3">
         <string>javax.swing.JButton</string>
         <void method="setProperty">
          <string>text</string>
@@ -144,12 +219,12 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>6</int>
+         <int>10</int>
         </void>
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent" id="FormComponent3">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent4">
         <string>javax.swing.JButton</string>
         <void method="setProperty">
          <string>text</string>
@@ -173,7 +248,7 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>8</int>
+         <int>12</int>
         </void>
        </object>
       </void>
@@ -196,7 +271,7 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>10</int>
+         <int>14</int>
         </void>
         <void method="setProperty">
          <string>gridWidth</string>
@@ -205,7 +280,7 @@
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent" id="FormComponent4">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent5">
         <string>javax.swing.JCheckBox</string>
         <void method="setProperty">
          <string>text</string>
@@ -229,12 +304,12 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>12</int>
+         <int>16</int>
         </void>
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent" id="FormComponent5">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent6">
         <string>javax.swing.JCheckBox</string>
         <void method="setProperty">
          <string>text</string>
@@ -258,12 +333,12 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>14</int>
+         <int>18</int>
         </void>
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent" id="FormComponent6">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent7">
         <string>javax.swing.JButton</string>
         <void method="setProperty">
          <string>text</string>
@@ -287,7 +362,7 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>16</int>
+         <int>20</int>
         </void>
        </object>
       </void>
@@ -310,7 +385,7 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>18</int>
+         <int>22</int>
         </void>
         <void method="setProperty">
          <string>gridWidth</string>
@@ -337,12 +412,12 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>20</int>
+         <int>24</int>
         </void>
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent" id="FormComponent7">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent8">
         <string>javax.swing.JTextField</string>
         <void method="setProperty">
          <string>editable</string>
@@ -366,12 +441,12 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>20</int>
+         <int>24</int>
         </void>
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent" id="FormComponent8">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent9">
         <string>javax.swing.JCheckBox</string>
         <void method="setProperty">
          <string>text</string>
@@ -395,7 +470,7 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>20</int>
+         <int>24</int>
         </void>
        </object>
       </void>
@@ -418,12 +493,12 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>22</int>
+         <int>26</int>
         </void>
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent" id="FormComponent9">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent10">
         <string>javax.swing.JTextField</string>
         <void method="setProperty">
          <string>editable</string>
@@ -447,12 +522,12 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>22</int>
+         <int>26</int>
         </void>
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent" id="FormComponent10">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent11">
         <string>javax.swing.JButton</string>
         <void method="setProperty">
          <string>text</string>
@@ -476,7 +551,7 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>22</int>
+         <int>26</int>
         </void>
        </object>
       </void>
@@ -499,12 +574,12 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>24</int>
+         <int>28</int>
         </void>
        </object>
       </void>
       <void method="add">
-       <object class="com.jformdesigner.model.FormComponent" id="FormComponent11">
+       <object class="com.jformdesigner.model.FormComponent" id="FormComponent12">
         <string>javax.swing.JTextField</string>
         <void method="setProperty">
          <string>editable</string>
@@ -528,7 +603,7 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>24</int>
+         <int>28</int>
         </void>
        </object>
       </void>
@@ -542,7 +617,7 @@
          <string>scrollPane2</string>
         </void>
         <void method="add">
-         <object class="com.jformdesigner.model.FormComponent" id="FormComponent12">
+         <object class="com.jformdesigner.model.FormComponent" id="FormComponent13">
           <string>javax.swing.JTable</string>
           <void property="name">
            <string>tableDeltaSQLStatements</string>
@@ -564,7 +639,7 @@
         </void>
         <void method="setProperty">
          <string>gridY</string>
-         <int>26</int>
+         <int>29</int>
         </void>
         <void method="setProperty">
          <string>gridWidth</string>
@@ -586,7 +661,7 @@
        <string>size</string>
        <object class="java.awt.Dimension">
         <int>655</int>
-        <int>485</int>
+        <int>545</int>
        </object>
       </void>
      </object>

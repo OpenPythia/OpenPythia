@@ -32,8 +32,10 @@ import javax.swing.JOptionPane;
 
 import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.progress.ProgressListener;
+import org.openpythia.utilities.FileSelectorUtility;
 
 public class SnapshotHelper {
+    private static File lastSnapshotPath;
 
     private static SortedMap<String, Snapshot> snapshots = new ConcurrentSkipListMap<>();
 
@@ -57,6 +59,7 @@ public class SnapshotHelper {
     }
 
     public static boolean saveSnapshot(String snapshotId, File snapshotFile) {
+        // on automatic snapshot saving, the files are saved under OpenPythia project
         Snapshot toSave = getSnapshot(snapshotId);
 
         try (
@@ -125,8 +128,8 @@ public class SnapshotHelper {
         addSnapshot(loaded);
     }
 
-    public static void takeSnapshot(ProgressListener progressListener, String connectionName) {
-        new Thread(new SnapshotTaker(progressListener, connectionName)).start();
+    public static void takeSnapshot(ProgressListener progressListener, String connectionName, boolean isAutomated, Integer timeInterval) {
+        new Thread(new SnapshotTaker(progressListener, connectionName, isAutomated, timeInterval)).start();
     }
 
     private static class SnapshotTaker implements Runnable {
@@ -140,10 +143,14 @@ public class SnapshotHelper {
 
         private ProgressListener progressListener;
         private String connectionName;
+        private boolean isAutomated;
+        private Integer timeInterval;
 
-        public SnapshotTaker(ProgressListener progressListener, String connectionName) {
+        public SnapshotTaker(ProgressListener progressListener, String connectionName, boolean isAutomated, Integer timeInterval) {
             this.progressListener = progressListener;
             this.connectionName = connectionName;
+            this.isAutomated = isAutomated;
+            this.timeInterval = timeInterval;
         }
 
         @Override
@@ -152,11 +159,15 @@ public class SnapshotHelper {
             progressListener.setEndValue(SQLHelper.getNumberSQLStatementsInLibraryCache());
             progressListener.setCurrentValue(0);
 
+            System.out.println("timeInterval: "+ timeInterval);
             Snapshot snapshot = new Snapshot(SQLHelper.getCurrentDBDateTime(), connectionName);
+            String snapshotFileName =  FileSelectorUtility.suggestedFileNameForSnapshotID(snapshot.getSnapshotName());
+            File snapshotFile = new File(snapshotFileName);
 
                 fillSnapshot(snapshot);
 
                 addSnapshot(snapshot);
+                saveSnapshot(snapshot.getSnapshotName(), snapshotFile);
 
                 progressListener.informFinished();
         }
