@@ -71,19 +71,32 @@ public class WorstStatementsDetailController implements FinishedListener {
     private void bindActions() {
         view.getBtnTakeSnapshot().addActionListener(e -> takeSnapshot());
 
-        // initially the option to take snapshots automatically is not selected, there is why, the time interval and the buton to activate the automated snapshots are disabled
+        // initially the option to take snapshots automatically is not selected, there is why, the time interval and the button to activate the automated snapshots are disabled
         view.getComboTimeInterval().setEnabled(false);
         view.getBtnTakeAutomatedSnapshots().setEnabled(false);
-
+        view.getBtnStopAutomatedSnapshots().setEnabled(false);
         // enable/disable options depending on checkbox isSelected value
         view.getCheckboxAutomatedSnapshots().addActionListener(e -> {
                     if (view.getCheckboxAutomatedSnapshots().isSelected()) {
                         view.getComboTimeInterval().setEnabled(true);
                         view.getBtnTakeAutomatedSnapshots().setEnabled(true);
-                        view.getBtnTakeAutomatedSnapshots().addActionListener(y -> takeAutomatedSnapshotsAndSave(view.getComboTimeInterval().toString()));
+                        view.getBtnStopAutomatedSnapshots().setEnabled(false);
+                        view.getBtnTakeAutomatedSnapshots().addActionListener(y -> {
+                            takeAutomatedSnapshotsAndSave();
+                            view.getBtnStopAutomatedSnapshots().setEnabled(true);
+                            view.getComboTimeInterval().setEnabled(false);
+                            view.getBtnTakeAutomatedSnapshots().setEnabled(false);
+                        });
+                        view.getBtnStopAutomatedSnapshots().addActionListener(z -> {
+                            stopAutomatedSnapshots();
+                            view.getBtnStopAutomatedSnapshots().setEnabled(false);
+                            view.getComboTimeInterval().setEnabled(true);
+                            view.getBtnTakeAutomatedSnapshots().setEnabled(true);
+                        });
                     } else {
                         view.getComboTimeInterval().setEnabled(false);
                         view.getBtnTakeAutomatedSnapshots().setEnabled(false);
+                        view.getBtnStopAutomatedSnapshots().setEnabled(false);
                     }
                 });
         view.getBtnSaveSnapshot().addActionListener(e -> saveSnapshot());
@@ -106,22 +119,26 @@ public class WorstStatementsDetailController implements FinishedListener {
         ProgressController controller = new ProgressController(owner, this,
                 "Taking Snapshot...",
                 "Pythia is taking a snapshot of the library cache.");
-        SnapshotHelper.takeSnapshot(controller, connectionName, false, null);
+        SnapshotHelper.takeSnapshot(controller, connectionName, false, 0);
 
         SQLHelper.startSQLTextLoader();
     }
-    private void takeAutomatedSnapshotsAndSave(String timeInterval) {
+    private void takeAutomatedSnapshotsAndSave() {
 
-        // do this after timeInterval minutes
+      ProgressController controller = new ProgressController(owner, this,
+                        "Taking Snapshot...",
+                        "Pythia will take a snapshot of the library cache every." + view.getComboTimeInterval().getSelectedItem() + " minutes");
+        JOptionPane.showMessageDialog(view, "Pythia will Take a new Snapshot every " + view.getComboTimeInterval().getSelectedItem() + " minutes until is will be stopped", "Take Automated Snapshots", JOptionPane.INFORMATION_MESSAGE);
 
-            ProgressController controller = new ProgressController(owner, this,
-                    "Taking Snapshot...",
-                    "Pythia is taking a snapshot of the library cache.");
-            SnapshotHelper.takeSnapshot(controller, connectionName, true, (Integer) view.getComboTimeInterval().getSelectedItem());
+        SnapshotHelper.takeSnapshot(controller, connectionName, true, Integer.parseInt(view.getComboTimeInterval().getSelectedItem().toString()));
 
-            SQLHelper.startSQLTextLoader();
+        SQLHelper.startSQLTextLoader();
     }
 
+    private void stopAutomatedSnapshots(){
+        SnapshotHelper.stopAutomatedSnapshots();
+        JOptionPane.showMessageDialog(view, "Automated snapshot taker was stopped. You can start a new thread at any time.", "Take Automated Snapshots", JOptionPane.INFORMATION_MESSAGE);
+    }
     private void saveSnapshot() {
         int numberSelectedSnapshots = view.getListSnapshots().getSelectedIndices().length;
         if (numberSelectedSnapshots != 1) {
@@ -186,6 +203,17 @@ public class WorstStatementsDetailController implements FinishedListener {
                 condenseInstances, condenseMissingBindVariables,
                 listener)).start();
     }
+/*
+
+    private void updateParameters(){
+        ProgressController controller = new ProgressController(owner, this,
+                "Taking Snapshot...",
+                "Pythia is taking a snapshot of the library cache.");
+        SnapshotHelper.updateTakeSnapshots(controller, connectionName, view.getCheckboxAutomatedSnapshots().isSelected(), (Integer) view.getComboTimeInterval().getSelectedItem());
+
+        SQLHelper.startSQLTextLoader();
+    }
+*/
 
     private void setGUIElementsToCorrectState() {
         if (dialogBlocked) {

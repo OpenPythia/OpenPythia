@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.Timer;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -34,8 +35,12 @@ import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.progress.ProgressListener;
 import org.openpythia.utilities.FileSelectorUtility;
 
+import static java.lang.Thread.currentThread;
+
 public class SnapshotHelper {
     private static File lastSnapshotPath;
+    private static volatile boolean stopAutomatedThread = false;
+    private static boolean stopThread;
 
     private static SortedMap<String, Snapshot> snapshots = new ConcurrentSkipListMap<>();
 
@@ -129,7 +134,14 @@ public class SnapshotHelper {
     }
 
     public static void takeSnapshot(ProgressListener progressListener, String connectionName, boolean isAutomated, Integer timeInterval) {
+        stopAutomatedThread = false;
         new Thread(new SnapshotTaker(progressListener, connectionName, isAutomated, timeInterval)).start();
+    }
+
+    public static void stopAutomatedSnapshots(){
+        stopAutomatedThread = true;
+        Thread.currentThread().interrupt();
+        System.out.println("Automated Snaphots Thread was stopped");
     }
 
     private static class SnapshotTaker implements Runnable {
@@ -144,7 +156,7 @@ public class SnapshotHelper {
         private ProgressListener progressListener;
         private String connectionName;
         private boolean isAutomated;
-        private Integer timeInterval;
+        private long timeInterval;
 
         public SnapshotTaker(ProgressListener progressListener, String connectionName, boolean isAutomated, Integer timeInterval) {
             this.progressListener = progressListener;
@@ -153,23 +165,44 @@ public class SnapshotHelper {
             this.timeInterval = timeInterval;
         }
 
-        @Override
-        public void run() {
+            @Override
+            public void run() {
+            if(isAutomated) {
+                try {
+                    do {
+                        Snapshot snapshot =  prepareSnapshot();
+                        String snapshotFileName = FileSelectorUtility.suggestedFileNameForSnapshotID(snapshot.getSnapshotName());
+                        addSnapshot(snapshot);
+                        File snapshotFile = new File(snapshotFileName);
+                        saveSnapshot(snapshot.getSnapshotName(), snapshotFile);
+                        // TODO thread sleeping should be interrupted on stopAutomatedThread value
+                        if(stopAutomatedThread) {
+                            timeInterval = 0;
+                        }
+                        Thread.sleep(timeInterval * 1000);
+                    } while (!stopAutomatedThread);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                prepareSnapshot();
+            }
+        }
+
+        private Snapshot prepareSnapshot() {
             progressListener.setStartValue(0);
             progressListener.setEndValue(SQLHelper.getNumberSQLStatementsInLibraryCache());
             progressListener.setCurrentValue(0);
 
-            System.out.println("timeInterval: "+ timeInterval);
+            System.out.println("timeInterval: " + timeInterval);
+            System.out.println("isAutomated: " + isAutomated);
             Snapshot snapshot = new Snapshot(SQLHelper.getCurrentDBDateTime(), connectionName);
-            String snapshotFileName =  FileSelectorUtility.suggestedFileNameForSnapshotID(snapshot.getSnapshotName());
-            File snapshotFile = new File(snapshotFileName);
 
-                fillSnapshot(snapshot);
+            fillSnapshot(snapshot);
 
-                addSnapshot(snapshot);
-                saveSnapshot(snapshot.getSnapshotName(), snapshotFile);
-
-                progressListener.informFinished();
+            addSnapshot(snapshot);
+            progressListener.informFinished();
+            return snapshot;
         }
 
         private void fillSnapshot(Snapshot snapshot) {
@@ -225,6 +258,13 @@ public class SnapshotHelper {
                 ConnectionPoolUtils.returnConnectionToPool(connection);
             }
 
+        }
+
+        public void changeTimeInterval(Integer methodTimeInterval){
+            this.timeInterval= methodTimeInterval;
+        }
+        public boolean setIsAtomatedToFalse(){
+            return false;
         }
     }
 

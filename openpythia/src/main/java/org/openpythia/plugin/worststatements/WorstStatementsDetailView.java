@@ -41,6 +41,10 @@ public class WorstStatementsDetailView extends JPanel {
         return btnTakeAutomatedSnapshots;
     }
 
+    public JButton getBtnStopAutomatedSnapshots() {
+        return btnStopAutomatedSnapshots;
+    }
+
     public JButton getBtnCompareSnapshots() {
         return btnCompareSnapshots;
     }
@@ -93,8 +97,9 @@ public class WorstStatementsDetailView extends JPanel {
         listSnapshots = new JList();
         btnTakeSnapshot = new JButton();
         checkboxAutomatedSnapshots = new JCheckBox();
-        comboTimeInterval = new JComboBox();
+        comboTimeInterval = new JComboBox<>();
         btnTakeAutomatedSnapshots = new JButton();
+        btnStopAutomatedSnapshots = new JButton();
         btnSaveSnapshot = new JButton();
         btnLoadSnapshot = new JButton();
         separator2 = compFactory.createSeparator("Compare Snapshots");
@@ -116,7 +121,7 @@ public class WorstStatementsDetailView extends JPanel {
         //======== this ========
         setLayout(new FormLayout(
             "$lcgap, default, $lcgap, 100dlu, $lcgap, 131dlu, $lcgap, default:grow, $lcgap",
-            "$lgap, top:default, $lgap, 10dlu, 11*($lgap, default), $lgap, 21dlu, fill:default:grow, 2*($lgap)"));
+            "$lgap, top:default, $lgap, 10dlu, 12*($lgap, default), $lgap, 21dlu, fill:default:grow, 2*($lgap)"));
 
         //---- label1 ----
         label1.setText("Snapshots");
@@ -129,7 +134,7 @@ public class WorstStatementsDetailView extends JPanel {
             listSnapshots.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
             scrollPane1.setViewportView(listSnapshots);
         }
-        add(scrollPane1, CC.xywh(4, 2, 1, 19));
+        add(scrollPane1, CC.xywh(4, 2, 1, 21));
 
         //---- btnTakeSnapshot ----
         btnTakeSnapshot.setText("Take Snapshot");
@@ -140,76 +145,82 @@ public class WorstStatementsDetailView extends JPanel {
         add(checkboxAutomatedSnapshots, CC.xy(6, 4));
 
         //---- comboTimeInterval ----
-        comboTimeInterval.setToolTipText("snapshots time interval");
+        comboTimeInterval.setToolTipText("snapshots time interval in minutes");
+        comboTimeInterval.setModel(new DefaultComboBoxModel<>(new String[] {
+            "30",
+            "60",
+            "90",
+            "120"
+        }));
         add(comboTimeInterval, CC.xy(6, 6));
-        comboTimeInterval.addItem(30);
-        comboTimeInterval.addItem(60);
-        comboTimeInterval.addItem(90);
-        comboTimeInterval.addItem(120);
 
         //---- btnTakeAutomatedSnapshots ----
         btnTakeAutomatedSnapshots.setText("Set Automated Snapshots");
         add(btnTakeAutomatedSnapshots, CC.xy(6, 8));
 
+        //---- btnStopAutomatedSnapshots ----
+        btnStopAutomatedSnapshots.setText("Stop Automated Snapshots");
+        add(btnStopAutomatedSnapshots, CC.xy(6, 10));
+
         //---- btnSaveSnapshot ----
         btnSaveSnapshot.setText("Save Snapshot");
-        add(btnSaveSnapshot, CC.xy(6, 10));
+        add(btnSaveSnapshot, CC.xy(6, 12));
 
         //---- btnLoadSnapshot ----
         btnLoadSnapshot.setText("Load Snapshot");
-        add(btnLoadSnapshot, CC.xy(6, 12));
-        add(separator2, CC.xywh(6, 14, 2, 1));
+        add(btnLoadSnapshot, CC.xy(6, 14));
+        add(separator2, CC.xywh(6, 16, 2, 1));
 
         //---- cbCondenseInstances ----
         cbCondenseInstances.setText("Condense Instances");
-        add(cbCondenseInstances, CC.xy(6, 16));
+        add(cbCondenseInstances, CC.xy(6, 18));
 
         //---- cbCondenseMissingBindvariables ----
         cbCondenseMissingBindvariables.setText("Condense Missing Bindvariables");
-        add(cbCondenseMissingBindvariables, CC.xy(6, 18));
+        add(cbCondenseMissingBindvariables, CC.xy(6, 20));
 
         //---- btnCompareSnapshots ----
         btnCompareSnapshots.setText("Compare Snapshots...");
-        add(btnCompareSnapshots, CC.xy(6, 20));
-        add(separator1, CC.xywh(2, 22, 7, 1));
+        add(btnCompareSnapshots, CC.xy(6, 22));
+        add(separator1, CC.xywh(2, 24, 7, 1));
 
         //---- label2 ----
         label2.setText("Snapshot A");
-        add(label2, CC.xy(2, 24));
+        add(label2, CC.xy(2, 26));
 
         //---- tfSnapshotA ----
         tfSnapshotA.setEditable(false);
-        add(tfSnapshotA, CC.xy(4, 24));
+        add(tfSnapshotA, CC.xy(4, 26));
 
         //---- cbMoreExecutionPlans ----
         cbMoreExecutionPlans.setText("Load More Executation Plans");
-        add(cbMoreExecutionPlans, CC.xy(6, 24));
+        add(cbMoreExecutionPlans, CC.xy(6, 26));
 
         //---- label3 ----
         label3.setText("Snapshot B");
-        add(label3, CC.xy(2, 26));
+        add(label3, CC.xy(2, 28));
 
         //---- tfSnapshotB ----
         tfSnapshotB.setEditable(false);
-        add(tfSnapshotB, CC.xy(4, 26));
+        add(tfSnapshotB, CC.xy(4, 28));
 
         //---- btnExportExcel ----
         btnExportExcel.setText("Export to Excel");
-        add(btnExportExcel, CC.xy(6, 26));
+        add(btnExportExcel, CC.xy(6, 28));
 
         //---- label4 ----
         label4.setText("Number Statements");
-        add(label4, CC.xy(2, 28));
+        add(label4, CC.xy(2, 30));
 
         //---- tfNumberStatements ----
         tfNumberStatements.setEditable(false);
-        add(tfNumberStatements, CC.xy(4, 28));
+        add(tfNumberStatements, CC.xy(4, 30));
 
         //======== scrollPane2 ========
         {
             scrollPane2.setViewportView(tableDeltaSQLStatements);
         }
-        add(scrollPane2, CC.xywh(2, 29, 7, 1));
+        add(scrollPane2, CC.xywh(2, 31, 7, 1));
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
@@ -219,8 +230,9 @@ public class WorstStatementsDetailView extends JPanel {
     private JList listSnapshots;
     private JButton btnTakeSnapshot;
     private JCheckBox checkboxAutomatedSnapshots;
-    private JComboBox comboTimeInterval;
+    private JComboBox<String> comboTimeInterval;
     private JButton btnTakeAutomatedSnapshots;
+    private JButton btnStopAutomatedSnapshots;
     private JButton btnSaveSnapshot;
     private JButton btnLoadSnapshot;
     private JComponent separator2;
