@@ -21,9 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.Timer;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -35,12 +33,8 @@ import org.openpythia.dbconnection.ConnectionPoolUtils;
 import org.openpythia.progress.ProgressListener;
 import org.openpythia.utilities.FileSelectorUtility;
 
-import static java.lang.Thread.currentThread;
-
 public class SnapshotHelper {
-    private static File lastSnapshotPath;
-    private static volatile boolean stopAutomatedThread = false;
-    private static boolean stopThread;
+    private static List<Boolean> stopAutomatedThread = new ArrayList<>();
 
     private static SortedMap<String, Snapshot> snapshots = new ConcurrentSkipListMap<>();
 
@@ -58,7 +52,6 @@ public class SnapshotHelper {
 
     private static void addSnapshot(Snapshot snapshot) {
         if (snapshot != null) {
-           // snapshots.put(snapshot.getSnapshotId(), snapshot);
             snapshots.put(snapshot.getSnapshotName(), snapshot);
         }
     }
@@ -133,15 +126,30 @@ public class SnapshotHelper {
         addSnapshot(loaded);
     }
 
-    public static void takeSnapshot(ProgressListener progressListener, String connectionName, boolean isAutomated, Integer timeInterval) {
-        stopAutomatedThread = false;
-        new Thread(new SnapshotTaker(progressListener, connectionName, isAutomated, timeInterval)).start();
+    public static void takeSnapshot(ProgressListener progressListener, String connectionName, boolean isAutomated, Integer timeInterval, int threadIndex) {
+
+        // every new started thread for taking snapshots automatically after a time interval is controlled using an ArrayList of booleans.
+        // When starting a new thread, a new index is sent to this method, so the value at this index controls the thread.
+        // The first element in the Array is reserved for the snapshots that are not automatically taken. That is why, there is the need to check
+        // and to set the value of the first item when "take snapshot" button is clicked or when the first thread of automatic snapshots is started
+
+        if (threadIndex == 0)
+        {
+            if (stopAutomatedThread.isEmpty()) {
+                stopAutomatedThread.add(0, false);
+                }
+        } else {
+            if (stopAutomatedThread.isEmpty() && threadIndex == 1) {
+                stopAutomatedThread.add(0, false);
+            }
+            stopAutomatedThread.add(threadIndex, false);
+        }
+        new Thread(new SnapshotTaker(progressListener, connectionName, isAutomated, timeInterval, threadIndex)).start();
     }
 
-    public static void stopAutomatedSnapshots(){
-        stopAutomatedThread = true;
+    public static void stopAutomatedSnapshots(int threadIndex){
+        stopAutomatedThread.set(threadIndex, true);
         Thread.currentThread().interrupt();
-        System.out.println("Automated Snaphots Thread was stopped");
     }
 
     private static class SnapshotTaker implements Runnable {
@@ -157,12 +165,14 @@ public class SnapshotHelper {
         private String connectionName;
         private boolean isAutomated;
         private long timeInterval;
+        private int automatedThreadIndex;
 
-        public SnapshotTaker(ProgressListener progressListener, String connectionName, boolean isAutomated, Integer timeInterval) {
+        public SnapshotTaker(ProgressListener progressListener, String connectionName, boolean isAutomated, Integer timeInterval, int threadIndex) {
             this.progressListener = progressListener;
             this.connectionName = connectionName;
             this.isAutomated = isAutomated;
             this.timeInterval = timeInterval;
+            this.automatedThreadIndex = threadIndex;
         }
 
             @Override
@@ -170,17 +180,24 @@ public class SnapshotHelper {
             if(isAutomated) {
                 try {
                     do {
+                        // prepare the snapshot
                         Snapshot snapshot =  prepareSnapshot();
                         String snapshotFileName = FileSelectorUtility.suggestedFileNameForSnapshotID(snapshot.getSnapshotName());
+
+                        // add it to the snapshots list is UI
                         addSnapshot(snapshot);
                         File snapshotFile = new File(snapshotFileName);
+
+                        // save it under OpenPyhtia project
                         saveSnapshot(snapshot.getSnapshotName(), snapshotFile);
-                        // TODO thread sleeping should be interrupted on stopAutomatedThread value
-                        if(stopAutomatedThread) {
+
+                        // if the "stop automatic snapshots" button was clicked, set timeInterval to 0
+                        if(stopAutomatedThread.get(automatedThreadIndex)) {
                             timeInterval = 0;
                         }
-                        Thread.sleep(timeInterval * 1000);
-                    } while (!stopAutomatedThread);
+                        Thread.sleep(timeInterval * 60000);
+                        // do this until the item with the index "automatedThreadIndex" is set to true
+                    } while (!stopAutomatedThread.get(automatedThreadIndex));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -194,8 +211,6 @@ public class SnapshotHelper {
             progressListener.setEndValue(SQLHelper.getNumberSQLStatementsInLibraryCache());
             progressListener.setCurrentValue(0);
 
-            System.out.println("timeInterval: " + timeInterval);
-            System.out.println("isAutomated: " + isAutomated);
             Snapshot snapshot = new Snapshot(SQLHelper.getCurrentDBDateTime(), connectionName);
 
             fillSnapshot(snapshot);
@@ -258,13 +273,6 @@ public class SnapshotHelper {
                 ConnectionPoolUtils.returnConnectionToPool(connection);
             }
 
-        }
-
-        public void changeTimeInterval(Integer methodTimeInterval){
-            this.timeInterval= methodTimeInterval;
-        }
-        public boolean setIsAtomatedToFalse(){
-            return false;
         }
     }
 

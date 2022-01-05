@@ -41,6 +41,7 @@ public class WorstStatementsDetailController implements FinishedListener {
 
     private static File lastSnapshotPath;
     private static File lastExcelExportPath;
+    private static int automatedThreadCounter;
 
     private DeltaSnapshot deltaSnapshot = null;
 
@@ -75,6 +76,7 @@ public class WorstStatementsDetailController implements FinishedListener {
         view.getComboTimeInterval().setEnabled(false);
         view.getBtnTakeAutomatedSnapshots().setEnabled(false);
         view.getBtnStopAutomatedSnapshots().setEnabled(false);
+
         // enable/disable options depending on checkbox isSelected value
         view.getCheckboxAutomatedSnapshots().addActionListener(e -> {
                     if (view.getCheckboxAutomatedSnapshots().isSelected()) {
@@ -82,13 +84,14 @@ public class WorstStatementsDetailController implements FinishedListener {
                         view.getBtnTakeAutomatedSnapshots().setEnabled(true);
                         view.getBtnStopAutomatedSnapshots().setEnabled(false);
                         view.getBtnTakeAutomatedSnapshots().addActionListener(y -> {
-                            takeAutomatedSnapshotsAndSave();
+                            automatedThreadCounter++;
+                            takeAutomatedSnapshotsAndSave(automatedThreadCounter);
                             view.getBtnStopAutomatedSnapshots().setEnabled(true);
                             view.getComboTimeInterval().setEnabled(false);
                             view.getBtnTakeAutomatedSnapshots().setEnabled(false);
                         });
                         view.getBtnStopAutomatedSnapshots().addActionListener(z -> {
-                            stopAutomatedSnapshots();
+                            stopAutomatedSnapshots(automatedThreadCounter);
                             view.getBtnStopAutomatedSnapshots().setEnabled(false);
                             view.getComboTimeInterval().setEnabled(true);
                             view.getBtnTakeAutomatedSnapshots().setEnabled(true);
@@ -119,24 +122,24 @@ public class WorstStatementsDetailController implements FinishedListener {
         ProgressController controller = new ProgressController(owner, this,
                 "Taking Snapshot...",
                 "Pythia is taking a snapshot of the library cache.");
-        SnapshotHelper.takeSnapshot(controller, connectionName, false, 0);
+        SnapshotHelper.takeSnapshot(controller, connectionName, false, 0, 0);
 
         SQLHelper.startSQLTextLoader();
     }
-    private void takeAutomatedSnapshotsAndSave() {
+    private void takeAutomatedSnapshotsAndSave(int threadIndex) {
 
       ProgressController controller = new ProgressController(owner, this,
                         "Taking Snapshot...",
                         "Pythia will take a snapshot of the library cache every." + view.getComboTimeInterval().getSelectedItem() + " minutes");
-        JOptionPane.showMessageDialog(view, "Pythia will Take a new Snapshot every " + view.getComboTimeInterval().getSelectedItem() + " minutes until is will be stopped", "Take Automated Snapshots", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(view, "Pythia will Take a new Snapshot every " + view.getComboTimeInterval().getSelectedItem() + " minutes until it will be manually stopped", "Take Automated Snapshots", JOptionPane.INFORMATION_MESSAGE);
 
-        SnapshotHelper.takeSnapshot(controller, connectionName, true, Integer.parseInt(view.getComboTimeInterval().getSelectedItem().toString()));
+        SnapshotHelper.takeSnapshot(controller, connectionName, true, Integer.parseInt(view.getComboTimeInterval().getSelectedItem().toString()), threadIndex);
 
         SQLHelper.startSQLTextLoader();
     }
 
-    private void stopAutomatedSnapshots(){
-        SnapshotHelper.stopAutomatedSnapshots();
+    private void stopAutomatedSnapshots(int threadIndex){
+        SnapshotHelper.stopAutomatedSnapshots(threadIndex);
         JOptionPane.showMessageDialog(view, "Automated snapshot taker was stopped. You can start a new thread at any time.", "Take Automated Snapshots", JOptionPane.INFORMATION_MESSAGE);
     }
     private void saveSnapshot() {
@@ -203,17 +206,6 @@ public class WorstStatementsDetailController implements FinishedListener {
                 condenseInstances, condenseMissingBindVariables,
                 listener)).start();
     }
-/*
-
-    private void updateParameters(){
-        ProgressController controller = new ProgressController(owner, this,
-                "Taking Snapshot...",
-                "Pythia is taking a snapshot of the library cache.");
-        SnapshotHelper.updateTakeSnapshots(controller, connectionName, view.getCheckboxAutomatedSnapshots().isSelected(), (Integer) view.getComboTimeInterval().getSelectedItem());
-
-        SQLHelper.startSQLTextLoader();
-    }
-*/
 
     private void setGUIElementsToCorrectState() {
         if (dialogBlocked) {
