@@ -128,53 +128,25 @@ public class LoginController {
 
     private void bindActions() {
 
-        view.getButtonConnect().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleConnectButton();
-            }
-        });
+        view.getButtonConnect().addActionListener(e -> handleConnectButton());
 
-        view.getButtonAdd().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleSaveButton();
-            }
-        });
+        view.getButtonAdd().addActionListener(e -> handleSaveButton());
 
-        view.getButtonCancel().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                handleCancelButton();
-            }
-        });
+        view.getButtonCancel().addActionListener(e -> handleCancelButton());
 
-        view.getButtonRemoveSavedConnection().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removeSavedConnection();
-            }
-        });
+        view.getButtonRemoveSavedConnection().addActionListener(e -> removeSavedConnection());
 
-        view.getSavedConnectionsList().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) {
-                    int index = view.getSavedConnectionsList().getSelectedIndex();
+        view.getSavedConnectionsList().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int index = view.getSavedConnectionsList().getSelectedIndex();
 
-                    if (index != -1) {
-                        updateView(model.getElementAt(index));
-                    }
+                if (index != -1) {
+                    updateView(model.getElementAt(index));
                 }
             }
         });
 
-        view.getMenuCreateSchemaScript().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                generateSchemaCreationScript();
-            }
-        });
+        view.getMenuCreateSchemaScript().addActionListener(e -> generateSchemaCreationScript());
 
         view.getSavedConnectionsList().setModel(model);
         view.getRootPane().setDefaultButton(view.getButtonConnect());

@@ -41,7 +41,7 @@ public class WorstStatementsDetailController implements FinishedListener {
 
     private static File lastSnapshotPath;
     private static File lastExcelExportPath;
-    private static int automatedThreadCounter;
+    private static int automatedThreadCounter = 0;
 
     private DeltaSnapshot deltaSnapshot = null;
 
@@ -84,9 +84,9 @@ public class WorstStatementsDetailController implements FinishedListener {
                         view.getBtnTakeAutomatedSnapshots().setEnabled(true);
                         view.getBtnStopAutomatedSnapshots().setEnabled(false);
                         view.getBtnTakeAutomatedSnapshots().addActionListener(y -> {
+                            view.getBtnStopAutomatedSnapshots().setEnabled(true);
                             automatedThreadCounter++;
                             takeAutomatedSnapshotsAndSave(automatedThreadCounter);
-                            view.getBtnStopAutomatedSnapshots().setEnabled(true);
                             view.getComboTimeInterval().setEnabled(false);
                             view.getBtnTakeAutomatedSnapshots().setEnabled(false);
                         });
